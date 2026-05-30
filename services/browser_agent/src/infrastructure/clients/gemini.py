@@ -22,9 +22,9 @@ from libs.domain.types._types.shared import ImagePayload
 class Gemini(IGeminiProtocol):
     def __init__(
         self,
-        config: type[TApplicationConfig],
+        # config: type[TApplicationConfig],
     ) -> None:
-        self._config = config
+        # self._config = config
 
         self._client = ChatGoogleGenerativeAI(
             model=os.getenv("GOOGLE_MODEL"),

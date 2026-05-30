@@ -1,9 +1,13 @@
+# packages
+
+from typing import Optional
+
+# application dependencies
+
 from ..clients import (
     Gemini,
     Crawler,
 )
-
-from .gemini import GeminiFactory
 
 from src.interface.services import BrowserAgentService
 
@@ -11,10 +15,10 @@ from src.interface.services import BrowserAgentService
 class BrowserAgentFactory:
     @staticmethod
     def create(
-        crawler: Crawler = Crawler(),
-        gemini: Gemini = GeminiFactory.create(),
+        crawler: Optional[Crawler] = None,
+        gemini: Optional[Gemini] = None,
     ) -> BrowserAgentService:
         return BrowserAgentService(
-            crawler=crawler,
-            gemini=gemini,
+            crawler=crawler or Crawler(),
+            gemini=gemini or Gemini(),
         )

@@ -1,9 +1,18 @@
 .PHONY: dev prod down logs ps clean help
 
 # === Настройки ===
-SERVICES := infra
-
 SERVICE_DIR := services
+
+# 1. Автоматически находим все папки внутри $(SERVICE_DIR)/
+# Звездочка со слешем на конце (/*/) гарантирует, что мы ищем ТОЛЬКО директории
+_SERVICE_PATHS := $(wildcard $(SERVICE_DIR)/*/)
+
+# 2. Очищаем пути: убираем слеши и оставляем только имена папок (infra, browser_agent)
+ALL_SERVICES := $(notdir $(patsubst %/,%,$(_SERVICE_PATHS)))
+
+# 3. Мягкое присваивание! 
+# Если вы не передали SERVICES в консоли, Make будет использовать ВСЕ найденные сервисы.
+SERVICES ?= $(ALL_SERVICES)
 
 COMPOSE_DIR := docker
 BASE_FILE := $(COMPOSE_DIR)/base.yaml
