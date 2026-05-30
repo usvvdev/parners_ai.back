@@ -1,0 +1,14 @@
+services:
+  mysql:
+    ports:
+      - "${MYSQL_PORT}:3306"
+  
+  clickhouse:
+    ports:
+      - "${CLICKHOUSE_HTTP_PORT}:8123"
+      - "${CLICKHOUSE_NATIVE_PORT}:9000"
+
+  caddy:
+    ports:
+      - "${CADDY_PORT}:80"
+      - "${CADDY_TLS_PORT}:443"

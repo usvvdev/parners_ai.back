@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.benv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Browser profiles and screenshots
+.browser_profile/
+.screenshots/
+*.png
+*.jpg
+*.jpeg
+
+# Logs
+logs/
+*.log
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Playwright
+.playwright/
+.playwright-report/
+test-results/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Json configs
+base.config.json
+prod.config.json
+development.config.json

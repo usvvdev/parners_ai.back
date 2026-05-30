@@ -1,2 +1,12 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Set default behavior, automatically marking files as UTF-8:
+* text=auto eol=lf
+
+# Python
+*.py text
+*.pyi text
+
+# CI
+.github/workflows/*.yml text
+
+# Documentation
+*.md text

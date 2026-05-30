@@ -1,0 +1,7 @@
+{$DOMAIN} {
+
+    handle /api/* {
+        reverse_proxy {$BACKEND_HOST}:{$BACKEND_PORT}
+    }
+
+}

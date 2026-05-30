@@ -1,0 +1,66 @@
+x-engine: &engine
+  restart: unless-stopped
+  networks:
+    - backend
+  healthcheck:
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 30s
+
+services:
+  mysql:
+    <<: *engine
+    image: mysql:8.3-oracle
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
+      MYSQL_USER: ${MYSQL_USERNAME:-user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init/mysql:/docker-entrypoint-initdb.d:ro
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+
+  clickhouse:
+    <<: *engine
+    image: clickhouse/clickhouse-server:24.8-alpine
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-default}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USERNAME:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    <<: *engine
+    image: caddy:2.10
+    environment:
+      TZ: "Europe/Moscow"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - ./ssl:/etc/caddy/ssl
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 1m
+
+networks:
+  backend:
+    driver: bridge
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_backend
+
+volumes:
+  mysql_data:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_mysql_data
+  clickhouse_data:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_clickhouse_data
+  caddy_data:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_caddy_data
