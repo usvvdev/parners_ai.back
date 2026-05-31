@@ -22,6 +22,9 @@ browser-agent = [
     "langchain-google-genai>=4.2.4",
     "playwright>=1.60.0",
 ]
+api = [
+    "alembic>=1.18.4",
+]
 
 [project.scripts]
 browser_agent = "services.browser_agent.main:main"
