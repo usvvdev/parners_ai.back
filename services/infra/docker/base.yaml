@@ -45,7 +45,7 @@ services:
     environment:
       TZ: "Europe/Moscow"
     volumes:
-      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - ./ssl:/etc/caddy/ssl
     healthcheck:
