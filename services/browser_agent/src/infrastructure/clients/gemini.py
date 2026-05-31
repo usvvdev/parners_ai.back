@@ -31,7 +31,7 @@ class Gemini(IGeminiProtocol):
             temperature=1.0,
             api_key=self._config.google_api_key,
             httpx_client=Client(
-                proxies={
+                proxy={
                     "http": self._config.proxy_url,
                     "https": self._config.proxy_url,
                 }
