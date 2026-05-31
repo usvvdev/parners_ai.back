@@ -56,11 +56,6 @@ class ApplicationBaseConfig(
         description="Tuple of logger names to configure",
     )
 
-    api_prefix: str = Field(
-        default="/api",
-        description="",
-    )
-
     @classmethod
     def settings_customise_sources(
         cls,

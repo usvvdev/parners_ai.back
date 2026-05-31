@@ -32,7 +32,7 @@ class OpenAPIOptions(BaseConfigType):
     )
 
     title: str = Field(
-        default="API",
+        default="api",
         description="Title of the API (shown in docs).",
     )
 

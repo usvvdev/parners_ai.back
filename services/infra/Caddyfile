@@ -1,7 +1,11 @@
 {$DOMAIN} {
 
     handle /api/* {
-        reverse_proxy {$BACKEND_HOST}:{$BACKEND_PORT}
+        reverse_proxy api:{$BACKEND_PORT}
+    }
+
+    handle / {
+        respond "Hellow there"
     }
 
     respond 404
