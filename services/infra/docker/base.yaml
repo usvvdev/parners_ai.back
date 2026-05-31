@@ -44,6 +44,7 @@ services:
     image: caddy:2.10
     environment:
       TZ: "Europe/Moscow"
+      DOMAIN: ${DOMAIN:-localhost}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
