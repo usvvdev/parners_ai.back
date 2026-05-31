@@ -56,45 +56,45 @@ prod: ## Запуск всех сервисов (production)
 	@echo "✅ Продакшн окружение готово!"
 
 down: ## Остановка всех сервисов
-    @echo "⏹️  Остановка сервисов..."
-    @for s in $(SERVICES); do \
+	@echo "⏹️  Остановка сервисов..."
+	@for s in $(SERVICES); do \
         echo "⏸️  Остановка $$s..."; \
         docker compose \
             --project-directory $(SERVICE_DIR)/$$s \
             -f $(SERVICE_DIR)/$$s/docker/base.yaml \
             down || true; \
-    done
-    @echo "✅ Все остановлено!"
+	done
+	@echo "✅ Все остановлено!"
 
 logs: ## Просмотр логов (использование: make logs service=browser_agent)
 ifndef service
     @echo "❌ Ошибка: Укажите сервис. Пример: make logs service=browser_agent"
-    @exit 1
+	@exit 1
 else
-    @echo "📜 Логи сервиса $(service)..."
-    @docker compose \
+	@echo "📜 Логи сервиса $(service)..."
+	@docker compose \
         --project-directory $(SERVICE_DIR)/$(service) \
         -f $(SERVICE_DIR)/$(service)/docker/base.yaml \
         logs -f
 endif
 
 ps: ## Показать статус всех сервисов
-    @for s in $(SERVICES); do \
+	@for s in $(SERVICES); do \
         echo ""; \
         echo "=== Сервис: $$s ==="; \
         docker compose \
             --project-directory $(SERVICE_DIR)/$$s \
             -f $(SERVICE_DIR)/$$s/docker/base.yaml \
             ps || true; \
-    done
+	done
 
 clean: ## Удалить все (контейнеры, volume-диски)
-    @echo "🧹 Очистка сервисов..."
-    @for s in $(SERVICES); do \
+	@echo "🧹 Очистка сервисов..."
+	@for s in $(SERVICES); do \
         echo "🧹 Очистка $$s..."; \
         docker compose \
             --project-directory $(SERVICE_DIR)/$$s \
             -f $(SERVICE_DIR)/$$s/docker/base.yaml \
             down -v || true; \
     done
-    @echo "✅ Очистка завершена!"
+	@echo "✅ Очистка завершена!"
