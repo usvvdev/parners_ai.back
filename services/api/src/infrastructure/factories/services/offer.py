@@ -18,7 +18,7 @@ class OfferRepositoryServiceFactory:
     @staticmethod
     def create() -> OfferRepositoryService:
         config = ApplicationConfigFactory.create(
-            service_dir=Path(__file__).parent.parent,
+            service_dir=Path(__file__).parents[4],
         )
 
         repository = MySQLOfferRepository.create(

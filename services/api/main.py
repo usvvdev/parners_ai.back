@@ -17,6 +17,7 @@ SERVICE_DIR = Path(__file__).parent
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    logger.info("Starting migrations")
     try:
         run_migrations(SERVICE_DIR)
     except Exception as err:

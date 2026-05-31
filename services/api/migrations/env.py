@@ -14,6 +14,8 @@ from libs.core.config import TApplicationConfig
 
 from libs.domain.types.enums.stores import EngineType
 
+from libs.infrastructure.stores.mysql.models import *
+
 from libs.infrastructure.stores.common.base import ETableModel
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory

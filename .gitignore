@@ -80,3 +80,6 @@ docker-compose.override.yml
 
 # Json configs
 config.json
+
+# Migrations
+*/migrations/versions

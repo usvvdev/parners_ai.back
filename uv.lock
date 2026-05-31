@@ -1730,6 +1730,7 @@ dependencies = [
 api = [
     { name = "alembic" },
     { name = "fastapi" },
+    { name = "greenlet" },
     { name = "gunicorn" },
     { name = "uvicorn" },
 ]
@@ -1748,6 +1749,7 @@ requires-dist = [
     { name = "black", specifier = ">=26.5.1" },
     { name = "crawl4ai", marker = "extra == 'browser-agent'", specifier = ">=0.8.6" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.136.3" },
+    { name = "greenlet", marker = "extra == 'api'", specifier = ">=3.5.1" },
     { name = "gunicorn", marker = "extra == 'api'", specifier = ">=26.0.0" },
     { name = "httpx", marker = "extra == 'browser-agent'", specifier = ">=0.28.1" },
     { name = "langchain-core", marker = "extra == 'browser-agent'", specifier = ">=1.4.0" },
