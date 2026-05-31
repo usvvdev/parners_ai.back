@@ -18,7 +18,7 @@ RUN uv sync --frozen --no-install-project --extra browser-agent
 
 # 4. Устанавливаем системные зависимости Playwright и Chromium
 # Пакет playwright уже скачан на предыдущем шаге, uv run задействует его
-RUN uv run playwright install --with-deps chromium
+RUN uv run --no-sync playwright install --with-deps chromium
 
 # 5. Копируем весь исходный код (включая папки libs и services)
 COPY . .
