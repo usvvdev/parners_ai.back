@@ -1,6 +1,6 @@
 from .browser_agent import BrowserAgentServiceFactory
 
-from src.interface.services.parser_agent import ParserAgentService
+from ....interface.services.parser_agent import ParserAgentService
 
 from libs.core.config import TApplicationConfig
 

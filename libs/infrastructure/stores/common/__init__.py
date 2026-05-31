@@ -5,15 +5,9 @@ from .sql import (
     BaseSQLRepository,
 )
 
-from .cache import (
-    BaseCacheEngine,
-    BaseCacheRepository,
-)
 
 __all__: list[str] = [
     "TTable",
     "BaseSQLEngine",
     "BaseSQLRepository",
-    "BaseCacheEngine",
-    "BaseCacheRepository",
 ]

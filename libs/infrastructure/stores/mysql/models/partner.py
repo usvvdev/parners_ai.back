@@ -2,7 +2,6 @@
 
 from sqlalchemy import (
     String,
-    URL,
     Index,
 )
 
@@ -38,11 +37,11 @@ class Partners(
     )
 
     link: Mapped[str] = mapped_column(
-        URL,
+        String(2048),
         nullable=False,
     )
 
-    is_tracking = Mapped[bool] = mapped_column(
+    is_tracking: Mapped[bool] = mapped_column(
         TINYINT,
         default=True,
         nullable=False,

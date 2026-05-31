@@ -36,7 +36,7 @@ class Offers(
         nullable=False,
     )
 
-    is_active = Mapped[bool] = mapped_column(
+    is_active: Mapped[bool] = mapped_column(
         TINYINT,
         default=True,
         nullable=False,

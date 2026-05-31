@@ -103,11 +103,6 @@ class ConnectionOptions(DSNOptions):
         description="Enable SQL debug logging",
     )
 
-    heartbeat: Optional[int] = Field(
-        default=None,
-        description="Enable heartbeat (RabbitMQ/etc.)",
-    )
-
 
 class EngineOptions(RootModel[dict[EngineType, ConnectionOptions]]):
     model_config = ConfigDict(
