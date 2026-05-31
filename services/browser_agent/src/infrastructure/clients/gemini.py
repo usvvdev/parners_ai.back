@@ -1,7 +1,5 @@
 # packages
 
-import os
-
 from langchain_core.messages import HumanMessage
 
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -10,11 +8,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from libs.core.config import TApplicationConfig
 
-from src.domain.types import PartnerResult
+from ...domain.types import PartnerResult
 
 from libs.core.constants import SYSTEM_PROMPT
 
-from src.domain.protocols import IGeminiProtocol
+from ...domain.protocols import IGeminiProtocol
 
 from libs.domain.types._types.shared import ImagePayload
 
@@ -22,14 +20,14 @@ from libs.domain.types._types.shared import ImagePayload
 class Gemini(IGeminiProtocol):
     def __init__(
         self,
-        # config: type[TApplicationConfig],
+        config: type[TApplicationConfig],
     ) -> None:
-        # self._config = config
+        self._config = config
 
         self._client = ChatGoogleGenerativeAI(
-            model=os.getenv("GOOGLE_MODEL"),
+            model=self._config.google_model,
             temperature=1.0,
-            api_key=os.getenv("GOOGLE_API_KEY"),
+            api_key=self._config.google_api_key,
         )
 
     async def analyze(

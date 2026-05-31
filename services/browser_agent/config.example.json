@@ -1,0 +1,14 @@
+{
+    "engine_options": {
+        "mysql": {
+            "driver": "aio+mysql",
+            "pool_size": 5,
+            "max_overflow": 10,
+            "echo": false
+        },
+        "clickhouse": {
+            "driver": "clickhouse+asynch",
+            "echo": true
+        }
+    }
+}

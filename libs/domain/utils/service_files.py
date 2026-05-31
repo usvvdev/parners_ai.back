@@ -29,7 +29,7 @@ def get_service_files(
     if not service_dir.exists():
         raise ValueError(f"Service directory does not exist: {service_dir}")
 
-    config_file = service_dir / f"{mode}.config.json"
+    config_file = service_dir / "config.json"
     env_file = service_dir / ".env"
 
     env_source = DotEnvSettingsSource(

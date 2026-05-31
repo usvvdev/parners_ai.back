@@ -17,7 +17,7 @@ class BaseConfigType(
     model_config = SettingsConfigDict(
         validate_assignment=True,
         use_enum_values=True,
-        extra="forbid",
+        extra="allow",
         env_file=None,
         env_nested_delimiter="__",
     )

@@ -1,5 +1,8 @@
-from .browser_agent import BrowserAgentFactory
+from .services.browser_agent import BrowserAgentServiceFactory
+
+from .services.parser_agent import PartnerParserServiceFactory
 
 __all__: list[str] = [
-    "BrowserAgentFactory",
+    "BrowserAgentServiceFactory",
+    "PartnerParserServiceFactory",
 ]
