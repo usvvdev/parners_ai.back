@@ -1,9 +1,9 @@
-from src.domain.protocols import (
+from ...domain.protocols import (
     ICrawlerProtocol,
     IGeminiProtocol,
 )
 
-from src.domain.types import PartnerResult
+from ...domain.types import PartnerResult
 
 
 class BrowserAgentService:

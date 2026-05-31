@@ -11,7 +11,7 @@ from ...clients import (
 
 from libs.core.config import TApplicationConfig
 
-from src.interface.services import BrowserAgentService
+from ....interface.services import BrowserAgentService
 
 
 class BrowserAgentServiceFactory:

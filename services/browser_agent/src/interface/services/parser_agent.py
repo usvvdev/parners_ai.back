@@ -1,6 +1,6 @@
 from .browser_agent import BrowserAgentService
 
-from src.domain.types.partner_result import PartnerResult
+from ...domain.types.partner_result import PartnerResult
 
 from libs.infrastructure.stores.mysql.repositories import PartnerRepository
 
