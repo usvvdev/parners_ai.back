@@ -1,7 +1,7 @@
 x-engine: &engine
   restart: unless-stopped
   networks:
-    - backend
+    - default
   healthcheck:
     interval: 10s
     timeout: 5s
@@ -54,9 +54,10 @@ services:
     #   interval: 1m
 
 networks:
-  backend:
+  default:
     driver: bridge
-    name: ${COMPOSE_PROJECT_NAME:-dydex}_backend
+    name: backend_network
+    external: true
 
 volumes:
   mysql_data:
