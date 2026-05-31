@@ -79,6 +79,4 @@ test-results/
 docker-compose.override.yml
 
 # Json configs
-base.config.json
-prod.config.json
-development.config.json
+config.json
