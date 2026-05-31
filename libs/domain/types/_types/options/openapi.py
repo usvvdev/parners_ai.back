@@ -31,16 +31,16 @@ class OpenAPIOptions(BaseConfigType):
         description="Application API version.",
     )
 
-    title: str = Field(
-        default="api",
-        description="Title of the API (shown in docs).",
-    )
+    # title: str = Field(
+    #     default="api",
+    #     description="Title of the API (shown in docs).",
+    # )
 
-    @computed_field
-    @property
-    def root_path(
-        self,
-    ) -> str:
-        if self.title is not None:
-            return f"/{self.title}"
-        raise ValueError("Application title is not filled")
+    # @computed_field
+    # @property
+    # def root_path(
+    #     self,
+    # ) -> str:
+    #     if self.title is not None:
+    #         return f"/{self.title}"
+    #     raise ValueError("Application title is not filled")
