@@ -1,8 +1,8 @@
 x-base-service: &base-service
   restart: unless-stopped
   build:
-    context: .
-    dockerfile: Dockerfile
+    context: ../../
+    dockerfile: services/browser_agent/docker/Dockerfile
   environment:
     - PYTHONUNBUFFERED=1
     - PYTHONDONTWRITEBYTECODE=1
@@ -19,3 +19,7 @@ services:
       timeout: 10s   
       retries: 3      
       start_period: 15s
+
+networks:
+  backend:
+    external: true
