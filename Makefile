@@ -1,4 +1,4 @@
-.PHONY: dev prod down logs ps clean help rebuild
+.PHONY: dev prod down logs ps clean help rebuild run restart
 
 # === Настройки ===
 SERVICE_DIR := services
@@ -149,3 +149,35 @@ clean: ## Удалить все (контейнеры, volume-диски) в о�
 		fi \
 	done
 	@echo "✅ Очистка завершена!"
+
+run: ## Запуск одного сервиса (использование: make run service=api ENV=dev|prod)
+ifndef service
+	@echo "❌ Укажи сервис: make run service=api"
+	@exit 1
+else
+	@echo "🚀 Запуск сервиса $(service) (ENV=$(ENV))..."
+	@docker compose \
+		--project-directory $(SERVICE_DIR)/$(service) \
+		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
+		-f $(SERVICE_DIR)/$(service)/docker/$(TARGET_FILE) \
+		up -d --build
+	@echo "✅ Сервис $(service) запущен!"
+endif
+
+restart: ## Перезапуск одного сервиса (make restart service=api)
+ifndef service
+	@echo "❌ Укажи сервис: make restart service=api"
+	@exit 1
+else
+	@echo "🔁 Перезапуск $(service)..."
+	@docker compose \
+		--project-directory $(SERVICE_DIR)/$(service) \
+		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
+		down || true
+	@docker compose \
+		--project-directory $(SERVICE_DIR)/$(service) \
+		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
+		-f $(SERVICE_DIR)/$(service)/docker/$(TARGET_FILE) \
+		up -d --build
+	@echo "✅ $(service) перезапущен!"
+endif
