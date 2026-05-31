@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-browser-agent = [
+browser_agent = [
     "crawl4ai>=0.8.6",
     "httpx>=0.28.1",
     "langchain-core>=1.4.0",
@@ -28,6 +28,7 @@ api = [
 
 [project.scripts]
 browser_agent = "services.browser_agent.main:main"
+api = "services.api.main:main"
 
 [tool.uv]
 package = true

@@ -14,7 +14,7 @@ COPY pyproject.toml uv.lock ./
 
 # 3. Синхронизируем ТОЛЬКО внешние зависимости для browser-agent
 # --extra browser-agent указывает uv установить эту конкретную группу
-RUN uv sync --frozen --no-install-project --extra browser-agent
+RUN uv sync --frozen --no-install-project --extra browser_agent
 
 # 4. Устанавливаем системные зависимости Playwright и Chromium
 # Пакет playwright уже скачан на предыдущем шаге, uv run задействует его
