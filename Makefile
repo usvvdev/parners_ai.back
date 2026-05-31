@@ -7,8 +7,15 @@ SERVICE_DIR := services
 # Звездочка со слешем на конце (/*/) гарантирует, что мы ищем ТОЛЬКО директории
 _SERVICE_PATHS := $(wildcard $(SERVICE_DIR)/*/)
 
-# 2. Очищаем пути: убираем слеши и оставляем только имена папок (infra, browser_agent)
-ALL_SERVICES := $(notdir $(patsubst %/,%,$(_SERVICE_PATHS)))
+# 2. Очищаем пути и сортируем: infra должна быть первой
+RAW_SERVICES := $(notdir $(patsubst %/,%,$(_SERVICE_PATHS)))
+
+# Находим infra (если она есть) и все остальные сервисы
+INFRA_SERVICE := $(filter infra, $(RAW_SERVICES))
+OTHER_SERVICES := $(filter-out infra, $(RAW_SERVICES))
+
+# Склеиваем список: infra всегда будет первой, затем все остальное
+ALL_SERVICES := $(INFRA_SERVICE) $(OTHER_SERVICES)
 
 # 3. Мягкое присваивание! 
 # Если вы не передали SERVICES в консоли, Make будет использовать ВСЕ найденные сервисы.
@@ -55,14 +62,16 @@ prod: ## Запуск всех сервисов (production)
 	done
 	@echo "✅ Продакшн окружение готово!"
 
-down: ## Остановка всех сервисов
+down: ## Остановка всех сервисов (в обратном порядке)
 	@echo "⏹️  Остановка сервисов..."
-	@for s in $(SERVICES); do \
-        echo "⏸️  Остановка $$s..."; \
-        docker compose \
-            --project-directory $(SERVICE_DIR)/$$s \
-            -f $(SERVICE_DIR)/$$s/docker/base.yaml \
-            down || true; \
+	@for s in $(OTHER_SERVICES) $(INFRA_SERVICE); do \
+		if echo "$(SERVICES)" | grep -wq "$$s"; then \
+			echo "⏸️  Остановка $$s..."; \
+			docker compose \
+				--project-directory $(SERVICE_DIR)/$$s \
+				-f $(SERVICE_DIR)/$$s/docker/base.yaml \
+				down || true; \
+		fi \
 	done
 	@echo "✅ Все остановлено!"
 
@@ -73,28 +82,30 @@ ifndef service
 else
 	@echo "📜 Логи сервиса $(service)..."
 	@docker compose \
-        --project-directory $(SERVICE_DIR)/$(service) \
-        -f $(SERVICE_DIR)/$(service)/docker/base.yaml \
-        logs -f
+		--project-directory $(SERVICE_DIR)/$(service) \
+		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
+		logs -f
 endif
 
 ps: ## Показать статус всех сервисов
 	@for s in $(SERVICES); do \
-        echo ""; \
-        echo "=== Сервис: $$s ==="; \
-        docker compose \
-            --project-directory $(SERVICE_DIR)/$$s \
-            -f $(SERVICE_DIR)/$$s/docker/base.yaml \
-            ps || true; \
+		echo ""; \
+		echo "=== Сервис: $$s ==="; \
+		docker compose \
+			--project-directory $(SERVICE_DIR)/$$s \
+			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
+			ps || true; \
 	done
 
-clean: ## Удалить все (контейнеры, volume-диски)
+clean: ## Удалить все (контейнеры, volume-диски) в обратном порядке
 	@echo "🧹 Очистка сервисов..."
-	@for s in $(SERVICES); do \
-        echo "🧹 Очистка $$s..."; \
-        docker compose \
-            --project-directory $(SERVICE_DIR)/$$s \
-            -f $(SERVICE_DIR)/$$s/docker/base.yaml \
-            down -v || true; \
-    done
+	@for s in $(OTHER_SERVICES) $(INFRA_SERVICE); do \
+		if echo "$(SERVICES)" | grep -wq "$$s"; then \
+			echo "🧹 Очистка $$s..."; \
+			docker compose \
+				--project-directory $(SERVICE_DIR)/$$s \
+				-f $(SERVICE_DIR)/$$s/docker/base.yaml \
+				down -v || true; \
+		fi \
+	done
 	@echo "✅ Очистка завершена!"
