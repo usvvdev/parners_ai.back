@@ -12,19 +12,19 @@ from ..views.offer import (
     OfferRepositoryView,
 )
 
-from ....infrastructure.factories.services import OfferRepositoryServiceFactory
+from ....infrastructure.factories.api.view import OfferRepositoryViewFactory
 
 
 offer_router = APIRouter(
     prefix="/offers",
-    tags=["offer"],
+    tags=["Offers"],
 )
 
 
 @offer_router.get("/")
 async def fetch_offers(
     view: OfferRepositoryView = Depends(
-        OfferRepositoryServiceFactory.create,
+        OfferRepositoryViewFactory.create,
     ),
 ) -> list[FetchOffer]:
     return await view.fetch()
@@ -34,7 +34,7 @@ async def fetch_offers(
 async def create_offer(
     data: InsertOffer,
     view: OfferRepositoryView = Depends(
-        OfferRepositoryServiceFactory.create,
+        OfferRepositoryViewFactory.create,
     ),
 ) -> FetchOffer:
     return await view.create(
@@ -47,7 +47,7 @@ async def update_offer(
     offer_id: int,
     data: InsertOffer,
     view: OfferRepositoryView = Depends(
-        OfferRepositoryServiceFactory.create,
+        OfferRepositoryViewFactory.create,
     ),
 ) -> FetchOffer:
     return await view.update(
@@ -60,7 +60,7 @@ async def update_offer(
 async def delete_offer(
     offer_id: int,
     view: OfferRepositoryView = Depends(
-        OfferRepositoryServiceFactory.create,
+        OfferRepositoryViewFactory.create,
     ),
 ) -> FetchOffer:
     return await view.delete(

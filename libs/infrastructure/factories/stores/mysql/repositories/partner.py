@@ -1,19 +1,13 @@
 from ..engine import MySQLEngineFactory
 
-from libs.infrastructure.stores.common import TTable
-
-from libs.infrastructure.stores.mysql import MySQLRepository
-
-from libs.infrastructure.stores.mysql.models import Partners
+from libs.infrastructure.stores.mysql.repositories import PartnerRepository
 
 
 class MySQLPartnerRepository:
     @staticmethod
     def create(
         engine: MySQLEngineFactory,
-        table: type[TTable] = Partners,
-    ) -> MySQLRepository[Partners]:
-        return MySQLRepository(
+    ) -> PartnerRepository:
+        return PartnerRepository(
             engine=engine,
-            table=table,
         )

@@ -58,16 +58,17 @@ class BaseSQLRepository(
         self,
         data: dict[str, Any],
     ) -> TTable:
-        stmt: Insert = (
-            insert(self._table)
-            .values(**data)
-            .returning(
-                self._table,
+        # TODO сделать returning
+        try:
+            stmt: Insert = insert(self._table).values(**data)
+
+            result = await self._commit(
+                stmt,
             )
-        )
-        return await self._commit(
-            stmt,
-        )
+        except Exception as err:
+            raise err
+        finally:
+            return result
 
     async def update(
         self,

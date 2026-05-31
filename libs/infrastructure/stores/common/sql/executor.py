@@ -41,6 +41,8 @@ class BaseSQLExecutor:
                 yield session
         except SQLAlchemyError as err:
             raise RuntimeError(err)
+        finally:
+            await session.close()
 
     async def __fetch_scalars(
         self,

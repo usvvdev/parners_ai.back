@@ -9,7 +9,7 @@ from uvicorn import run
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 from .src.infrastructure.utils import run_migrations
-from .src.interface.api.routes import offer_router
+from .src.interface.api.routes import offer_router, partner_router
 
 
 SERVICE_DIR = Path(__file__).parent
@@ -40,7 +40,10 @@ def create_app() -> FastAPI:
         allow_credentials=True,
     )
 
-    app.include_router(offer_router, prefix="/api")
+    [
+        app.include_router(route, prefix="/api")
+        for route in (offer_router, partner_router)
+    ]
 
     return app
 
