@@ -1,3 +1,15 @@
+x-base-service: &base-service
+  restart: unless-stopped
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment:
+    - PYTHONUNBUFFERED=1
+    - PYTHONDONTWRITEBYTECODE=1
+    - TZ=UTC
+  networks:
+    - backend
+
 services:
   browser-agent:
     <<: *base-service
