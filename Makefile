@@ -68,7 +68,7 @@ down: ## Остановка всех сервисов
 
 logs: ## Просмотр логов (использование: make logs service=browser_agent)
 ifndef service
-    @echo "❌ Ошибка: Укажите сервис. Пример: make logs service=browser_agent"
+	@echo "❌ Ошибка: Укажите сервис. Пример: make logs service=browser_agent"
 	@exit 1
 else
 	@echo "📜 Логи сервиса $(service)..."
