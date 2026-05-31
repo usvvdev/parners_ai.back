@@ -5,7 +5,7 @@
     }
 
     handle / {
-        respond "Hellow there"
+        respond "API Service is ready"
     }
 
     respond 404

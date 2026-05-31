@@ -40,7 +40,7 @@ def create_app() -> FastAPI:
         allow_credentials=True,
     )
 
-    app.include_router(offer_router)
+    app.include_router(offer_router, prefix="/api")
 
     return app
 
