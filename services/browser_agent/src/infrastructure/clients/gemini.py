@@ -1,5 +1,7 @@
 # packages
 
+from httpx import Client
+
 from langchain_core.messages import HumanMessage
 
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -28,6 +30,12 @@ class Gemini(IGeminiProtocol):
             model=self._config.google_model,
             temperature=1.0,
             api_key=self._config.google_api_key,
+            httpx_client=Client(
+                proxies={
+                    "http": self._config.proxy_url,
+                    "https": self._config.proxy_url,
+                }
+            ),
         )
 
     async def analyze(
