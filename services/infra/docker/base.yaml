@@ -51,6 +51,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
+      - caddy_config:/config
       - ./ssl:/etc/caddy/ssl
     # healthcheck:
     #   test: ["CMD", "curl", "-f", "http://localhost:80"]
