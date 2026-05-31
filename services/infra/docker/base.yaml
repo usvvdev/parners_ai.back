@@ -12,6 +12,7 @@ services:
   mysql:
     <<: *engine
     image: mysql:8.3-oracle
+    container_name: mysql
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
       MYSQL_USER: ${MYSQL_USERNAME:-user}
@@ -27,6 +28,7 @@ services:
   clickhouse:
     <<: *engine
     image: clickhouse/clickhouse-server:24.8-alpine
+    container_name: clickhouse
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-default}
       CLICKHOUSE_USER: ${CLICKHOUSE_USERNAME:-default}
@@ -42,6 +44,7 @@ services:
   caddy:
     <<: *engine
     image: caddy:2.10
+    container_name: caddy
     environment:
       TZ: "Europe/Moscow"
       DOMAIN: ${DOMAIN:-localhost}

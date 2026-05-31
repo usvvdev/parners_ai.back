@@ -11,6 +11,7 @@ x-base-service: &base-service
 services:
   browser_agent:
     <<: *base-service
+    container_name: browser_agent
     healthcheck:
       test: ["CMD", "uv", "run", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=5)"]
       interval: 30s   
