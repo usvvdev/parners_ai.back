@@ -1,7 +1,7 @@
 {$DOMAIN} {
 
-    handle {
-        respond "Hello World" 200
+    handle /api/* {
+        reverse_proxy {$BACKEND_HOST}:{$BACKEND_PORT}
     }
 
 }
