@@ -20,11 +20,9 @@ from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
-config_factory = ApplicationConfigFactory.create(
+config = ApplicationConfigFactory.create(
     service_dir=Path(__file__).parent.parent,
 )
-
-config: type[TApplicationConfig] = config_factory
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
