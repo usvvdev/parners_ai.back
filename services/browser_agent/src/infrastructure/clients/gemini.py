@@ -30,9 +30,9 @@ class Gemini(IGeminiProtocol):
             model=self._config.google_model,
             temperature=1.0,
             api_key=self._config.google_api_key,
-            httpx_client=Client(
-                proxy=self._config.proxy_url,
-            ),
+            client_args={
+                "proxy": self._config.proxy_url,
+            },
         )
 
     async def analyze(
