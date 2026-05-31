@@ -1,8 +1,9 @@
 {$DOMAIN} {
 
-    handle /api/* {
+    handle {
         reverse_proxy api:8000
     }
+
 
     handle / {
         respond "API Service is ready"
