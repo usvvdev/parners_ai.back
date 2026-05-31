@@ -69,3 +69,5 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME:-dydex}_clickhouse_data
   caddy_data:
     name: ${COMPOSE_PROJECT_NAME:-dydex}_caddy_data
+  caddy_config:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_caddy_config
