@@ -1,0 +1,10 @@
+{
+    "engine_options": {
+        "mysql": {
+            "driver": "mysql+aiomysql",
+            "pool_size": 5,
+            "max_overflow": 10,
+            "echo": true
+        }
+    }
+}
