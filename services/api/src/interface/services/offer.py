@@ -25,6 +25,16 @@ class OfferRepositoryService:
             data=data,
         )
 
+    async def update(
+        self,
+        offer_id: int,
+        data: dict,
+    ) -> Offers:
+        return await self._repository.update(
+            id=offer_id,
+            data=data,
+        )
+
     async def delete(
         self,
         offer_id: int,

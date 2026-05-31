@@ -24,15 +24,25 @@ class OfferRepositoryView:
     async def create(
         self,
         data: InsertOffer,
-    ) -> InsertOffer:
+    ) -> FetchOffer:
         return await self._service.create(
-            data=data,
+            data=data.dump,
+        )
+
+    async def update(
+        self,
+        offer_id: int,
+        data: InsertOffer,
+    ) -> FetchOffer:
+        return await self._service.update(
+            offer_id=offer_id,
+            data=data.dump,
         )
 
     async def delete(
         self,
         offer_id: int,
-    ) -> None:
+    ) -> FetchOffer:
         return await self._service.delete(
             offer_id=offer_id,
         )

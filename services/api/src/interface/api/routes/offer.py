@@ -42,6 +42,20 @@ async def create_offer(
     )
 
 
+@offer_router.put("/{offer_id}")
+async def update_offer(
+    offer_id: int,
+    data: InsertOffer,
+    view: OfferRepositoryView = Depends(
+        OfferRepositoryServiceFactory.create,
+    ),
+) -> FetchOffer:
+    return await view.update(
+        offer_id=offer_id,
+        data=data,
+    )
+
+
 @offer_router.delete("/{offer_id}")
 async def delete_offer(
     offer_id: int,
