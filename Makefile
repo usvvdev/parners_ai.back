@@ -1,30 +1,30 @@
-.PHONY: dev prod down logs ps clean help
+.PHONY: dev prod down logs ps clean help rebuild
 
 # === Настройки ===
 SERVICE_DIR := services
 
 # 1. Автоматически находим все папки внутри $(SERVICE_DIR)/
-# Звездочка со слешем на конце (/*/) гарантирует, что мы ищем ТОЛЬКО директории
 _SERVICE_PATHS := $(wildcard $(SERVICE_DIR)/*/)
 
 # 2. Очищаем пути и сортируем: infra должна быть первой
 RAW_SERVICES := $(notdir $(patsubst %/,%,$(_SERVICE_PATHS)))
 
-# Находим infra (если она есть) и все остальные сервисы
 INFRA_SERVICE := $(filter infra, $(RAW_SERVICES))
 OTHER_SERVICES := $(filter-out infra, $(RAW_SERVICES))
 
-# Склеиваем список: infra всегда будет первой, затем все остальное
 ALL_SERVICES := $(INFRA_SERVICE) $(OTHER_SERVICES)
 
-# 3. Мягкое присваивание! 
-# Если вы не передали SERVICES в консоли, Make будет использовать ВСЕ найденные сервисы.
+# 3. Мягкое присваивание списка сервисов
 SERVICES ?= $(ALL_SERVICES)
 
-COMPOSE_DIR := docker
-BASE_FILE := $(COMPOSE_DIR)/base.yaml
-DEV_FILE := $(COMPOSE_DIR)/development.yaml
-PROD_FILE := $(COMPOSE_DIR)/production.yaml
+# === Окружение для Rebuild ===
+# По умолчанию используем dev. Для продакшена: make rebuild ENV=prod
+ENV ?= dev
+ifeq ($(ENV),prod)
+	TARGET_FILE := production.yaml
+else
+	TARGET_FILE := development.yaml
+endif
 
 # ANSI-цвета для вывода в терминале
 CYAN  := \033[36m
@@ -36,7 +36,12 @@ help: ## Показать доступные команды
 	@echo "Использование: make [команда]"
 	@echo ""
 	@echo "Команды:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(CYAN)%-10s$(RESET) %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(CYAN)%-15s$(RESET) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "Примеры:"
+	@echo "  make rebuild              - Полная пересборка (dev) с паузой для infra"
+	@echo "  make rebuild ENV=prod     - Полная пересборка (production) с паузой для infra"
+	@echo "  make logs service=api     - Просмотр логов конкретного сервиса"
 
 dev: ## Запуск всех сервисов (dev)
 	@echo "🚀 Запуск сервисов (dev)..."
@@ -47,6 +52,10 @@ dev: ## Запуск всех сервисов (dev)
 			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
 			-f $(SERVICE_DIR)/$$s/docker/development.yaml \
 			up -d || exit 1; \
+		if [ "$$s" = "infra" ]; then \
+			echo "⏳ Ожидание 15 секунд для инициализации баз данных..."; \
+			sleep 15; \
+		fi; \
 	done
 	@echo "✅ Все запущено!"
 
@@ -59,8 +68,39 @@ prod: ## Запуск всех сервисов (production)
 			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
 			-f $(SERVICE_DIR)/$$s/docker/production.yaml \
 			up -d || exit 1; \
+		if [ "$$s" = "infra" ]; then \
+			echo "⏳ Ожидание 15 секунд для инициализации баз данных..."; \
+			sleep 15; \
+		fi; \
 	done
 	@echo "✅ Продакшн окружение готово!"
+
+rebuild: ## Полная пересборка (использование: make rebuild [ENV=prod])
+	@echo "♻️  Пересборка сервисов (Окружение: $(ENV))..."
+	@for s in $(SERVICES); do \
+		echo "⏹️  Удаление старых контейнеров $$s..."; \
+		docker compose \
+			--project-directory $(SERVICE_DIR)/$$s \
+			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
+			down || true; \
+		echo "🔨 Сборка $$s без кэша..."; \
+		docker compose \
+			--project-directory $(SERVICE_DIR)/$$s \
+			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
+			-f $(SERVICE_DIR)/$$s/docker/$(TARGET_FILE) \
+			build --no-cache; \
+		echo "▶️  Запуск $$s..."; \
+		docker compose \
+			--project-directory $(SERVICE_DIR)/$$s \
+			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
+			-f $(SERVICE_DIR)/$$s/docker/$(TARGET_FILE) \
+			up -d --force-recreate || exit 1; \
+		if [ "$$s" = "infra" ]; then \
+			echo "⏳ Ожидание 15 секунд для инициализации баз данных..."; \
+			sleep 15; \
+		fi; \
+	done
+	@echo "✅ Пересборка ($(ENV)) завершена!"
 
 down: ## Остановка всех сервисов (в обратном порядке)
 	@echo "⏹️  Остановка сервисов..."
