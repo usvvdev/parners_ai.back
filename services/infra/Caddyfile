@@ -4,4 +4,5 @@
         reverse_proxy {$BACKEND_HOST}:{$BACKEND_PORT}
     }
 
+    respond 404
 }
