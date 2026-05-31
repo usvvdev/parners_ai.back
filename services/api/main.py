@@ -1,54 +1,55 @@
-from pathlib import Path
-from uvicorn import run
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from pathlib import Path
+from loguru import logger
 
-from alembic.config import Config
-from alembic import command
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from uvicorn import run
 
+from libs.infrastructure.factories.common import ApplicationConfigFactory
+
+from .src.infrastructure.utils import run_migrations
 from .src.interface.api.routes import offer_router
 
-# Определяем абсолютный путь к директории, где лежит этот скрипт
-BASE_DIR = Path(__file__).parent.resolve()
 
-# Указываем путь к папке сервиса, где лежит Alembic
+SERVICE_DIR = Path(__file__).parent
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Connecting to database...")
-    print("Running database migrations...")
-
+async def lifespan(_: FastAPI):
     try:
-        # Указываем пути относительно папки сервиса
-        alembic_ini_path = BASE_DIR / "alembic.ini"
-        migrations_dir_path = BASE_DIR / "migrations"
-
-        # Проверяем, существуют ли файлы, чтобы избежать непонятных ошибок
-        if not alembic_ini_path.exists():
-            print(f"Warning: alembic.ini not found at {alembic_ini_path}")
-        if not migrations_dir_path.exists():
-            print(f"Warning: migrations folder not found at {migrations_dir_path}")
-
-        alembic_cfg = Config(str(alembic_ini_path))
-        alembic_cfg.set_main_option("script_location", str(migrations_dir_path))
-
-        command.upgrade(alembic_cfg, "head")
-        print("Migrations applied successfully!")
-
-    except Exception as e:
-        print(f"Error applying migrations: {e}")
-
+        run_migrations(SERVICE_DIR)
+    except Exception as err:
+        logger.error(err)
     yield
-    print("Cleaning up database connection...")
 
 
-app = FastAPI(lifespan=lifespan)
-app.include_router(offer_router)
+def create_app() -> FastAPI:
+    config = ApplicationConfigFactory.create(
+        service_dir=SERVICE_DIR,
+    )
+
+    app = FastAPI(
+        lifespan=lifespan,
+        **config.openai,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=True,
+    )
+
+    app.include_router(offer_router)
+
+    return app
 
 
 def main():
-    run(app, host="0.0.0.0", port=8000)
+    run(
+        create_app,
+        host="0.0.0.0",
+        port=8000,
+    )
 
 
 if __name__ == "__main__":

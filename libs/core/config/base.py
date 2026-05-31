@@ -2,7 +2,7 @@
 
 from os import getenv
 
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from pydantic import Field
 
@@ -56,6 +56,11 @@ class ApplicationBaseConfig(
         description="Tuple of logger names to configure",
     )
 
+    api_prefix: str = Field(
+        default="/api",
+        description="",
+    )
+
     @classmethod
     def settings_customise_sources(
         cls,
@@ -95,6 +100,12 @@ class ApplicationBaseConfig(
                 map(lambda x: x, sources),
             )
         )
+
+    @property
+    def openai(
+        self,
+    ) -> dict[str, Any]:
+        return self.openai_options.model_dump()
 
 
 TApplicationConfig = TypeVar(

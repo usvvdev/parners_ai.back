@@ -27,18 +27,18 @@ class OpenAPIOptions(BaseConfigType):
     )
 
     version: str = Field(
-        ...,
+        default="0.0.1",
         description="Application API version.",
     )
 
     title: str = Field(
-        ...,
+        default="API",
         description="Title of the API (shown in docs).",
     )
 
     @computed_field
     @property
-    def openapi_prefix(
+    def root_path(
         self,
     ) -> str:
         if self.title is not None:
