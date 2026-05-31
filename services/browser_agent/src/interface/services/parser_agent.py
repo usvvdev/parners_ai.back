@@ -27,7 +27,7 @@ class ParserAgentService:
         for partner in partners:
             result = await self._browser_agent.parse(
                 link=partner.link,
-                target_offers=[partner.offers],
+                target_offers=[offer.title for offer in partner.offers],
             )
 
             results.append(result)
