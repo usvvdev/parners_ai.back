@@ -15,14 +15,14 @@ from .src.interface.api.routes import offer_router, partner_router
 SERVICE_DIR = Path(__file__).parent
 
 
-# @asynccontextmanager
-# async def lifespan(_: FastAPI):
-#     logger.info("Starting migrations")
-#     try:
-#         run_migrations(SERVICE_DIR)
-#     except Exception as err:
-#         logger.error(err)
-#     yield
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    logger.info("Starting migrations")
+    try:
+        run_migrations(SERVICE_DIR)
+    except Exception as err:
+        logger.error(err)
+    yield
 
 
 def create_app() -> FastAPI:
@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
     )
 
     app = FastAPI(
-        # lifespan=lifespan,
+        lifespan=lifespan,
         **config.openai,
     )
 
