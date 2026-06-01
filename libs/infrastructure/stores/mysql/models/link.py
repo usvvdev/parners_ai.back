@@ -43,8 +43,3 @@ class Links(
     )
 
     __updated_at__: bool = True
-
-    __table_args__ = (
-        # fast search
-        Index("ix_offers_link", "link"),
-    )
