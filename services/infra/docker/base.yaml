@@ -53,9 +53,9 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - ./ssl:/etc/caddy/ssl
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:80"]
-    #   interval: 1m
+    depends_on:
+      api:
+        condition: service_healthy
 
 networks:
   default:

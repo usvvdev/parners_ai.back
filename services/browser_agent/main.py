@@ -21,7 +21,9 @@ async def run_app() -> None:
 
     for result in results:
         for offer in result.target_offers_found:
-            print(f"🎯 Оффер '{offer.title}' найден на позиции №{offer.position}")
+            print(
+                f"🎯 Оффер '{offer.title}' найден на позиции №{offer.position}. У партнера: {result}"
+            )
 
 
 # # 2. Create a standard synchronous 'main' function for the CLI entry point

@@ -22,21 +22,21 @@ from .mixins.common import (
 )
 
 from .mixins.relations import (
-    PartnerRelationMixin,
+    LinkRelationMixin,
 )
 
 
-class Partners(
+class Links(
     BaseMixin,
     TimestampMixin,
-    PartnerRelationMixin,
+    LinkRelationMixin,
 ):
-    title: Mapped[str] = mapped_column(
-        String(128),
+    link: Mapped[str] = mapped_column(
+        String(2048),
         nullable=False,
     )
 
-    is_tracking: Mapped[bool] = mapped_column(
+    is_active: Mapped[bool] = mapped_column(
         TINYINT,
         default=True,
         nullable=False,
@@ -46,5 +46,5 @@ class Partners(
 
     __table_args__ = (
         # fast search
-        Index("ix_partner_title", "title"),
+        Index("ix_offers_link", "link"),
     )

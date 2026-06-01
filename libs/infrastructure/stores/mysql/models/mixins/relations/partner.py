@@ -12,3 +12,11 @@ class PartnerRelationMixin:
             secondary="partner_offer",
             back_populates="partners",
         )
+
+    @declared_attr
+    def links(cls):
+        return relationship(
+            "Links",
+            secondary="partner_link",
+            back_populates="partners",
+        )

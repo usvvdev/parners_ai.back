@@ -33,6 +33,7 @@ class PartnerRepository(MySQLRepository[Partners]):
     ):
         query = select(self._table).options(
             selectinload(self._table.offers),
+            selectinload(self._table.links),
         )
         if partner_id:
             query = query.where(self._table.id == partner_id)
