@@ -8,7 +8,10 @@ from sqlalchemy.orm import selectinload
 
 # application dependencies
 
-from ..models import Partners
+from ..models import (
+    Partners,
+    Links,
+)
 
 from ..repository import MySQLRepository
 
@@ -32,7 +35,7 @@ class PartnerRepository(MySQLRepository[Partners]):
         partner_id: Optional[int] = None,
     ):
         query = select(self._table).options(
-            selectinload(self._table.links),
+            selectinload(self._table.links).selectinload(Links.offers),
         )
         if partner_id:
             query = query.where(self._table.id == partner_id)
