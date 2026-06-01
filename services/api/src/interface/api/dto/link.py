@@ -1,35 +1,35 @@
-from pydantic import Field
-
 from typing import Optional
 
-from .link import FetchLink
+from pydantic import Field
+
+from .offer import FetchOffer
 
 from libs.domain.types._types.common import BaseModelType
 
 
-class BasePartner(BaseModelType):
-    title: str = Field(
+class BaseLink(BaseModelType):
+    link: str = Field(
         ...,
         description="Название оффера",
     )
 
-    is_tracking: bool = Field(
+    is_active: bool = Field(
         default=True,
         description="Активность оффера",
     )
 
 
-class FetchPartner(BasePartner):
+class FetchLink(BaseLink):
     id: int = Field(
         ...,
         description="ID оффера",
     )
 
-    links: Optional[list[FetchLink]] = Field(
+    offers: Optional[list[FetchOffer]] = Field(
         default=list,
-        description="Офферы, относящиеся к партнеру",
+        description="",
     )
 
 
-class InsertPartner(BasePartner):
+class InsertLink(BaseLink):
     pass

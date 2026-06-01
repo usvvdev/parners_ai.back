@@ -15,11 +15,11 @@ from sqlalchemy.orm import (
 from ..mixins.common import LinkMixin
 
 
-class PartnerOffer(LinkMixin):
-    partner_id: Mapped[int] = mapped_column(
+class LinkOffer(LinkMixin):
+    link_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey(
-            "partners.id",
+            "links.id",
             ondelete="CASCADE",
         ),
         primary_key=True,

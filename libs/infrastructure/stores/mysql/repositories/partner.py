@@ -32,7 +32,6 @@ class PartnerRepository(MySQLRepository[Partners]):
         partner_id: Optional[int] = None,
     ):
         query = select(self._table).options(
-            selectinload(self._table.offers),
             selectinload(self._table.links),
         )
         if partner_id:

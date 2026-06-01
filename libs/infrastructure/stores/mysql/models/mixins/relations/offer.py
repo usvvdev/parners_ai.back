@@ -6,9 +6,9 @@ from sqlalchemy.orm import (
 
 class OfferRelationMixin:
     @declared_attr
-    def partners(cls):
+    def links(cls):
         return relationship(
-            "Partners",
-            secondary="partner_offer",
+            "Links",
+            secondary="link_offer",
             back_populates="offers",
         )
