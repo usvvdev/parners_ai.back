@@ -5,7 +5,7 @@ from .partner import Partners
 from .link import Links
 
 from .links import (
-    PartnerOffer,
+    LinkOffer,
     PartnerLink,
 )
 
@@ -13,6 +13,6 @@ __all__: list[str] = [
     "Offers",
     "Partners",
     "Links",
-    "PartnerOffer",
+    "LinkOffer",
     "PartnerLink",
 ]
