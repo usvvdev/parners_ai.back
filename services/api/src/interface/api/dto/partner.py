@@ -4,6 +4,8 @@ from typing import Optional
 
 from .link import FetchLink
 
+from .base import BaseFetch
+
 from libs.domain.types._types.common import BaseModelType
 
 
@@ -19,17 +21,25 @@ class BasePartner(BaseModelType):
     )
 
 
-class FetchPartner(BasePartner):
-    id: int = Field(
-        ...,
-        description="ID оффера",
-    )
-
+class FetchPartnerLinks(
+    BaseFetch,
+    BasePartner,
+):
     links: Optional[list[FetchLink]] = Field(
         default=list,
         description="Офферы, относящиеся к партнеру",
     )
 
 
-class InsertPartner(BasePartner):
+class FetchPartner(
+    BaseFetch,
+    BasePartner,
+):
     pass
+
+
+class InsertPartner(BasePartner):
+    link_ids: Optional[list[int]] = Field(
+        default=list,
+        description="ID офферов, относящихся к партнеру",
+    )

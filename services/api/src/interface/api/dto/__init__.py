@@ -5,6 +5,7 @@ from .offer import (
 
 from .partner import (
     FetchPartner,
+    FetchPartnerLinks,
     InsertPartner,
 )
 
@@ -17,6 +18,7 @@ __all__: list[str] = [
     "InsertOffer",
     "FetchOffer",
     "FetchPartner",
+    "FetchPartnerLinks",
     "InsertPartner",
     "FetchLink",
     "InsertLink",

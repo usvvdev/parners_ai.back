@@ -1,5 +1,7 @@
 # application dependencies
 
+from typing import Any
+
 from libs.infrastructure.stores.mysql.models import Partners
 
 from libs.infrastructure.stores.mysql.repositories import PartnerRepository
@@ -20,25 +22,33 @@ class PartnerRepositoryService:
     async def fetch_by_id(
         self,
         id: int,
-    ) -> Partners | None:
+    ) -> Partners:
         return await self._repository.fetch_by_id(
             id=id,
         )
 
-    # async def update(
-    #     self,
-    #     offer_id: int,
-    #     data: dict,
-    # ) -> Partners:
-    #     return await self._repository.update(
-    #         id=offer_id,
-    #         data=data,
-    #     )
+    async def insert(
+        self,
+        data: dict[str, Any],
+    ) -> Partners:
+        return await self._repository.insert(
+            data=data,
+        )
 
-    # async def delete(
-    #     self,
-    #     offer_id: int,
-    # ) -> Partners:
-    #     return await self._repository.delete(
-    #         id=offer_id,
-    #     )
+    async def update(
+        self,
+        id: int,
+        data: dict[str, Any],
+    ) -> Partners:
+        return await self._repository.update(
+            id=id,
+            data=data,
+        )
+
+    async def delete(
+        self,
+        id: int,
+    ) -> Partners:
+        return await self._repository.delete(
+            id=id,
+        )

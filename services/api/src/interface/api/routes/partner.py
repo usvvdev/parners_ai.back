@@ -1,11 +1,13 @@
-from typing import Any
-
 from fastapi import (
     APIRouter,
     Depends,
 )
 
-from ..dto import FetchPartner
+from ..dto import (
+    FetchPartner,
+    FetchPartnerLinks,
+    InsertPartner,
+)
 
 from ..views import PartnerRepositoryView
 
@@ -33,7 +35,31 @@ async def fetch_partner(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-) -> FetchPartner | None:
+) -> FetchPartnerLinks:
     return await view.fetch_by_id(
+        id=id,
+    )
+
+
+@partner_router.post("/")
+async def create_partner(
+    data: InsertPartner,
+    view: PartnerRepositoryView = Depends(
+        PartnerRepositoryViewFactory.create,
+    ),
+) -> FetchPartner:
+    return await view.insert(
+        data=data,
+    )
+
+
+@partner_router.delete("/{id}")
+async def delete_offer(
+    id: int,
+    view: PartnerRepositoryView = Depends(
+        PartnerRepositoryViewFactory.create,
+    ),
+):
+    return await view.delete(
         id=id,
     )

@@ -1,6 +1,9 @@
 # packages
 
-from typing import Optional
+from typing import (
+    Any,
+    Optional,
+)
 
 from sqlalchemy import select
 
@@ -33,7 +36,7 @@ class PartnerRepository(MySQLRepository[Partners]):
     async def fetch_by_id(
         self,
         id: int,
-    ):
+    ) -> Optional[Partners]:
         query = (
             select(self._table)
             .options(
@@ -46,3 +49,29 @@ class PartnerRepository(MySQLRepository[Partners]):
             many=False,
             id=id,
         )
+
+    async def insert(
+        self,
+        data: dict[str, Any],
+    ) -> Partners:
+        async with self._engine.session_factory() as session:
+            partner = Partners(
+                title=data.get("title"),
+                is_tracking=data.get("is_tracking", True),
+            )
+
+            if data.get("link_ids"):
+                result = await session.execute(
+                    select(Links).where(
+                        Links.id.in_(data.get("link_ids")),
+                    )
+                )
+
+                partner.links = result.scalars().all()
+
+            session.add(partner)
+
+            await session.commit()
+            await session.refresh(partner)
+
+            return partner

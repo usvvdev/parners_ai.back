@@ -34,6 +34,7 @@ class Partners(
     title: Mapped[str] = mapped_column(
         String(128),
         nullable=False,
+        unique=True,
     )
 
     is_tracking: Mapped[bool] = mapped_column(

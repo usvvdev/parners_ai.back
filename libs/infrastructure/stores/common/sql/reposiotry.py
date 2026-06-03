@@ -60,17 +60,10 @@ class BaseSQLRepository(
         self,
         data: dict[str, Any],
     ) -> TTable:
-        # TODO сделать returning
-        try:
-            stmt: Insert = insert(self._table).values(**data)
-
-            result = await self._commit(
-                stmt,
-            )
-        except Exception as err:
-            raise err
-        finally:
-            return result
+        stmt: Insert = insert(self._table).values(**data)
+        return await self._commit(
+            stmt,
+        )
 
     async def update(
         self,
@@ -84,7 +77,6 @@ class BaseSQLRepository(
             .values(
                 **data,
             )
-            .returning(self._table)
         )
         return await self._commit(
             stmt,
@@ -95,13 +87,7 @@ class BaseSQLRepository(
         *,
         id: int,
     ) -> TTable | None:
-        stmt: Delete = (
-            delete(self._table)
-            .filter_by(id=id)
-            .returning(
-                self._table,
-            )
-        )
+        stmt: Delete = delete(self._table).filter_by(id=id)
         return await self._commit(
             stmt,
         )
