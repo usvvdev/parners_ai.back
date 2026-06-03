@@ -6,23 +6,31 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
 
+from libs.domain.utils import app_exception_handler
+
+from libs.domain.errors.base import BaseApplicationException
+
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 from .src.infrastructure.utils import run_migrations
-from .src.interface.api.routes import offer_router, partner_router
+
+from .src.interface.api.routes import (
+    offer_router,
+    partner_router,
+)
 
 
 SERVICE_DIR = Path(__file__).parent
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    logger.info("Starting migrations")
-    try:
-        run_migrations(SERVICE_DIR)
-    except Exception as err:
-        logger.error(err)
-    yield
+# @asynccontextmanager
+# async def lifespan(_: FastAPI):
+#     logger.info("Starting migrations")
+#     try:
+#         run_migrations(SERVICE_DIR)
+#     except Exception as err:
+#         logger.error(err)
+#     yield
 
 
 def create_app() -> FastAPI:
@@ -31,8 +39,13 @@ def create_app() -> FastAPI:
     )
 
     app = FastAPI(
-        lifespan=lifespan,
+        # lifespan=lifespan,
         **config.openai,
+    )
+
+    app.add_exception_handler(
+        BaseApplicationException,
+        app_exception_handler,
     )
 
     app.add_middleware(

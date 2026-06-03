@@ -25,11 +25,6 @@ class FetchLink(BaseLink):
         description="ID оффера",
     )
 
-    offers: Optional[list[FetchOffer]] = Field(
-        default=list,
-        description="",
-    )
-
 
 class InsertLink(BaseLink):
     pass

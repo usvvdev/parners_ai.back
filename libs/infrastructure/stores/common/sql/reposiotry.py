@@ -47,11 +47,13 @@ class BaseSQLRepository(
         query: Select | None = None,
         *,
         many: bool = True,
+        **kwargs,
     ) -> list[TTable] | TTable | None:
         stmt: Select = query if query is not None else select(self._table)
         return await self._fetch(
             stmt,
             many=many,
+            **kwargs,
         )
 
     async def insert(

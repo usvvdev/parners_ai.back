@@ -17,13 +17,13 @@ class PartnerRepositoryService:
     ) -> list[Partners]:
         return await self._repository.fetch()
 
-    # async def create(
-    #     self,
-    #     data: dict,
-    # ) -> Partners:
-    #     return await self._repository.insert(
-    #         data=data,
-    #     )
+    async def fetch_by_id(
+        self,
+        id: int,
+    ) -> Partners | None:
+        return await self._repository.fetch_by_id(
+            id=id,
+        )
 
     # async def update(
     #     self,

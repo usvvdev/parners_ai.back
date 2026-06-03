@@ -11,6 +11,8 @@ from sqlalchemy import (
     Result,
 )
 
+from loguru import logger
+
 from sqlalchemy.exc import SQLAlchemyError
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +24,13 @@ from contextlib import asynccontextmanager
 # application dependencies
 
 from .engine import BaseSQLEngine
+
+from libs.domain.errors.stores import (
+    ObjectNotFoundException,
+    QueryExecutionException,
+)
+
+from libs.domain.errors.stores import RepositoryException
 
 
 class BaseSQLExecutor:
@@ -39,40 +48,75 @@ class BaseSQLExecutor:
         try:
             async with self._engine.session_factory() as session:
                 yield session
-        except SQLAlchemyError as err:
-            raise RuntimeError(err)
-        finally:
-            await session.close()
+        except SQLAlchemyError:
+            raise RepositoryException
 
     async def __fetch_scalars(
         self,
         query: Executable,
     ) -> ScalarResult[Any]:
-        async with self.__open_session() as session:
-            result: Result[Any] = await session.execute(
-                query,
+        try:
+            async with self.__open_session() as session:
+                result: Result[Any] = await session.execute(query)
+
+                return result.scalars()
+
+        except SQLAlchemyError:
+            logger.exception(
+                "Failed query execution",
+                extra={
+                    "table": self._table.__name__,
+                    "query": str(query),
+                },
             )
-            return result.scalars()
+
+            raise QueryExecutionException(
+                table=self._table.__name__,
+            )
 
     async def _fetch(
         self,
         query: Executable,
         *,
         many: bool,
+        id: int | None = None,
     ) -> Sequence[Any] | Any | None:
         scalars: ScalarResult[Any] = await self.__fetch_scalars(
             query,
         )
-        return scalars.all() if many else scalars.first()
+        result = scalars.all() if many else scalars.first()
+
+        if not result:
+            raise ObjectNotFoundException(
+                table=self._table.__name__,
+                id=id,
+            )
+
+        return result
 
     async def _commit(
         self,
         query: Executable,
     ) -> Result[Any]:
         async with self.__open_session() as session:
-            result: Result[Any] = await session.execute(
-                query,
-            )
-            await session.commit()
+            try:
+                result: Result[Any] = await session.execute(query)
 
-            return result
+                await session.commit()
+
+                return result
+
+            except SQLAlchemyError:
+                await session.rollback()
+
+                logger.exception(
+                    "Failed query execution",
+                    extra={
+                        "table": self._table.__name__,
+                        "query": str(query),
+                    },
+                )
+
+                raise QueryExecutionException(
+                    table=self._table.__name__,
+                )

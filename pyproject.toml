@@ -29,10 +29,15 @@ api = [
     "gunicorn>=26.0.0",
     "uvicorn>=0.48.0",
 ]
+bot = [
+    "aiogram>=3.28.2",
+    "httpx>=0.28.1",
+]
 
 [project.scripts]
 browser_agent = "services.browser_agent.main:main"
 api = "services.api.main:main"
+bot = "services.bot.main:main"
 
 [tool.uv]
 package = true

@@ -15,9 +15,15 @@ class PartnerRepositoryView:
     async def fetch(
         self,
     ) -> list[FetchPartner]:
-        data = await self._service.fetch()
-        return data
-        # return [FetchPartner.model_validate(item) for item in data]
+        return await self._service.fetch()
+
+    async def fetch_by_id(
+        self,
+        id: int,
+    ) -> FetchPartner | None:
+        return await self._service.fetch_by_id(
+            id=id,
+        )
 
     # async def create(
     #     self,

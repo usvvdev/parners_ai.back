@@ -8,7 +8,11 @@ from pydantic import Field
 
 from pathlib import PosixPath
 
-from logging import INFO
+from logging import (
+    INFO,
+    ERROR,
+    DEBUG,
+)
 
 from pydantic_settings import (
     BaseSettings,
@@ -46,13 +50,21 @@ class ApplicationBaseConfig(
     )
 
     # Logging level/loggers settings
-    logging_level: int = Field(
-        default=INFO,
+    logging_level: tuple[int, ...] = Field(
+        default=(
+            INFO,
+            ERROR,
+            DEBUG,
+        ),
         description="Default logging level",
     )
 
     loggers: tuple[str, ...] = Field(
-        default=("uvicorn.asgi", "uvicorn.access"),
+        default=(
+            "uvicorn",
+            "uvicorn.error",
+            "uvicorn.access",
+        ),
         description="Tuple of logger names to configure",
     )
 

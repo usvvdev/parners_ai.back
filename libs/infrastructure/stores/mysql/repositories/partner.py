@@ -30,16 +30,19 @@ class PartnerRepository(MySQLRepository[Partners]):
             **kwargs,
         )
 
-    async def fetch(
+    async def fetch_by_id(
         self,
-        partner_id: Optional[int] = None,
+        id: int,
     ):
-        query = select(self._table).options(
-            selectinload(self._table.links).selectinload(Links.offers),
+        query = (
+            select(self._table)
+            .options(
+                selectinload(self._table.links).selectinload(Links.offers),
+            )
+            .where(self._table.id == id)
         )
-        if partner_id:
-            query = query.where(self._table.id == partner_id)
-
         return await super().fetch(
             query=query,
+            many=False,
+            id=id,
         )
