@@ -5,12 +5,11 @@ from fastapi import (
 
 from ..dto import (
     FetchOffer,
+    FetchOffers,
     InsertOffer,
 )
 
-from ..views.offer import (
-    OfferRepositoryView,
-)
+from ..views import OfferRepositoryView
 
 from ....infrastructure.factories.api.view import OfferRepositoryViewFactory
 
@@ -21,37 +20,55 @@ offer_router = APIRouter(
 )
 
 
-@offer_router.get("/")
+@offer_router.get(
+    "",
+    response_model=list[FetchOffers],
+)
 async def fetch_offers(
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
-) -> list[FetchOffer]:
+) -> list[FetchOffers]:
     return await view.fetch()
 
 
-@offer_router.post("/")
+@offer_router.post("")
 async def create_offer(
     data: InsertOffer,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
 ) -> FetchOffer:
-    return await view.create(
+    return await view.insert(
         data=data,
     )
 
 
-@offer_router.put("/{offer_id}")
+@offer_router.get(
+    "/{id}",
+    response_model=FetchOffer,
+)
+async def fetch_offer_by_id(
+    id: int,
+    view: OfferRepositoryView = Depends(
+        OfferRepositoryViewFactory.create,
+    ),
+) -> FetchOffer:
+    return await view.fetch_by_id(
+        id=id,
+    )
+
+
+@offer_router.put("/{id}")
 async def update_offer(
-    offer_id: int,
+    id: int,
     data: InsertOffer,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
 ) -> FetchOffer:
     return await view.update(
-        offer_id=offer_id,
+        id=id,
         data=data,
     )
 

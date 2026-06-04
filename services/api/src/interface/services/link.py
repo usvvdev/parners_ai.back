@@ -2,27 +2,27 @@
 
 from typing import Any
 
-from libs.infrastructure.stores.mysql.models import Partners
+from libs.infrastructure.stores.mysql.models import Links
 
-from libs.infrastructure.stores.mysql.repositories import PartnerRepository
+from libs.infrastructure.stores.mysql.repositories import LinkRepository
 
 
-class PartnerRepositoryService:
+class LinkRepositoryService:
     def __init__(
         self,
-        repository: PartnerRepository,
+        repository: LinkRepository,
     ) -> None:
         self._repository = repository
 
     async def fetch(
         self,
-    ) -> list[Partners]:
+    ) -> list[Links]:
         return await self._repository.fetch()
 
     async def fetch_by_id(
         self,
         id: int,
-    ) -> Partners:
+    ) -> Links:
         return await self._repository.fetch_by_id(
             id=id,
         )
@@ -30,7 +30,7 @@ class PartnerRepositoryService:
     async def insert(
         self,
         data: Any,
-    ) -> Partners:
+    ) -> Links:
         return await self._repository.insert(
             data=data,
         )
@@ -39,7 +39,7 @@ class PartnerRepositoryService:
         self,
         id: int,
         data: Any,
-    ) -> Partners:
+    ) -> Links:
         return await self._repository.update(
             id=id,
             data=data,
@@ -48,7 +48,7 @@ class PartnerRepositoryService:
     async def delete(
         self,
         id: int,
-    ) -> Partners:
+    ) -> Links:
         return await self._repository.delete(
             id=id,
         )

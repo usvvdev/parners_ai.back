@@ -1,4 +1,10 @@
+# packages
+
 from pydantic import Field
+
+# application dependencies
+
+from .base import BaseFetch
 
 from libs.domain.types._types.common import BaseModelType
 
@@ -9,18 +15,26 @@ class BaseOffer(BaseModelType):
         description="Название оффера",
     )
 
+
+class FetchOffers(
+    BaseOffer,
+    BaseFetch,
+):
+    pass
+
+
+class FetchOffer(
+    BaseOffer,
+    BaseFetch,
+):
     is_active: bool = Field(
         default=True,
         description="Активность оффера",
     )
 
 
-class FetchOffer(BaseOffer):
-    id: int = Field(
-        ...,
-        description="ID оффера",
-    )
-
-
 class InsertOffer(BaseOffer):
-    pass
+    is_active: bool = Field(
+        default=True,
+        description="Активность оффера",
+    )

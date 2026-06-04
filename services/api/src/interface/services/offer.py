@@ -1,5 +1,7 @@
 # application dependencies
 
+from typing import Any
+
 from libs.infrastructure.stores.mysql.models import Offers
 
 from libs.infrastructure.stores.mysql.repositories import OfferRepository
@@ -17,9 +19,17 @@ class OfferRepositoryService:
     ) -> list[Offers]:
         return await self._repository.fetch()
 
-    async def create(
+    async def fetch_by_id(
         self,
-        data: dict,
+        id: int,
+    ) -> Offers:
+        return await self._repository.fetch_by_id(
+            id=id,
+        )
+
+    async def insert(
+        self,
+        data: Any,
     ) -> Offers:
         return await self._repository.insert(
             data=data,
@@ -27,18 +37,18 @@ class OfferRepositoryService:
 
     async def update(
         self,
-        offer_id: int,
-        data: dict,
+        id: int,
+        data: Any,
     ) -> Offers:
         return await self._repository.update(
-            id=offer_id,
+            id=id,
             data=data,
         )
 
     async def delete(
         self,
-        offer_id: int,
+        id: int,
     ) -> Offers:
         return await self._repository.delete(
-            id=offer_id,
+            id=id,
         )

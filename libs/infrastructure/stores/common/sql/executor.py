@@ -54,12 +54,16 @@ class BaseSQLExecutor:
     async def __fetch_scalars(
         self,
         query: Executable,
+        session: AsyncSession | None = None,
     ) -> ScalarResult[Any]:
         try:
+            if session is not None:
+                result: Result[Any] = await session.execute(query)
+
             async with self.__open_session() as session:
                 result: Result[Any] = await session.execute(query)
 
-                return result.scalars()
+            return result.scalars()
 
         except SQLAlchemyError:
             logger.exception(
@@ -80,9 +84,11 @@ class BaseSQLExecutor:
         *,
         many: bool,
         id: int | None = None,
+        session: AsyncSession | None = None,
     ) -> Sequence[Any] | Any | None:
         scalars: ScalarResult[Any] = await self.__fetch_scalars(
             query,
+            session=session,
         )
         result = scalars.all() if many else scalars.first()
 

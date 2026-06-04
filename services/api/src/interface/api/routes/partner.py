@@ -5,7 +5,7 @@ from fastapi import (
 
 from ..dto import (
     FetchPartner,
-    FetchPartnerLinks,
+    FetchPartners,
     InsertPartner,
 )
 
@@ -20,7 +20,10 @@ partner_router = APIRouter(
 )
 
 
-@partner_router.get("/")
+@partner_router.get(
+    "",
+    response_model=list[FetchPartner],
+)
 async def fetch_offers(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
@@ -29,19 +32,25 @@ async def fetch_offers(
     return await view.fetch()
 
 
-@partner_router.get("/{id}")
+@partner_router.get(
+    "/{id}",
+    response_model=FetchPartners,
+)
 async def fetch_partner(
     id: int,
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-) -> FetchPartnerLinks:
+) -> FetchPartners:
     return await view.fetch_by_id(
         id=id,
     )
 
 
-@partner_router.post("/")
+@partner_router.post(
+    "",
+    response_model=FetchPartner,
+)
 async def create_partner(
     data: InsertPartner,
     view: PartnerRepositoryView = Depends(
@@ -53,8 +62,25 @@ async def create_partner(
     )
 
 
+@partner_router.put(
+    "/{id}",
+    response_model=FetchPartner,
+)
+async def update_partner(
+    id: int,
+    data: InsertPartner,
+    view: PartnerRepositoryView = Depends(
+        PartnerRepositoryViewFactory.create,
+    ),
+) -> FetchPartner:
+    return await view.update(
+        id=id,
+        data=data,
+    )
+
+
 @partner_router.delete("/{id}")
-async def delete_offer(
+async def delete_partner(
     id: int,
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,

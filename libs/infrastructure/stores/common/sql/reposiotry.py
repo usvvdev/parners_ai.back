@@ -18,6 +18,8 @@ from sqlalchemy import (
     Delete,
 )
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 # application dependencies
 
 from ..base import TTable
@@ -47,20 +49,24 @@ class BaseSQLRepository(
         query: Select | None = None,
         *,
         many: bool = True,
+        session: AsyncSession | None = None,
         **kwargs,
     ) -> list[TTable] | TTable | None:
         stmt: Select = query if query is not None else select(self._table)
         return await self._fetch(
             stmt,
             many=many,
+            session=session,
             **kwargs,
         )
 
     async def insert(
         self,
-        data: dict[str, Any],
+        data: Any,
     ) -> TTable:
-        stmt: Insert = insert(self._table).values(**data)
+        stmt: Insert = insert(self._table).values(
+            **data.dump,
+        )
         return await self._commit(
             stmt,
         )

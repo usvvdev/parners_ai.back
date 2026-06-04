@@ -3,9 +3,10 @@
 from ..dto import (
     InsertOffer,
     FetchOffer,
+    FetchOffers,
 )
 
-from ...services.offer import OfferRepositoryService
+from ...services import OfferRepositoryService
 
 
 class OfferRepositoryView:
@@ -17,32 +18,39 @@ class OfferRepositoryView:
 
     async def fetch(
         self,
-    ) -> list[FetchOffer]:
-        data = await self._service.fetch()
-        return [FetchOffer.model_validate(item) for item in data]
+    ) -> list[FetchOffers]:
+        return await self._service.fetch()
 
-    async def create(
+    async def fetch_by_id(
+        self,
+        id: int,
+    ) -> FetchOffer:
+        return await self._service.fetch_by_id(
+            id=id,
+        )
+
+    async def insert(
         self,
         data: InsertOffer,
     ) -> FetchOffer:
-        return await self._service.create(
-            data=data.dump,
+        return await self._service.insert(
+            data=data,
         )
 
     async def update(
         self,
-        offer_id: int,
+        id: int,
         data: InsertOffer,
     ) -> FetchOffer:
         return await self._service.update(
-            offer_id=offer_id,
-            data=data.dump,
+            id=id,
+            data=data,
         )
 
     async def delete(
         self,
-        offer_id: int,
+        id: int,
     ) -> FetchOffer:
         return await self._service.delete(
-            offer_id=offer_id,
+            id=id,
         )

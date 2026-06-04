@@ -1,47 +1,46 @@
 # application dependencies
 
 from ..dto import (
-    FetchPartner,
-    InsertPartner,
-    FetchPartners,
+    InsertLink,
+    FetchLink,
 )
 
-from ...services import PartnerRepositoryService
+from ...services import LinkRepositoryService
 
 
-class PartnerRepositoryView:
+class LinkRepositoryView:
     def __init__(
         self,
-        service: PartnerRepositoryService,
+        service: LinkRepositoryService,
     ) -> None:
         self._service = service
 
     async def fetch(
         self,
-    ) -> list[FetchPartner]:
+    ) -> list[FetchLink]:
         return await self._service.fetch()
 
     async def fetch_by_id(
         self,
         id: int,
-    ) -> FetchPartners:
+    ) -> FetchLink:
         return await self._service.fetch_by_id(
             id=id,
         )
 
-    async def insert(
+    async def create(
         self,
-        data: InsertPartner,
-    ) -> FetchPartner:
-        return await self._service.insert(
+        data: InsertLink,
+    ) -> FetchLink:
+        return await self._service.create(
             data=data,
         )
 
     async def update(
         self,
         id: int,
-        data: InsertPartner,
-    ) -> FetchPartner:
+        data: InsertLink,
+    ) -> FetchLink:
         return await self._service.update(
             id=id,
             data=data,
@@ -50,7 +49,7 @@ class PartnerRepositoryView:
     async def delete(
         self,
         id: int,
-    ) -> FetchPartner:
+    ) -> FetchLink:
         return await self._service.delete(
             id=id,
         )

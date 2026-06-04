@@ -4,7 +4,7 @@ from .....interface.api.views import OfferRepositoryView
 
 from .....interface.services import OfferRepositoryService
 
-from ...services.offer import OfferRepositoryServiceFactory
+from ...services import OfferRepositoryServiceFactory
 
 
 class OfferRepositoryViewFactory:

@@ -12,15 +12,15 @@ from sqlalchemy.orm import selectinload
 # application dependencies
 
 from ..models import (
-    Partners,
     Links,
+    Offers,
 )
 
 from ..repository import MySQLRepository
 
 
-class PartnerRepository(MySQLRepository[Partners]):
-    _table: type[Partners] = Partners
+class LinkRepository(MySQLRepository[Links]):
+    _table: type[Links] = Links
 
     def __init__(
         self,
@@ -36,11 +36,11 @@ class PartnerRepository(MySQLRepository[Partners]):
     async def fetch_by_id(
         self,
         id: int,
-    ) -> Optional[Partners]:
+    ) -> Optional[Links]:
         query = (
             select(self._table)
             .options(
-                selectinload(self._table.links),
+                selectinload(self._table.offers),
             )
             .where(self._table.id == id)
         )
@@ -53,67 +53,67 @@ class PartnerRepository(MySQLRepository[Partners]):
     async def insert(
         self,
         data: Any,
-    ) -> Partners:
+    ) -> Links:
         async with self._engine.session_factory() as session:
             payload = data.model_dump(
                 exclude_unset=True,
             )
 
-            link_ids = payload.pop(
-                "link_ids",
+            offer_ids = payload.pop(
+                "offer_ids",
                 [],
             )
 
-            partner = self._table(
+            link = self._table(
                 **payload,
             )
 
-            if link_ids:
+            if offer_ids:
                 query = (
-                    select(Links).where(
-                        Links.id.in_(link_ids),
+                    select(Offers).where(
+                        Offers.id.in_(offer_ids),
                     ),
                 )
 
-                partner.links = await super().fetch(
+                link.offers = await super().fetch(
                     query=query,
                     session=session,
                 )
 
-            session.add(partner)
+            session.add(link)
 
             await session.commit() and await session.refresh(
-                partner,
+                link,
             )
 
-            return partner
+            return link
 
     async def update(
         self,
         id: int,
         data: Any,
-    ) -> Partners:
+    ) -> Links:
         async with self._engine.session_factory() as session:
             payload = data.model_dump(
                 exclude_unset=True,
             )
 
-            link_ids = payload.pop(
-                "link_ids",
+            offer_ids = payload.pop(
+                "offer_ids",
                 [],
             )
 
             query = (
                 select(self._table)
                 .options(
-                    selectinload(self._table.links),
+                    selectinload(self._table.offers),
                 )
                 .where(
                     self._table.id == id,
                 )
             )
 
-            partner = await super().fetch(
+            link = await super().fetch(
                 query=query,
                 many=False,
                 session=session,
@@ -122,25 +122,25 @@ class PartnerRepository(MySQLRepository[Partners]):
 
             for field, value in payload.items():
                 setattr(
-                    partner,
+                    link,
                     field,
                     value,
                 )
 
-            if link_ids is not None:
-                query = select(Links).where(
-                    Links.id.in_(link_ids),
+            if offer_ids is not None:
+                query = select(Offers).where(
+                    Offers.id.in_(offer_ids),
                 )
 
-                partner.links = (
+                link.offers = (
                     await super().fetch(
                         query=query,
                         session=session,
                     )
-                    if link_ids
+                    if offer_ids
                     else []
                 )
 
-            await session.commit() and await session.refresh(partner)
+            await session.commit() and await session.refresh(link)
 
-            return partner
+            return link
