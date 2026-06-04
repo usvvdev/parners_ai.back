@@ -12,7 +12,7 @@ class ApplicationConfigFactory:
     def create(
         service_dir: str,
     ) -> type[TApplicationConfig]:
-        mode = getenv("APP_MODE", "production")
+        mode = getenv("APP_MODE", "development")
 
         config_class = application_config_mapping.get(mode)
         if not config_class:

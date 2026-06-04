@@ -1,18 +1,19 @@
-from contextlib import asynccontextmanager
+# packages
+
+from uvicorn import run
+
 from pathlib import Path
+
 from loguru import logger
 
 from fastapi import FastAPI
+
+from contextlib import asynccontextmanager
+
 from fastapi.middleware.cors import CORSMiddleware
-from uvicorn import run
 
-from libs.domain.utils import app_exception_handler
 
-from libs.domain.errors.base import BaseApplicationException
-
-from libs.infrastructure.factories.common import ApplicationConfigFactory
-
-from .src.infrastructure.utils import run_migrations
+# application dependencies
 
 from .src.interface.api.routes import (
     offer_router,
@@ -20,18 +21,28 @@ from .src.interface.api.routes import (
     link_router,
 )
 
+from libs.domain.types.enums.config import AppMode
+
+from libs.domain.utils import app_exception_handler
+
+from .src.infrastructure.utils import run_migrations
+
+from libs.domain.errors.base import BaseApplicationException
+
+from libs.infrastructure.factories.common import ApplicationConfigFactory
+
 
 SERVICE_DIR = Path(__file__).parent
 
 
-# @asynccontextmanager
-# async def lifespan(_: FastAPI):
-#     logger.info("Starting migrations")
-#     try:
-#         run_migrations(SERVICE_DIR)
-#     except Exception as err:
-#         logger.error(err)
-#     yield
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    logger.info("Starting migrations")
+    try:
+        run_migrations(SERVICE_DIR)
+    except Exception as err:
+        logger.error(err)
+    yield
 
 
 def create_app() -> FastAPI:
@@ -40,7 +51,7 @@ def create_app() -> FastAPI:
     )
 
     app = FastAPI(
-        # lifespan=lifespan,
+        lifespan=lifespan if config.mode == AppMode.PRODUCTION else None,
         **config.openai,
     )
 
