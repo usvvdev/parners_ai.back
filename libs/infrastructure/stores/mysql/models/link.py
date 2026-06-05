@@ -13,9 +13,9 @@ from sqlalchemy.dialects.mysql import (
 
 # application dependencies
 
-from .mixins.common import (
-    BaseMixin,
-    TimestampMixin,
+from ...common.sql.models import (
+    BaseModel,
+    TimestampModel,
 )
 
 from .mixins.relations import (
@@ -24,8 +24,8 @@ from .mixins.relations import (
 
 
 class Links(
-    BaseMixin,
-    TimestampMixin,
+    BaseModel,
+    TimestampModel,
     LinkRelationMixin,
 ):
     link: Mapped[str] = mapped_column(

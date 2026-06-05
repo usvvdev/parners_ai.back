@@ -14,10 +14,10 @@ from sqlalchemy.dialects.mysql import TINYINT
 
 # application dependencies
 
-from ..mixins.common import LinkMixin
+from ....common.sql.models import LinkModel
 
 
-class PartnerLinkOffer(LinkMixin):
+class PartnerLinkOffer(LinkModel):
     partner_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey(

@@ -16,19 +16,17 @@ from sqlalchemy.dialects.mysql import (
 
 # application dependencies
 
-from .mixins.common import (
-    BaseMixin,
-    TimestampMixin,
+from ...common.sql.models import (
+    BaseModel,
+    TimestampModel,
 )
 
-from .mixins.relations import (
-    PartnerRelationMixin,
-)
+from .mixins.relations import PartnerRelationMixin
 
 
 class Partners(
-    BaseMixin,
-    TimestampMixin,
+    BaseModel,
+    TimestampModel,
     PartnerRelationMixin,
 ):
     wmid: Mapped[str] = mapped_column(

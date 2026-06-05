@@ -10,24 +10,17 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 
-from sqlalchemy.dialects.mysql import (
-    TINYINT,
-)
-
 # application dependencies
-
-from .mixins.common import (
-    BaseMixin,
-    TimestampMixin,
-)
 
 from .mixins.relations import (
     OfferRelationMixin,
 )
 
+from ...common.sql.models import BaseModel
+
 
 class Offers(
-    BaseMixin,
+    BaseModel,
     OfferRelationMixin,
 ):
     title: Mapped[str] = mapped_column(

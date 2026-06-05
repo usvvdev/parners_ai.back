@@ -18,13 +18,10 @@ from clickhouse_sqlalchemy.types import (
 
 # application dependencies
 
-from .mixins.common import (
-    BaseMixin,
-    TimestampMixin,
-)
+from ...common.sql.models import BaseModel
 
 
-class OfferPositions:
+class OfferPositions(BaseModel):
     wmid: Mapped[str] = mapped_column(
         String(length=128),
         nullable=False,
