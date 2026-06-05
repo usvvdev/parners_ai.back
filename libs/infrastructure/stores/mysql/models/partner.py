@@ -31,10 +31,14 @@ class Partners(
     TimestampMixin,
     PartnerRelationMixin,
 ):
-    title: Mapped[str] = mapped_column(
+    wmid: Mapped[str] = mapped_column(
         String(128),
         nullable=False,
-        unique=True,
+    )
+
+    utm_source: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
     )
 
     is_tracking: Mapped[bool] = mapped_column(
@@ -47,5 +51,6 @@ class Partners(
 
     __table_args__ = (
         # fast search
-        Index("ix_partner_title", "title"),
+        Index("ix_partner_wmid", "wmid"),
+        Index("ix_partner_utm_source", "utm_source"),
     )

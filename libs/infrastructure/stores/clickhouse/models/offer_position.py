@@ -1,0 +1,56 @@
+# packages
+
+
+from sqlalchemy import func
+
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+)
+
+from datetime import datetime
+
+from clickhouse_sqlalchemy.types import (
+    String,
+    DateTime,
+)
+
+
+# application dependencies
+
+from .mixins.common import (
+    BaseMixin,
+    TimestampMixin,
+)
+
+
+class OfferPositions:
+    wmid: Mapped[str] = mapped_column(
+        String(length=128),
+        nullable=False,
+    )
+
+    utm_souce: Mapped[str] = mapped_column(
+        String(length=64),
+        nullable=False,
+    )
+
+    vitrina: Mapped[str] = mapped_column(
+        String(length=2048),
+        nullable=False,
+    )
+
+    offer: Mapped[str] = mapped_column(
+        String(length=128),
+        nullable=False,
+    )
+
+    position: Mapped[str] = mapped_column(
+        String,
+        server_default="null",
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )

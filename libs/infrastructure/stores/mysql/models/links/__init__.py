@@ -1,8 +1,5 @@
-from .partner_link import PartnerLink
-
-from .link_offer import LinkOffer
+from .partner_link_offer import PartnerLinkOffer
 
 __all__: list[str] = [
-    "LinkOffer",
-    "PartnerLink",
+    "PartnerLinkOffer",
 ]

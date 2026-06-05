@@ -1,9 +1,6 @@
 # packages
 
-from sqlalchemy import (
-    String,
-    Index,
-)
+from sqlalchemy import String
 
 from sqlalchemy.orm import (
     Mapped,

@@ -14,7 +14,12 @@ from libs.domain.types._types.common import BaseModelType
 
 
 class BasePartner(BaseModelType):
-    title: str = Field(
+    wmid: str = Field(
+        ...,
+        description="Название оффера",
+    )
+
+    utm_source: str = Field(
         ...,
         description="Название оффера",
     )

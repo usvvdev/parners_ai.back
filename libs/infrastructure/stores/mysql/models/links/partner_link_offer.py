@@ -10,12 +10,14 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 
+from sqlalchemy.dialects.mysql import TINYINT
+
 # application dependencies
 
 from ..mixins.common import LinkMixin
 
 
-class PartnerLink(LinkMixin):
+class PartnerLinkOffer(LinkMixin):
     partner_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey(
@@ -32,4 +34,18 @@ class PartnerLink(LinkMixin):
             ondelete="CASCADE",
         ),
         primary_key=True,
+    )
+
+    offer_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey(
+            "offers.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+    )
+
+    is_actve: Mapped[bool] = mapped_column(
+        TINYINT,
+        default=1,
     )
