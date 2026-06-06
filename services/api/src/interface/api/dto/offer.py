@@ -27,14 +27,8 @@ class FetchOffer(
     BaseOffer,
     BaseFetch,
 ):
-    is_active: bool = Field(
-        default=True,
-        description="Активность оффера",
-    )
+    pass
 
 
 class InsertOffer(BaseOffer):
-    is_active: bool = Field(
-        default=True,
-        description="Активность оффера",
-    )
+    pass

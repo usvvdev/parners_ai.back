@@ -9,6 +9,8 @@ from sqlalchemy import select
 
 from sqlalchemy.orm import selectinload
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 # application dependencies
 
 from ..models import (
@@ -32,6 +34,56 @@ class LinkRepository(MySQLRepository[Links]):
             *args,
             **kwargs,
         )
+
+    async def __fetch_offers(
+        self,
+        session: AsyncSession,
+        offer_ids: list[int],
+    ) -> list[Offers]:
+        if not offer_ids:
+            return []
+
+        query = select(Offers).where(
+            Offers.id.in_(offer_ids),
+        )
+
+        return await super().fetch(
+            query=query,
+            session=session,
+        )
+
+    async def __commit_offers(
+        self,
+        obj: Links,
+        session: AsyncSession,
+        offer_ids: list[int] | None,
+    ) -> None:
+        if offer_ids is None:
+            return
+
+        obj.offers = await self.__fetch_offers(
+            session=session,
+            offer_ids=offer_ids,
+        )
+
+    async def __fetch_relations(
+        self,
+        session: AsyncSession,
+        obj_id: int,
+    ) -> Links:
+        query = (
+            select(self._table)
+            .options(
+                selectinload(self._table.offers),
+            )
+            .where(
+                self._table.id == obj_id,
+            )
+        )
+
+        result = await session.execute(query)
+
+        return result.scalar_one()
 
     async def fetch_by_id(
         self,
@@ -68,25 +120,20 @@ class LinkRepository(MySQLRepository[Links]):
                 **payload,
             )
 
-            if offer_ids:
-                query = (
-                    select(Offers).where(
-                        Offers.id.in_(offer_ids),
-                    ),
-                )
-
-                link.offers = await super().fetch(
-                    query=query,
-                    session=session,
-                )
+            await self.__commit_offers(
+                obj=link,
+                session=session,
+                offer_ids=offer_ids,
+            )
 
             session.add(link)
 
-            await session.commit() and await session.refresh(
-                link,
-            )
+            await session.commit() and await session.refresh(link)
 
-            return link
+            return await self.__fetch_relations(
+                session=session,
+                obj_id=link.id,
+            )
 
     async def update(
         self,
@@ -100,24 +147,12 @@ class LinkRepository(MySQLRepository[Links]):
 
             offer_ids = payload.pop(
                 "offer_ids",
-                [],
+                None,
             )
 
-            query = (
-                select(self._table)
-                .options(
-                    selectinload(self._table.offers),
-                )
-                .where(
-                    self._table.id == id,
-                )
-            )
-
-            link = await super().fetch(
-                query=query,
-                many=False,
+            link = await self.__fetch_relations(
                 session=session,
-                id=id,
+                obj_id=id,
             )
 
             for field, value in payload.items():
@@ -128,19 +163,14 @@ class LinkRepository(MySQLRepository[Links]):
                 )
 
             if offer_ids is not None:
-                query = select(Offers).where(
-                    Offers.id.in_(offer_ids),
+                link.offers = await self.__fetch_offers(
+                    session=session,
+                    offer_ids=offer_ids,
                 )
 
-                link.offers = (
-                    await super().fetch(
-                        query=query,
-                        session=session,
-                    )
-                    if offer_ids
-                    else []
-                )
+            await session.commit()
 
-            await session.commit() and await session.refresh(link)
-
-            return link
+            return await self.__fetch_relations(
+                session=session,
+                obj_id=id,
+            )

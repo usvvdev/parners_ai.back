@@ -2,31 +2,31 @@ from .browser_agent import BrowserAgentService
 
 from ...domain.types.partner_result import PartnerResult
 
-from libs.infrastructure.stores.mysql.repositories import PartnerRepository
+from libs.infrastructure.stores.mysql.repositories import LinkRepository
 
 
 class ParserAgentService:
     def __init__(
         self,
-        partner_repository: PartnerRepository,
+        link_repository: LinkRepository,
         browser_agent: BrowserAgentService,
     ):
-        self._partner_repository = partner_repository
+        self._partner_repository = link_repository
         self._browser_agent = browser_agent
 
     async def execute(
         self,
     ) -> list[PartnerResult]:
-        partners = await self._partner_repository.fetch()
+        links = await self._partner_repository.fetch()
 
-        if not partners:
+        if not links:
             return []
 
         results = []
 
-        for partner in partners:
+        for link in links:
             result = await self._browser_agent.parse(
-                link=partner.link,
+                link=link.link,
                 target_offers=[offer.title for offer in partner.offers],
             )
 

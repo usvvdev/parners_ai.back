@@ -6,7 +6,7 @@ from sqlalchemy.orm import declared_attr
 
 # application dependencies
 
-from .base import ETableModel
+from ...base import ETableModel
 
 
 class LinkModel(ETableModel):

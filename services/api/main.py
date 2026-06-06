@@ -51,8 +51,7 @@ def create_app() -> FastAPI:
     )
 
     app = FastAPI(
-        # lifespan=lifespan if config.mode == AppMode.PRODUCTION else None,
-        lifespan=lifespan,
+        lifespan=lifespan if config.mode == AppMode.PRODUCTION else None,
         **config.openai,
     )
 

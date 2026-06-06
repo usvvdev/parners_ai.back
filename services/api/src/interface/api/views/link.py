@@ -28,11 +28,11 @@ class LinkRepositoryView:
             id=id,
         )
 
-    async def create(
+    async def insert(
         self,
         data: InsertLink,
     ) -> FetchLink:
-        return await self._service.create(
+        return await self._service.insert(
             data=data,
         )
 

@@ -9,7 +9,7 @@ from sqlalchemy.orm import (
 
 # application dependencies
 
-from .base import ETableModel
+from ...base import ETableModel
 
 
 class BaseModel(ETableModel):
