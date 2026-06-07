@@ -50,5 +50,4 @@ class Partners(
     __table_args__ = (
         # fast search
         Index("ix_partner_wmid", "wmid"),
-        Index("ix_partner_utm_source", "utm_source"),
     )

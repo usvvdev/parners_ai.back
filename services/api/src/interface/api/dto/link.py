@@ -13,42 +13,50 @@ from .offer import FetchOffers
 from libs.domain.types._types.common import BaseModelType
 
 
-class BaseLink(BaseModelType):
+class LinkIdentity(BaseModelType):
     link: str = Field(
         ...,
         description="Название оффера",
     )
 
 
+class BaseLinkFields(BaseModelType):
+    is_active: bool = Field(
+        default=True,
+        description="Активность оффера",
+    )
+
+
 class FetchLinks(
-    BaseLink,
+    LinkIdentity,
     BaseFetch,
 ):
     pass
 
 
 class FetchLink(
-    BaseLink,
+    LinkIdentity,
+    BaseLinkFields,
     BaseFetch,
 ):
-    is_active: bool = Field(
-        default=True,
-        description="Активность оффера",
-    )
-
-    offers: Optional[list[FetchOffers]] = Field(
+    offers: list[FetchOffers] | None = Field(
         default=None,
         description="Список офферов, связанных с данной ссылкой",
     )
 
 
-class InsertLink(BaseLink):
-    is_active: bool = Field(
-        default=True,
-        description="Активность оффера",
+class InsertLink(
+    LinkIdentity,
+    BaseLinkFields,
+):
+    offer_ids: list[int] = Field(
+        default_factory=list,
+        description="ID офферов, относящихся к партнеру",
     )
 
-    offer_ids: Optional[list[int]] = Field(
-        default=list,
+
+class UpdateLink(BaseLinkFields):
+    offer_ids: list[int] | None = Field(
+        default=None,
         description="ID офферов, относящихся к партнеру",
     )

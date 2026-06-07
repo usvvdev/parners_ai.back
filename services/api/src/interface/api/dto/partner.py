@@ -13,7 +13,14 @@ from .base import BaseFetch
 from libs.domain.types._types.common import BaseModelType
 
 
-class BasePartner(BaseModelType):
+class BasePartnerFields(BaseModelType):
+    is_tracking: bool = Field(
+        default=True,
+        description="Активность оффера",
+    )
+
+
+class PartnerIdentity(BaseModelType):
     wmid: str = Field(
         ...,
         description="Название оффера",
@@ -26,34 +33,36 @@ class BasePartner(BaseModelType):
 
 
 class FetchPartners(
-    BasePartner,
+    PartnerIdentity,
+    BasePartnerFields,
     BaseFetch,
 ):
-    is_tracking: bool = Field(
-        default=True,
-        description="Активность оффера",
-    )
-
-    links: Optional[list[FetchLinks]] = Field(
-        default=list,
+    links: list[FetchLinks] = Field(
+        default_factory=list,
         description="Офферы, относящиеся к партнеру",
     )
 
 
 class FetchPartner(
-    BasePartner,
+    PartnerIdentity,
+    BasePartnerFields,
     BaseFetch,
 ):
     pass
 
 
-class InsertPartner(BasePartner):
-    is_tracking: bool = Field(
-        default=True,
-        description="Активность оффера",
+class InsertPartner(
+    PartnerIdentity,
+    BasePartnerFields,
+):
+    link_ids: list[int] = Field(
+        default_factory=list,
+        description="ID офферов, относящихся к партнеру",
     )
 
-    link_ids: Optional[list[int]] = Field(
-        default=list,
+
+class UpdatePartner(BasePartnerFields):
+    link_ids: list[int] | None = Field(
+        default=None,
         description="ID офферов, относящихся к партнеру",
     )

@@ -1,19 +1,28 @@
 from fastapi import Depends
 
+from ..base import create_mysql_engine
+
 from .....interface.api.views import LinkRepositoryView
 
-from .....interface.services import LinkRepositoryService
+from libs.infrastructure.stores.mysql import MySQLEngine
 
-from ...services import LinkRepositoryServiceFactory
+from libs.infrastructure.stores.mysql.repositories import LinkRepository
+
+from libs.infrastructure.factories.stores.mysql.repositories import (
+    LinkRepositoryFactory,
+)
 
 
 class LinkRepositoryViewFactory:
     @staticmethod
     def create(
-        service: LinkRepositoryService = Depends(
-            LinkRepositoryServiceFactory.create,
+        engine: MySQLEngine = Depends(
+            create_mysql_engine,
         ),
     ) -> LinkRepositoryView:
+        repository: LinkRepository = LinkRepositoryFactory.create(
+            engine=engine,
+        )
         return LinkRepositoryView(
-            service=service,
+            repository=repository,
         )

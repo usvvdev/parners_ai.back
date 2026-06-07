@@ -2,24 +2,33 @@
 
 from typing import (
     Any,
+    TypeVar,
+    Callable,
+    Awaitable,
     Sequence,
     AsyncGenerator,
 )
 
 from sqlalchemy import (
+    # types
     Executable,
     Result,
+    # functions
+    select,
 )
 
 from loguru import logger
+
+from contextlib import (
+    nullcontext,
+    asynccontextmanager,
+)
 
 from sqlalchemy.exc import SQLAlchemyError
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.engine import ScalarResult
-
-from contextlib import asynccontextmanager
 
 # application dependencies
 
@@ -33,6 +42,9 @@ from libs.domain.errors.stores import (
 from libs.domain.errors.stores import RepositoryException
 
 
+T = TypeVar("T")
+
+
 class BaseSQLExecutor:
     def __init__(
         self,
@@ -42,26 +54,34 @@ class BaseSQLExecutor:
         self._engine = engine
 
     @asynccontextmanager
-    async def __open_session(
+    async def _session(
         self,
+        session: AsyncSession | None = None,
     ) -> AsyncGenerator[AsyncSession, None]:
         try:
-            async with self._engine.session_factory() as session:
-                yield session
-        except SQLAlchemyError:
-            raise RepositoryException
+            cm = (
+                nullcontext(session)
+                if session is not None
+                else self._engine.session_factory()
+            )
 
-    async def __fetch_scalars(
+            async with cm as session:
+                yield session
+
+        except SQLAlchemyError as exc:
+            raise RepositoryException from exc
+
+    async def _query(
         self,
         query: Executable,
+        *,
         session: AsyncSession | None = None,
     ) -> ScalarResult[Any]:
         try:
-            if session is not None:
-                result: Result[Any] = await session.execute(query)
-
-            async with self.__open_session() as session:
-                result: Result[Any] = await session.execute(query)
+            async with self._session(session) as session:
+                result: Result[Any] = await session.execute(
+                    query,
+                )
 
             return result.scalars()
 
@@ -78,21 +98,52 @@ class BaseSQLExecutor:
                 table=self._table.__name__,
             )
 
-    async def _fetch(
+    async def _transaction(
+        self,
+        action: Callable[[AsyncSession], Awaitable[T]],
+        *,
+        session: AsyncSession | None = None,
+    ) -> T:
+        async with self._session(session) as session:
+            try:
+                result = await action(session)
+
+                if session is None:
+                    await session.commit()
+
+                return result
+
+            except SQLAlchemyError:
+                if session is None:
+                    await session.rollback()
+
+                logger.exception(
+                    "Transaction failed",
+                    extra={
+                        "table": self._table.__name__,
+                    },
+                )
+
+                raise QueryExecutionException(
+                    table=self._table.__name__,
+                )
+
+    async def _fetch_one(
         self,
         query: Executable,
         *,
-        many: bool,
         id: int | None = None,
         session: AsyncSession | None = None,
-    ) -> Sequence[Any] | Any | None:
-        scalars: ScalarResult[Any] = await self.__fetch_scalars(
-            query,
-            session=session,
-        )
-        result = scalars.all() if many else scalars.first()
+    ) -> Any:
 
-        if not result:
+        result = (
+            await self._query(
+                query,
+                session=session,
+            )
+        ).first()
+
+        if result is None:
             raise ObjectNotFoundException(
                 table=self._table.__name__,
                 id=id,
@@ -100,29 +151,114 @@ class BaseSQLExecutor:
 
         return result
 
-    async def _commit(
+    async def _fetch_many(
         self,
         query: Executable,
-    ) -> Result[Any]:
-        async with self.__open_session() as session:
-            try:
-                result: Result[Any] = await session.execute(query)
+        *,
+        session: AsyncSession | None = None,
+    ) -> Sequence[Any]:
+        return (
+            await self._query(
+                query,
+                session=session,
+            )
+        ).all()
 
-                await session.commit()
+    async def _before_commit(
+        self,
+        entity: Any,
+        data: Any,
+        session: AsyncSession,
+    ) -> None:
+        pass
 
-                return result
+    async def _after_commit(
+        self,
+        entity: Any,
+        session: AsyncSession,
+    ) -> Any:
+        return entity
 
-            except SQLAlchemyError:
-                await session.rollback()
+    async def _insert(
+        self,
+        data: Any,
+        *,
+        session: AsyncSession | None = None,
+    ) -> Any:
+        async def action(
+            opened_session: AsyncSession,
+        ) -> Any:
+            entity = self._table(
+                **data.dump,
+            )
 
-                logger.exception(
-                    "Failed query execution",
-                    extra={
-                        "table": self._table.__name__,
-                        "query": str(query),
-                    },
-                )
+            await self._before_commit(
+                entity=entity,
+                data=data,
+                session=opened_session,
+            )
 
-                raise QueryExecutionException(
-                    table=self._table.__name__,
-                )
+            opened_session.add(entity)
+
+            await opened_session.flush() and await opened_session.refresh(entity)
+
+            return await self._after_commit(
+                entity=entity,
+                session=opened_session,
+            )
+
+        return await self._transaction(
+            action,
+            session=session,
+        )
+
+    async def _update(
+        self,
+        entity: Any,
+        data: Any,
+        *,
+        session: AsyncSession | None = None,
+    ) -> Any:
+        async def action(
+            opened_session: AsyncSession,
+        ) -> Any:
+            for field, value in data.dump.items():
+                setattr(entity, field, value)
+
+            await self._before_commit(
+                entity=entity,
+                data=data,
+                session=opened_session,
+            )
+
+            await opened_session.flush() and await opened_session.refresh(
+                entity,
+            )
+
+            return await self._after_commit(
+                entity=entity,
+                session=opened_session,
+            )
+
+        return await self._transaction(
+            action,
+            session=session,
+        )
+
+    async def _delete(
+        self,
+        entity: Any,
+        *,
+        session: AsyncSession | None = None,
+    ) -> None:
+        async def action(
+            database: AsyncSession,
+        ) -> None:
+            await database.delete(
+                entity,
+            )
+
+        await self._transaction(
+            action,
+            session=session,
+        )

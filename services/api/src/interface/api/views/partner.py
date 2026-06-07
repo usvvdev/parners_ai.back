@@ -2,30 +2,31 @@
 
 from ..dto import (
     FetchPartner,
-    InsertPartner,
     FetchPartners,
+    InsertPartner,
+    UpdatePartner,
 )
 
-from ...services import PartnerRepositoryService
+from libs.infrastructure.stores.mysql.repositories import PartnerRepository
 
 
 class PartnerRepositoryView:
     def __init__(
         self,
-        service: PartnerRepositoryService,
+        repository: PartnerRepository,
     ) -> None:
-        self._service = service
+        self._repository = repository
 
     async def fetch(
         self,
     ) -> list[FetchPartner]:
-        return await self._service.fetch()
+        return await self._repository.fetch_many()
 
     async def fetch_by_id(
         self,
         id: int,
     ) -> FetchPartners:
-        return await self._service.fetch_by_id(
+        return await self._repository.fetch_one(
             id=id,
         )
 
@@ -33,7 +34,7 @@ class PartnerRepositoryView:
         self,
         data: InsertPartner,
     ) -> FetchPartner:
-        return await self._service.insert(
+        return await self._repository.insert(
             data=data,
         )
 
@@ -41,8 +42,8 @@ class PartnerRepositoryView:
         self,
         id: int,
         data: InsertPartner,
-    ) -> FetchPartner:
-        return await self._service.update(
+    ) -> UpdatePartner:
+        return await self._repository.update(
             id=id,
             data=data,
         )
@@ -51,6 +52,6 @@ class PartnerRepositoryView:
         self,
         id: int,
     ) -> FetchPartner:
-        return await self._service.delete(
+        return await self._repository.delete(
             id=id,
         )

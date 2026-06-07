@@ -1,31 +1,32 @@
 # application dependencies
 
 from ..dto import (
-    InsertOffer,
     FetchOffer,
     FetchOffers,
+    InsertOffer,
+    UpdateOffer,
 )
 
-from ...services import OfferRepositoryService
+from libs.infrastructure.stores.mysql.repositories import OfferRepository
 
 
 class OfferRepositoryView:
     def __init__(
         self,
-        service: OfferRepositoryService,
+        repository: OfferRepository,
     ) -> None:
-        self._service = service
+        self._repository = repository
 
     async def fetch(
         self,
     ) -> list[FetchOffers]:
-        return await self._service.fetch()
+        return await self._repository.fetch_many()
 
     async def fetch_by_id(
         self,
         id: int,
     ) -> FetchOffer:
-        return await self._service.fetch_by_id(
+        return await self._repository.fetch_one(
             id=id,
         )
 
@@ -33,16 +34,16 @@ class OfferRepositoryView:
         self,
         data: InsertOffer,
     ) -> FetchOffer:
-        return await self._service.insert(
+        return await self._repository.insert(
             data=data,
         )
 
     async def update(
         self,
         id: int,
-        data: InsertOffer,
+        data: UpdateOffer,
     ) -> FetchOffer:
-        return await self._service.update(
+        return await self._repository.update(
             id=id,
             data=data,
         )
@@ -51,6 +52,6 @@ class OfferRepositoryView:
         self,
         id: int,
     ) -> FetchOffer:
-        return await self._service.delete(
+        return await self._repository.delete(
             id=id,
         )

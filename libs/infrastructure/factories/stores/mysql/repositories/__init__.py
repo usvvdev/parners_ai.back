@@ -1,11 +1,11 @@
-from .offer import MySQLOfferRepository
+from .offer import OfferRepositoryFactory
 
-from .partner import MySQLPartnerRepository
+from .partner import PartnerRepositoryFactory
 
-from .link import MySQLLinkRepository
+from .link import LinkRepositoryFactory
 
 __all__: list[str] = [
-    "MySQLOfferRepository",
-    "MySQLPartnerRepository",
-    "MySQLLinkRepository",
+    "OfferRepositoryFactory",
+    "PartnerRepositoryFactory",
+    "LinkRepositoryFactory",
 ]

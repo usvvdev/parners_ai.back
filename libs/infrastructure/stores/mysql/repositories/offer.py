@@ -1,11 +1,10 @@
-# packages
+# packges
 
-from typing import (
-    Any,
-    Optional,
-)
+from typing import Any
 
 from sqlalchemy import select
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # application dependencies
 
@@ -28,66 +27,69 @@ class OfferRepository(MySQLRepository[Offers]):
             **kwargs,
         )
 
-    async def fetch_by_id(
+    async def fetch_one(
         self,
         id: int,
-    ) -> Optional[Offers]:
-        query = select(self._table).where(self._table.id == id)
-        return await super().fetch(
-            query=query,
-            many=False,
+        session: AsyncSession | None = None,
+    ) -> type[Offers] | None:
+        return await self._fetch_one(
+            query=select(self._table).where(
+                self._table.id == id,
+            ),
             id=id,
+            session=session,
+        )
+
+    async def fetch_many(
+        self,
+        session: AsyncSession | None = None,
+    ) -> type[Offers] | None:
+        return await self._fetch_many(
+            query=select(
+                self._table,
+            ),
+            session=session,
         )
 
     async def insert(
         self,
         data: Any,
-    ) -> Offers:
-        async with self._engine.session_factory() as session:
-            payload = data.model_dump(
-                exclude_unset=True,
-            )
-
-            offer = self._table(
-                **payload,
-            )
-
-            session.add(offer)
-
-            await session.commit() and await session.refresh(
-                offer,
-            )
-
-            return offer
+        session: AsyncSession | None = None,
+    ) -> type[Offers]:
+        return await self._insert(
+            data=data,
+            session=session,
+        )
 
     async def update(
         self,
         id: int,
         data: Any,
-    ) -> Offers:
-        async with self._engine.session_factory() as session:
-            payload = data.model_dump(
-                exclude_unset=True,
-            )
+        *,
+        session: AsyncSession | None = None,
+    ) -> type[Offers]:
+        offer: type[Offers] | None = await self._fetch_one(
+            id=id,
+            many=True,
+            session=session,
+        )
+        return await self._update(
+            offer,
+            data,
+            session=session,
+        )
 
-            query = select(self._table).where(
-                self._table.id == id,
-            )
-
-            offer = await super().fetch(
-                query=query,
-                many=False,
-                session=session,
-                id=id,
-            )
-
-            for field, value in payload.items():
-                setattr(
-                    offer,
-                    field,
-                    value,
-                )
-
-                await session.commit() and await session.refresh(offer)
-
-            return offer
+    async def delete(
+        self,
+        id: int,
+        *,
+        session: AsyncSession | None = None,
+    ) -> None:
+        offer: type[Offers] | None = await self.fetch_one(
+            id=id,
+            session=session,
+        )
+        await self._delete(
+            offer,
+            session=session,
+        )

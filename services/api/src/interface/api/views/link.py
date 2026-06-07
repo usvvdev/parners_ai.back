@@ -3,28 +3,30 @@
 from ..dto import (
     InsertLink,
     FetchLink,
+    FetchLinks,
+    UpdateLink,
 )
 
-from ...services import LinkRepositoryService
+from libs.infrastructure.stores.mysql.repositories import LinkRepository
 
 
 class LinkRepositoryView:
     def __init__(
         self,
-        service: LinkRepositoryService,
+        repository: LinkRepository,
     ) -> None:
-        self._service = service
+        self._repository = repository
 
     async def fetch(
         self,
-    ) -> list[FetchLink]:
-        return await self._service.fetch()
+    ) -> list[FetchLinks]:
+        return await self._repository.fetch_many()
 
     async def fetch_by_id(
         self,
         id: int,
     ) -> FetchLink:
-        return await self._service.fetch_by_id(
+        return await self._repository.fetch_one(
             id=id,
         )
 
@@ -32,16 +34,16 @@ class LinkRepositoryView:
         self,
         data: InsertLink,
     ) -> FetchLink:
-        return await self._service.insert(
+        return await self._repository.insert(
             data=data,
         )
 
     async def update(
         self,
         id: int,
-        data: InsertLink,
+        data: UpdateLink,
     ) -> FetchLink:
-        return await self._service.update(
+        return await self._repository.update(
             id=id,
             data=data,
         )
@@ -50,6 +52,6 @@ class LinkRepositoryView:
         self,
         id: int,
     ) -> FetchLink:
-        return await self._service.delete(
+        return await self._repository.delete(
             id=id,
         )

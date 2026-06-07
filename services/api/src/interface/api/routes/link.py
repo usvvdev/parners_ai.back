@@ -7,6 +7,7 @@ from ..dto import (
     FetchLink,
     FetchLinks,
     InsertLink,
+    UpdateLink,
 )
 
 from ..views import LinkRepositoryView
@@ -62,7 +63,7 @@ async def fetch_link_by_id(
 @link_router.put("/{id}")
 async def update_link(
     id: int,
-    data: InsertLink,
+    data: UpdateLink,
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),

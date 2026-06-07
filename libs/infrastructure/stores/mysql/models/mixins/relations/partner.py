@@ -9,6 +9,6 @@ class PartnerRelationMixin:
     def links(cls):
         return relationship(
             "Links",
-            secondary="partner_link_offer",
+            secondary="partner_links",
             back_populates="partners",
         )

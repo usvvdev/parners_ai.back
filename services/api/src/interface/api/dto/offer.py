@@ -9,7 +9,7 @@ from .base import BaseFetch
 from libs.domain.types._types.common import BaseModelType
 
 
-class BaseOffer(BaseModelType):
+class OfferIdentity(BaseModelType):
     title: str = Field(
         ...,
         description="Название оффера",
@@ -17,18 +17,22 @@ class BaseOffer(BaseModelType):
 
 
 class FetchOffers(
-    BaseOffer,
+    OfferIdentity,
     BaseFetch,
 ):
     pass
 
 
 class FetchOffer(
-    BaseOffer,
+    OfferIdentity,
     BaseFetch,
 ):
     pass
 
 
-class InsertOffer(BaseOffer):
+class InsertOffer(OfferIdentity):
+    pass
+
+
+class UpdateOffer(BaseModelType):
     pass

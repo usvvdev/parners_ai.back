@@ -3,10 +3,13 @@ from fastapi import (
     Depends,
 )
 
+from typing import List
+
 from ..dto import (
     FetchOffer,
     FetchOffers,
     InsertOffer,
+    UpdateOffer,
 )
 
 from ..views import OfferRepositoryView
@@ -22,7 +25,7 @@ offer_router = APIRouter(
 
 @offer_router.get(
     "",
-    response_model=list[FetchOffers],
+    response_model=List[FetchOffers],
 )
 async def fetch_offers(
     view: OfferRepositoryView = Depends(
@@ -62,7 +65,7 @@ async def fetch_offer_by_id(
 @offer_router.put("/{id}")
 async def update_offer(
     id: int,
-    data: InsertOffer,
+    data: UpdateOffer,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
@@ -73,13 +76,13 @@ async def update_offer(
     )
 
 
-@offer_router.delete("/{offer_id}")
+@offer_router.delete("/{id}")
 async def delete_offer(
-    offer_id: int,
+    id: int,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
 ) -> FetchOffer:
     return await view.delete(
-        offer_id=offer_id,
+        id=id,
     )

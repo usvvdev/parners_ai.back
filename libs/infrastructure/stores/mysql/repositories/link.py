@@ -38,139 +38,116 @@ class LinkRepository(MySQLRepository[Links]):
     async def __fetch_offers(
         self,
         session: AsyncSession,
-        offer_ids: list[int],
+        offer_ids: list[int] = [],
     ) -> list[Offers]:
-        if not offer_ids:
-            return []
-
-        query = select(Offers).where(
-            Offers.id.in_(offer_ids),
-        )
-
-        return await super().fetch(
-            query=query,
+        return await self._fetch_many(
+            query=select(Offers).where(
+                Offers.id.in_(offer_ids),
+            ),
             session=session,
         )
 
     async def __commit_offers(
         self,
-        obj: Links,
+        entity: Links,
         session: AsyncSession,
         offer_ids: list[int] | None,
     ) -> None:
         if offer_ids is None:
             return
 
-        obj.offers = await self.__fetch_offers(
+        entity.offers = await self.__fetch_offers(
             session=session,
             offer_ids=offer_ids,
         )
 
-    async def __fetch_relations(
+    async def _before_commit(
         self,
+        entity: Links,
+        data: Any,
         session: AsyncSession,
-        obj_id: int,
-    ) -> Links:
-        query = (
-            select(self._table)
-            .options(
-                selectinload(self._table.offers),
-            )
-            .where(
-                self._table.id == obj_id,
-            )
+    ) -> None:
+        await self.__commit_offers(
+            entity,
+            session=session,
+            offer_ids=data.offer_ids,
         )
 
-        result = await session.execute(query)
+    async def _after_commit(
+        self,
+        entity: Links,
+        session: AsyncSession,
+    ) -> Links:
+        return await self.fetch_one(
+            entity.id,
+            session=session,
+        )
 
-        return result.scalar_one()
-
-    async def fetch_by_id(
+    async def fetch_one(
         self,
         id: int,
+        session: AsyncSession | None = None,
     ) -> Optional[Links]:
-        query = (
-            select(self._table)
+        return await self._fetch_one(
+            query=select(self._table)
             .options(
                 selectinload(self._table.offers),
             )
-            .where(self._table.id == id)
-        )
-        return await super().fetch(
-            query=query,
-            many=False,
+            .where(self._table.id == id),
             id=id,
+            session=session,
+        )
+
+    async def fetch_many(
+        self,
+        session: AsyncSession | None = None,
+    ) -> type[Offers] | None:
+        return await self._fetch_many(
+            query=select(
+                self._table,
+            ),
+            session=session,
         )
 
     async def insert(
         self,
         data: Any,
+        *,
+        session: AsyncSession | None = None,
     ) -> Links:
-        async with self._engine.session_factory() as session:
-            payload = data.model_dump(
-                exclude_unset=True,
-            )
-
-            offer_ids = payload.pop(
-                "offer_ids",
-                [],
-            )
-
-            link = self._table(
-                **payload,
-            )
-
-            await self.__commit_offers(
-                obj=link,
-                session=session,
-                offer_ids=offer_ids,
-            )
-
-            session.add(link)
-
-            await session.commit() and await session.refresh(link)
-
-            return await self.__fetch_relations(
-                session=session,
-                obj_id=link.id,
-            )
+        return await self._insert(
+            data,
+            session=session,
+        )
 
     async def update(
         self,
         id: int,
         data: Any,
+        *,
+        session: AsyncSession | None = None,
     ) -> Links:
-        async with self._engine.session_factory() as session:
-            payload = data.model_dump(
-                exclude_unset=True,
-            )
+        link = await self.fetch_one(
+            id=id,
+            session=session,
+        )
+        return await self._update(
+            link,
+            data=data,
+            session=session,
+        )
 
-            offer_ids = payload.pop(
-                "offer_ids",
-                None,
-            )
-
-            link = await self.__fetch_relations(
-                session=session,
-                obj_id=id,
-            )
-
-            for field, value in payload.items():
-                setattr(
-                    link,
-                    field,
-                    value,
-                )
-
-            if offer_ids is not None:
-                link.offers = await self.__fetch_offers(
-                    session=session,
-                    offer_ids=offer_ids,
-                )
-
-            await session.commit()
-
-            return await self.__fetch_relations(
-                session=session,
-                obj_id=id,
-            )
+    async def delete(
+        self,
+        id: int,
+        *,
+        session: AsyncSession | None = None,
+    ) -> None:
+        link: type[Links] | None = await self.fetch_one(
+            id=id,
+            session=session,
+        )
+        await self._delete(
+            link,
+            session=session,
+        )

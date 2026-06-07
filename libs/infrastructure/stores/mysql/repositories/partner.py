@@ -9,6 +9,8 @@ from sqlalchemy import select
 
 from sqlalchemy.orm import selectinload
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 # application dependencies
 
 from ..models import (
@@ -33,114 +35,119 @@ class PartnerRepository(MySQLRepository[Partners]):
             **kwargs,
         )
 
-    async def fetch_by_id(
+    async def __fetch_links(
+        self,
+        session: AsyncSession,
+        link_ids: list[int] = [],
+    ) -> list[Links]:
+        return await self._fetch_many(
+            query=select(Links).where(
+                Links.id.in_(link_ids),
+            ),
+            session=session,
+        )
+
+    async def __commit_links(
+        self,
+        entity: Partners,
+        session: AsyncSession,
+        link_ids: list[int] | None,
+    ) -> None:
+        if link_ids is None:
+            return
+
+        entity.links = await self.__fetch_links(
+            session=session,
+            offer_ids=link_ids,
+        )
+
+    async def _before_commit(
+        self,
+        entity: Links,
+        data: Any,
+        session: AsyncSession,
+    ) -> None:
+        await self.__commit_links(
+            entity=entity,
+            session=session,
+            link_ids=data.link_ids,
+        )
+
+    async def _after_commit(
+        self,
+        entity: Partners,
+        session: AsyncSession,
+    ) -> Links:
+        return await self.fetch_one(
+            entity.id,
+            session=session,
+        )
+
+    async def fetch_one(
         self,
         id: int,
+        session: AsyncSession | None = None,
     ) -> Optional[Partners]:
-        query = (
-            select(self._table)
+        return await self._fetch_one(
+            query=select(self._table)
             .options(
                 selectinload(self._table.links),
             )
-            .where(self._table.id == id)
-        )
-        return await super().fetch(
-            query=query,
-            many=False,
+            .where(self._table.id == id),
             id=id,
+            session=session,
+        )
+
+    async def fetch_many(
+        self,
+        session: AsyncSession | None = None,
+    ) -> type[Partners] | None:
+        return await self._fetch_many(
+            query=select(
+                self._table,
+            ),
+            session=session,
         )
 
     async def insert(
         self,
         data: Any,
+        *,
+        session: AsyncSession | None = None,
     ) -> Partners:
-        async with self._engine.session_factory() as session:
-            payload = data.model_dump(
-                exclude_unset=True,
-            )
-
-            link_ids = payload.pop(
-                "link_ids",
-                [],
-            )
-
-            partner = self._table(
-                **payload,
-            )
-
-            if link_ids:
-                query = (
-                    select(Links).where(
-                        Links.id.in_(link_ids),
-                    ),
-                )
-
-                partner.links = await super().fetch(
-                    query=query,
-                    session=session,
-                )
-
-            session.add(partner)
-
-            await session.commit() and await session.refresh(
-                partner,
-            )
-
-            return partner
+        return await self._insert(
+            data,
+            session=session,
+        )
 
     async def update(
         self,
         id: int,
         data: Any,
+        *,
+        session: AsyncSession | None = None,
     ) -> Partners:
-        async with self._engine.session_factory() as session:
-            payload = data.model_dump(
-                exclude_unset=True,
-            )
+        partner = await self.fetch_one(
+            id=id,
+            session=session,
+        )
+        return await self._update(
+            partner,
+            data=data,
+            session=session,
+        )
 
-            link_ids = payload.pop(
-                "link_ids",
-                [],
-            )
-
-            query = (
-                select(self._table)
-                .options(
-                    selectinload(self._table.links),
-                )
-                .where(
-                    self._table.id == id,
-                )
-            )
-
-            partner = await super().fetch(
-                query=query,
-                many=False,
-                session=session,
-                id=id,
-            )
-
-            for field, value in payload.items():
-                setattr(
-                    partner,
-                    field,
-                    value,
-                )
-
-            if link_ids is not None:
-                query = select(Links).where(
-                    Links.id.in_(link_ids),
-                )
-
-                partner.links = (
-                    await super().fetch(
-                        query=query,
-                        session=session,
-                    )
-                    if link_ids
-                    else []
-                )
-
-            await session.commit() and await session.refresh(partner)
-
-            return partner
+    async def delete(
+        self,
+        id: int,
+        *,
+        session: AsyncSession | None = None,
+    ) -> None:
+        partner: type[Links] | None = await self.fetch_one(
+            id=id,
+            session=session,
+        )
+        await self._delete(
+            partner,
+            session=session,
+        )

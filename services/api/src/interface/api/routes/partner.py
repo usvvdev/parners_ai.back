@@ -7,6 +7,7 @@ from ..dto import (
     FetchPartner,
     FetchPartners,
     InsertPartner,
+    UpdatePartner,
 )
 
 from ..views import PartnerRepositoryView
@@ -68,7 +69,7 @@ async def create_partner(
 )
 async def update_partner(
     id: int,
-    data: InsertPartner,
+    data: UpdatePartner,
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
