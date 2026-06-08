@@ -11,8 +11,6 @@ from aiogram.filters.callback_data import CallbackData
 # partners -> partners/{partner_id} -> links/{link_id} -> offers/{offer_id}
 
 # --- Настройки ---
-BOT_TOKEN = "8602574775:AAGiOeweFa9RS6PaNmBv-_HltCpYj8EHPqo"
-API_URL = "https://dydex.ru/api/partners/"
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
