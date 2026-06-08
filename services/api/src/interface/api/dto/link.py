@@ -56,7 +56,7 @@ class InsertLink(
 
 
 class UpdateLink(BaseLinkFields):
-    offer_ids: list[int] | None = Field(
+    offer_ids: Optional[list[int]] = Field(
         default=None,
         description="ID офферов, относящихся к партнеру",
     )

@@ -68,9 +68,9 @@ def create_app() -> FastAPI:
     [
         app.include_router(route, prefix="/api")
         for route in (
-            offer_router,
             partner_router,
             link_router,
+            offer_router,
         )
     ]
 

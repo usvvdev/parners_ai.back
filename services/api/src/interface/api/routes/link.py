@@ -60,7 +60,7 @@ async def fetch_link_by_id(
     )
 
 
-@link_router.put("/{id}")
+@link_router.patch("/{id}")
 async def update_link(
     id: int,
     data: UpdateLink,

@@ -73,16 +73,6 @@ class LinkRepository(MySQLRepository[Links]):
             offer_ids=data.offer_ids,
         )
 
-    async def _after_commit(
-        self,
-        entity: Links,
-        session: AsyncSession,
-    ) -> Links:
-        return await self.fetch_one(
-            entity.id,
-            session=session,
-        )
-
     async def fetch_one(
         self,
         id: int,

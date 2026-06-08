@@ -63,7 +63,7 @@ async def create_partner(
     )
 
 
-@partner_router.put(
+@partner_router.patch(
     "/{id}",
     response_model=FetchPartners,
 )

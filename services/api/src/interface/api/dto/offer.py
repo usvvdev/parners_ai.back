@@ -34,5 +34,8 @@ class InsertOffer(OfferIdentity):
     pass
 
 
-class UpdateOffer(BaseModelType):
+class UpdateOffer(
+    BaseFetch,
+    OfferIdentity,
+):
     pass
