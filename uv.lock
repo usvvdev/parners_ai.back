@@ -222,7 +222,7 @@ wheels = [
 
 [[package]]
 name = "asynch"
-version = "0.3.1"
+version = "0.2.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ciso8601" },
@@ -232,9 +232,9 @@ dependencies = [
     { name = "tzlocal" },
     { name = "zstd" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0b/ce/f11ee2cafa6010d295db3ddee089f14cfc5fa9b8a19d0a21356c18a49267/asynch-0.3.1.tar.gz", hash = "sha256:d8bb3c1793a74a2e9d44cc7e8406ead3cf3818c11ecd6d8405b702b23148c584", size = 59825, upload-time = "2025-11-11T15:20:22.975Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/67/e7/c759d9202de046b2ca280fbfc1524063988f90ad8d4ee7a805ca7140c86e/asynch-0.2.5.tar.gz", hash = "sha256:e8e1656c81a1a156df20334e4c08d5832b02f38166dffc979235336309608543", size = 59288, upload-time = "2024-10-17T08:24:35.366Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/b0/9547aeadb577cb0c590162661b31110f7c3c02c1b23653a1b33222c7ff70/asynch-0.3.1-py3-none-any.whl", hash = "sha256:32b30a4409b70514077f7bf8ef713a248158fe5e63504c2769a4c7f772828412", size = 76502, upload-time = "2025-11-11T15:20:21.46Z" },
+    { url = "https://files.pythonhosted.org/packages/26/6a/5b164cf1cb69809484b747e20fcd17493ef57921c69fae6593197423c8fb/asynch-0.2.5-py3-none-any.whl", hash = "sha256:b14a4d4f49c3ed2f77a44722ce33a48b8049acb1ba24f425792ffdb3d1ef2829", size = 81300, upload-time = "2024-10-17T08:24:33.484Z" },
 ]
 
 [[package]]
@@ -762,6 +762,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/81/2d/ff8d91d7b564d464629a0fd50a4489c97fcb836ac230bf3a7269232a9b1f/fastapi-0.136.3.tar.gz", hash = "sha256:e487fae93ad408e6f47641ee4dfe389864fd7bec92e547ea8498fc13f43e83ab", size = 396410, upload-time = "2026-05-23T18:53:15.192Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/82/45359b62a067409bd929ae8a56b8ed13e5a8c8a61194b3c236920999ab83/fastapi-0.136.3-py3-none-any.whl", hash = "sha256:3d2a69bdf04b7e9f3afa292c3bc7a98816bbfafa10bc9b45f3f3700d2f761620", size = 117481, upload-time = "2026-05-23T18:53:16.924Z" },
+]
+
+[[package]]
+name = "fastapi-filters"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+    { name = "typing-inspect" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f0/6b/a91df4dd24d9e01579db8031d4aebd03b308d969179cae148462573938e7/fastapi_filters-0.4.0.tar.gz", hash = "sha256:dfcbaabd9d6a94e04e0538fba6c90a3541d1eb1236f46d07bf77fa5b9dbab6df", size = 222261, upload-time = "2026-05-24T20:44:01.921Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/2c/8e5bddf49de07fe95b358f308ed73d3b94659f76eb6e73206d31670a78bc/fastapi_filters-0.4.0-py3-none-any.whl", hash = "sha256:f3a9f0b9aa40f425b5594d0a883b46d6bfe2893c1c4183bf31b3ee285d725f3e", size = 23037, upload-time = "2026-05-24T20:44:03.163Z" },
 ]
 
 [[package]]
@@ -1903,20 +1918,22 @@ source = { editable = "." }
 dependencies = [
     { name = "aiomysql" },
     { name = "black" },
-    { name = "clickhouse-sqlalchemy" },
     { name = "loguru" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "ruff" },
-    { name = "sqlalchemy" },
 ]
 
 [package.optional-dependencies]
 api = [
     { name = "alembic" },
+    { name = "asynch" },
+    { name = "clickhouse-sqlalchemy" },
     { name = "fastapi" },
+    { name = "fastapi-filters" },
     { name = "greenlet" },
     { name = "gunicorn" },
+    { name = "sqlalchemy" },
     { name = "uvicorn" },
 ]
 bot = [
@@ -1936,10 +1953,12 @@ requires-dist = [
     { name = "aiogram", marker = "extra == 'bot'", specifier = ">=3.28.2" },
     { name = "aiomysql", specifier = ">=0.3.2" },
     { name = "alembic", marker = "extra == 'api'", specifier = ">=1.18.4" },
+    { name = "asynch", marker = "extra == 'api'", specifier = "==0.2.5" },
     { name = "black", specifier = ">=26.5.1" },
-    { name = "clickhouse-sqlalchemy", extras = ["api"], specifier = ">=0.3.2" },
+    { name = "clickhouse-sqlalchemy", marker = "extra == 'api'", specifier = ">=0.3.2" },
     { name = "crawl4ai", marker = "extra == 'browser-agent'", specifier = ">=0.8.6" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.136.3" },
+    { name = "fastapi-filters", marker = "extra == 'api'", specifier = ">=0.4.0" },
     { name = "greenlet", marker = "extra == 'api'", specifier = ">=3.5.1" },
     { name = "gunicorn", marker = "extra == 'api'", specifier = ">=26.0.0" },
     { name = "httpx", marker = "extra == 'bot'", specifier = ">=0.28.1" },
@@ -1951,7 +1970,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pydantic-settings", specifier = ">=2.14.1" },
     { name = "ruff", specifier = ">=0.15.15" },
-    { name = "sqlalchemy", specifier = ">=2.0.50" },
+    { name = "sqlalchemy", marker = "extra == 'api'", specifier = ">=2.0.50" },
     { name = "uvicorn", marker = "extra == 'api'", specifier = ">=0.48.0" },
 ]
 provides-extras = ["browser-agent", "api", "bot"]
@@ -3121,6 +3140,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466", size = 109391, upload-time = "2025-08-25T13:49:26.313Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548", size = 44614, upload-time = "2025-08-25T13:49:24.86Z" },
+]
+
+[[package]]
+name = "typing-inspect"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mypy-extensions" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/dc/74/1789779d91f1961fa9438e9a8710cdae6bd138c80d7303996933d117264a/typing_inspect-0.9.0.tar.gz", hash = "sha256:b23fc42ff6f6ef6954e4852c1fb512cdd18dbea03134f91f856a95ccc9461f78", size = 13825, upload-time = "2023-05-24T20:25:47.612Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/65/f3/107a22063bf27bdccf2024833d3445f4eea42b2e598abfbd46f6a63b6cb0/typing_inspect-0.9.0-py3-none-any.whl", hash = "sha256:9ee6fc59062311ef8547596ab6b955e1b8aa46242d854bfc78f4f6b0eff35f9f", size = 8827, upload-time = "2023-05-24T20:25:45.287Z" },
 ]
 
 [[package]]

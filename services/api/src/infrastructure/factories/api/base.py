@@ -6,14 +6,23 @@ from pathlib import Path
 
 from libs.infrastructure.factories.stores.mysql import MySQLEngineFactory
 
+from libs.infrastructure.factories.stores.clickhouse import ClickhouseEngineFactory
+
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 
+config = ApplicationConfigFactory.create(
+    service_dir=Path(__file__).parents[4],
+)
+
+
 def create_mysql_engine() -> MySQLEngineFactory:
-    config = ApplicationConfigFactory.create(
-        service_dir=Path(__file__).parents[4],
+    return MySQLEngineFactory.create(
+        config=config,
     )
 
-    return MySQLEngineFactory.create(
+
+def create_clickhouse_engine() -> ClickhouseEngineFactory:
+    return ClickhouseEngineFactory.create(
         config=config,
     )

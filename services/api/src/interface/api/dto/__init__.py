@@ -19,6 +19,12 @@ from .link import (
     UpdateLink,
 )
 
+from .offer_position import (
+    FetchOfferPosition,
+    InsertOfferPosition,
+    FiltersOfferPosition,
+)
+
 __all__: list[str] = [
     "InsertOffer",
     "UpdateOffer",
@@ -32,4 +38,7 @@ __all__: list[str] = [
     "FetchLinks",
     "InsertLink",
     "UpdateLink",
+    "FetchOfferPosition",
+    "InsertOfferPosition",
+    "FiltersOfferPosition",
 ]

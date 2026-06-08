@@ -9,7 +9,6 @@ from ..dto import (
     FetchOffer,
     FetchOffers,
     InsertOffer,
-    UpdateOffer,
 )
 
 from ..views import OfferRepositoryView
