@@ -1,8 +1,8 @@
 from .browser_agent import BrowserAgentService
 
-from .parser_agent import ParserAgentService
+from .offer_repository_agent import OfferReposiotryAgentService
 
 __all__: list[str] = [
     "BrowserAgentService",
-    "ParserAgentService",
+    "OfferReposiotryAgentService",
 ]

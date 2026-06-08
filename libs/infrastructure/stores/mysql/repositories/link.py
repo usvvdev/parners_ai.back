@@ -91,7 +91,7 @@ class LinkRepository(MySQLRepository[Links]):
     async def fetch_many(
         self,
         session: AsyncSession | None = None,
-    ) -> type[Offers] | None:
+    ) -> type[Links] | None:
         return await self._fetch_many(
             query=select(
                 self._table,

@@ -1,6 +1,6 @@
 from .browser_agent import BrowserAgentServiceFactory
 
-from ....interface.services.parser_agent import ParserAgentService
+from ....interface.services.offer_repository_agent import OfferReposiotryAgentService
 
 from libs.core.config import TApplicationConfig
 
@@ -27,7 +27,7 @@ class PartnerParserServiceFactory:
             config=config,
         )
 
-        return ParserAgentService(
+        return OfferReposiotryAgentService(
             partner_repository=partner_repository,
             browser_agent=browser_agent,
         )

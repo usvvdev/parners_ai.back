@@ -10,8 +10,6 @@ from libs.domain.types._types.common import BaseModelType
 
 
 class PartnerResult(BaseModelType):
-    """Результат парсинга страницы партнера"""
-
     link: str = Field(
         default="",
         description="URL страницы партнера, которая была проанализирована",

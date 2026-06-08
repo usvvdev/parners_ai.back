@@ -28,6 +28,8 @@ from libs.domain.utils import app_exception_handler
 
 from .src.infrastructure.utils import run_migrations
 
+from .src.interface.routing import ApplicationRouter
+
 from libs.domain.errors.base import BaseApplicationException
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
@@ -66,15 +68,16 @@ def create_app() -> FastAPI:
         allow_credentials=True,
     )
 
-    [
-        app.include_router(route, prefix="/api")
-        for route in (
+    ApplicationRouter(
+        app=app,
+    ).register_routes(
+        routes=[
+            offer_router,
             partner_router,
             link_router,
-            offer_router,
             offer_position_router,
-        )
-    ]
+        ]
+    )
 
     return app
 

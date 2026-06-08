@@ -7,10 +7,6 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters.callback_data import CallbackData
 
-# TODO разедлить запросы в ORM части \
-# partners -> partners/{partner_id} -> links/{link_id} -> offers/{offer_id}
-
-# --- Настройки ---
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)

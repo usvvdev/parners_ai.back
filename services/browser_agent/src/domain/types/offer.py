@@ -8,8 +8,6 @@ from libs.domain.types._types.common import BaseModelType
 
 
 class Offer(BaseModelType):
-    """Позиция оффера, найденного на странице партнера"""
-
     title: str = Field(
         default="",
         description="Название МФО оффера, например, 'Займер', 'Webbankir'",

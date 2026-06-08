@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from ..base import create_clickhouse_engine
+from ...base import create_clickhouse_engine
 
 from .....interface.api.views import OfferPositionRepositoryView
 

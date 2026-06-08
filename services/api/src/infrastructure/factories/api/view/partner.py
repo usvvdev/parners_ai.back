@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from ..base import create_mysql_engine
+from ...base import create_mysql_engine
 
 from .....interface.api.views import PartnerRepositoryView
 

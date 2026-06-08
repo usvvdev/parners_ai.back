@@ -5,6 +5,8 @@ from ...domain.protocols import (
 
 from ...domain.types import PartnerResult
 
+from libs.infrastructure.stores.clickhouse.repositories import OfferPositionRepository
+
 
 class BrowserAgentService:
     def __init__(
@@ -12,9 +14,11 @@ class BrowserAgentService:
         *,
         crawler: ICrawlerProtocol,
         gemini: IGeminiProtocol,
+        offer_position_repository: OfferPositionRepository,
     ) -> None:
         self._crawler = crawler
         self._gemini = gemini
+        self._offer_position_repository = offer_position_repository
 
     async def parse(
         self,
