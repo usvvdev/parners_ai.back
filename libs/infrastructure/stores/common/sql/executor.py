@@ -104,18 +104,20 @@ class BaseSQLExecutor:
         *,
         session: AsyncSession | None = None,
     ) -> T:
-        async with self._session(session) as session:
-            try:
-                result = await action(session)
+        owns_session = session is None
 
-                if session is None:
-                    await session.commit()
+        async with self._session(session) as opened_session:
+            try:
+                result = await action(opened_session)
+
+                if owns_session:
+                    await opened_session.commit()
 
                 return result
 
             except SQLAlchemyError:
-                if session is None:
-                    await session.rollback()
+                if owns_session:
+                    await opened_session.rollback()
 
                 logger.exception(
                     "Transaction failed",
@@ -175,7 +177,6 @@ class BaseSQLExecutor:
     async def _after_commit(
         self,
         entity: Any,
-        session: AsyncSession,
     ) -> Any:
         return entity
 
@@ -200,11 +201,10 @@ class BaseSQLExecutor:
 
             opened_session.add(entity)
 
-            await opened_session.flush() and await opened_session.refresh(entity)
+            await opened_session.flush()
 
             return await self._after_commit(
                 entity=entity,
-                session=opened_session,
             )
 
         return await self._transaction(
@@ -214,7 +214,7 @@ class BaseSQLExecutor:
 
     async def _update(
         self,
-        entity: Any,
+        id: int,
         data: Any,
         *,
         session: AsyncSession | None = None,
@@ -222,6 +222,11 @@ class BaseSQLExecutor:
         async def action(
             opened_session: AsyncSession,
         ) -> Any:
+            entity = await self.fetch_one(
+                id=id,
+                session=opened_session,
+            )
+
             for field, value in data.dump.items():
                 setattr(entity, field, value)
 
@@ -231,13 +236,10 @@ class BaseSQLExecutor:
                 session=opened_session,
             )
 
-            await opened_session.flush() and await opened_session.refresh(
-                entity,
-            )
+            await opened_session.flush()
 
             return await self._after_commit(
                 entity=entity,
-                session=opened_session,
             )
 
         return await self._transaction(
@@ -247,14 +249,19 @@ class BaseSQLExecutor:
 
     async def _delete(
         self,
-        entity: Any,
+        id: int,
         *,
         session: AsyncSession | None = None,
     ) -> None:
         async def action(
-            database: AsyncSession,
+            opened_session: AsyncSession,
         ) -> None:
-            await database.delete(
+            entity = await self._fetch_for_update(
+                id=id,
+                session=opened_session,
+            )
+
+            await opened_session.delete(
                 entity,
             )
 

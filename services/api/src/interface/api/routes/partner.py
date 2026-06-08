@@ -50,14 +50,14 @@ async def fetch_partner(
 
 @partner_router.post(
     "",
-    response_model=FetchPartner,
+    response_model=FetchPartners,
 )
 async def create_partner(
     data: InsertPartner,
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-) -> FetchPartner:
+) -> FetchPartners:
     return await view.insert(
         data=data,
     )
@@ -65,7 +65,7 @@ async def create_partner(
 
 @partner_router.put(
     "/{id}",
-    response_model=FetchPartner,
+    response_model=FetchPartners,
 )
 async def update_partner(
     id: int,
@@ -73,7 +73,7 @@ async def update_partner(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-) -> FetchPartner:
+) -> FetchPartners:
     return await view.update(
         id=id,
         data=data,

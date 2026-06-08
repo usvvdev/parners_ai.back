@@ -7,7 +7,7 @@ from typing import (
 
 from sqlalchemy import select
 
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -91,7 +91,7 @@ class LinkRepository(MySQLRepository[Links]):
         return await self._fetch_one(
             query=select(self._table)
             .options(
-                selectinload(self._table.offers),
+                joinedload(self._table.offers),
             )
             .where(self._table.id == id),
             id=id,
@@ -127,12 +127,8 @@ class LinkRepository(MySQLRepository[Links]):
         *,
         session: AsyncSession | None = None,
     ) -> Links:
-        link = await self.fetch_one(
-            id=id,
-            session=session,
-        )
         return await self._update(
-            link,
+            id=id,
             data=data,
             session=session,
         )
@@ -143,11 +139,7 @@ class LinkRepository(MySQLRepository[Links]):
         *,
         session: AsyncSession | None = None,
     ) -> None:
-        link: type[Links] | None = await self.fetch_one(
-            id=id,
-            session=session,
-        )
         await self._delete(
-            link,
+            id=id,
             session=session,
         )

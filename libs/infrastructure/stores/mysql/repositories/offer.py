@@ -68,14 +68,9 @@ class OfferRepository(MySQLRepository[Offers]):
         *,
         session: AsyncSession | None = None,
     ) -> type[Offers]:
-        offer: type[Offers] | None = await self._fetch_one(
-            id=id,
-            many=True,
-            session=session,
-        )
         return await self._update(
-            offer,
-            data,
+            id=id,
+            data=data,
             session=session,
         )
 
@@ -85,11 +80,7 @@ class OfferRepository(MySQLRepository[Offers]):
         *,
         session: AsyncSession | None = None,
     ) -> None:
-        offer: type[Offers] | None = await self.fetch_one(
-            id=id,
-            session=session,
-        )
         await self._delete(
-            offer,
+            id=id,
             session=session,
         )

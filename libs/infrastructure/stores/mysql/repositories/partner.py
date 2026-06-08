@@ -7,7 +7,7 @@ from typing import (
 
 from sqlalchemy import select
 
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -58,7 +58,7 @@ class PartnerRepository(MySQLRepository[Partners]):
 
         entity.links = await self.__fetch_links(
             session=session,
-            offer_ids=link_ids,
+            link_ids=link_ids,
         )
 
     async def _before_commit(
@@ -73,27 +73,19 @@ class PartnerRepository(MySQLRepository[Partners]):
             link_ids=data.link_ids,
         )
 
-    async def _after_commit(
-        self,
-        entity: Partners,
-        session: AsyncSession,
-    ) -> Links:
-        return await self.fetch_one(
-            entity.id,
-            session=session,
-        )
-
     async def fetch_one(
         self,
         id: int,
         session: AsyncSession | None = None,
     ) -> Optional[Partners]:
         return await self._fetch_one(
-            query=select(self._table)
-            .options(
-                selectinload(self._table.links),
-            )
-            .where(self._table.id == id),
+            query=(
+                select(self._table)
+                .options(
+                    joinedload(self._table.links),
+                )
+                .where(self._table.id == id)
+            ),
             id=id,
             session=session,
         )
@@ -127,12 +119,8 @@ class PartnerRepository(MySQLRepository[Partners]):
         *,
         session: AsyncSession | None = None,
     ) -> Partners:
-        partner = await self.fetch_one(
-            id=id,
-            session=session,
-        )
         return await self._update(
-            partner,
+            id=id,
             data=data,
             session=session,
         )
@@ -143,11 +131,7 @@ class PartnerRepository(MySQLRepository[Partners]):
         *,
         session: AsyncSession | None = None,
     ) -> None:
-        partner: type[Links] | None = await self.fetch_one(
-            id=id,
-            session=session,
-        )
         await self._delete(
-            partner,
+            id=id,
             session=session,
         )
