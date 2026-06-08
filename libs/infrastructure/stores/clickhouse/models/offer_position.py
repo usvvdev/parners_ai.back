@@ -18,16 +18,16 @@ from clickhouse_sqlalchemy.types import (
 
 # application dependencies
 
-from ...common.sql.models import BaseModel
+from ...common.base import ETableModel
 
 
-class OfferPositions(BaseModel):
+class OfferPositions(ETableModel):
     wmid: Mapped[str] = mapped_column(
         String(length=128),
         nullable=False,
     )
 
-    utm_souce: Mapped[str] = mapped_column(
+    utm_source: Mapped[str] = mapped_column(
         String(length=64),
         nullable=False,
     )
@@ -49,5 +49,6 @@ class OfferPositions(BaseModel):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
+        primary_key=True,
         server_default=func.now(),
     )
