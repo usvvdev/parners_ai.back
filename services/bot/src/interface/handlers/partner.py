@@ -104,6 +104,11 @@ async def show_partners(
             callback_data=PartnerCD(action="view", p_id=p.id),
         )
 
+    builder.button(
+        text="🏠 Главное меню",
+        callback_data=NavCD(level="main"),
+    )
+
     builder.adjust(1)
 
     await callback.message.edit_text(

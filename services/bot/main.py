@@ -36,7 +36,9 @@ async def run_app() -> None:
         base_url=settings.api_base_url,
     )
 
-    session = AiohttpSession(settings.proxy_url)
+    session = AiohttpSession(
+        settings.proxy_url,
+    )
 
     bot = Bot(
         token=settings.bot_token,

@@ -6,11 +6,9 @@ from aiogram.filters import Command
 
 from aiogram.types import Message
 
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-
 # application dependencies
 
-from ..callbacks import NavCD
+from ..utils import get_main_menu
 
 
 router = Router()
@@ -18,23 +16,9 @@ router = Router()
 
 @router.message(Command("start"))
 async def cmd_start(message: Message) -> None:
-    builder = InlineKeyboardBuilder()
-
-    builder.button(
-        text="📂 Список партнеров",
-        callback_data=NavCD(level="partners"),
-    )
-    builder.button(
-        text="🔗 Список ссылок",
-        callback_data=NavCD(level="links"),
-    )
-    builder.button(
-        text="🎁 Список офферов",
-        callback_data=NavCD(level="offers"),
-    )
-    builder.adjust(1)
+    text, markup = get_main_menu()
 
     await message.answer(
-        "👋 Добро пожаловать в CRM!\nВыберите действие:",
-        reply_markup=builder.as_markup(),
+        text,
+        reply_markup=markup,
     )

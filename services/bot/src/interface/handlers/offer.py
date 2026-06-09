@@ -47,12 +47,15 @@ async def show_offers(
             callback_data=OfferCD(action="view", p_id=0, l_id=0, o_id=offer.id),
         )
 
+    builder.button(
+        text="🏠 Главное меню",
+        callback_data=NavCD(level="main"),
+    )
+
     builder.adjust(1)
 
     await callback.message.edit_text(
-        "🎁 <b>Список офферов:</b>"
-        if offers
-        else "🎁 <b>Офферов пока нет.</b>",
+        "🎁 <b>Список офферов:</b>" if offers else "🎁 <b>Офферов пока нет.</b>",
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -106,8 +109,7 @@ async def show_offer(
     builder.adjust(1)
 
     await callback.message.edit_text(
-        f"🎁 <b>Оффер:</b> {safe(offer.title)}\n"
-        f"🆔 <b>ID:</b> {offer.id}",
+        f"🎁 <b>Оффер:</b> {safe(offer.title)}\n🆔 <b>ID:</b> {offer.id}",
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )

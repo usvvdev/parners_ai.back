@@ -47,12 +47,15 @@ async def show_links(
             callback_data=LinkCD(action="view", p_id=0, l_id=link.id),
         )
 
+    builder.button(
+        text="🏠 Главное меню",
+        callback_data=NavCD(level="main"),
+    )
+
     builder.adjust(1)
 
     await callback.message.edit_text(
-        "🔗 <b>Список ссылок:</b>"
-        if links
-        else "🔗 <b>Ссылок пока нет.</b>",
+        "🔗 <b>Список ссылок:</b>" if links else "🔗 <b>Ссылок пока нет.</b>",
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -269,6 +272,8 @@ async def delete_link(
 
     await callback.answer("Ссылка удалена")
     if callback_data.p_id:
-        await callback.message.edit_text("Ссылка удалена. Вернитесь к партнеру из меню.")
+        await callback.message.edit_text(
+            "Ссылка удалена. Вернитесь к партнеру из меню."
+        )
     else:
         await show_links(callback, link_client)
