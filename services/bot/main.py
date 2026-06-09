@@ -19,6 +19,7 @@ from .src.interface.handlers import (
     partner_router,
     link_router,
     offer_router,
+    main_router,
 )
 
 from .src.infrastructure.factories import APIClientsFactory
@@ -52,6 +53,7 @@ async def run_app() -> None:
     dp["offer_client"] = clients.offer
 
     dp.include_router(start_router)
+    dp.include_router(main_router)
     dp.include_router(partner_router)
     dp.include_router(link_router)
     dp.include_router(offer_router)
