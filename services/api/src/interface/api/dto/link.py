@@ -55,5 +55,8 @@ class InsertLink(
     )
 
 
-class UpdateLink(InsertLink):
-    pass
+class UpdateLink(BaseLinkFields):
+    offer_ids: list[int] = Field(
+        default_factory=list,
+        description="ID офферов, относящихся к партнеру",
+    )

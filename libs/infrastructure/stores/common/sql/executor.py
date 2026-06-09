@@ -13,8 +13,6 @@ from sqlalchemy import (
     # types
     Executable,
     Result,
-    # functions
-    select,
 )
 
 from loguru import logger
@@ -38,6 +36,8 @@ from libs.domain.errors.stores import (
     ObjectNotFoundException,
     QueryExecutionException,
 )
+
+from libs.domain.utils import orm_model_dump
 
 from libs.domain.errors.stores import RepositoryException
 
@@ -190,7 +190,10 @@ class BaseSQLExecutor:
             opened_session: AsyncSession,
         ) -> Any:
             entity = self._table(
-                **data.orm_model_dump(),
+                **orm_model_dump(
+                    data,
+                    table=self._table.__table__,
+                ),
             )
 
             await self._before_commit(
