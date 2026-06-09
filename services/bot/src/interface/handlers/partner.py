@@ -226,14 +226,16 @@ async def create_partner_link_start(
     callback_data: LinkCD,
     state: FSMContext,
 ) -> None:
-    await state.update_data(p_id=callback_data.p_id)
+    await state.update_data(
+        p_id=callback_data.p_id,
+        chat_id=callback.message.chat.id,
+        menu_message_id=callback.message.message_id,
+    )
 
     prompt = await callback.message.answer("Введите URL новой ссылки:")
 
     await state.update_data(
         prompt_message_id=prompt.message_id,
-        chat_id=callback.message.chat.id,
-        links_message_id=callback.message.message_id,
     )
 
     await state.set_state(LinkForm.create_url)
