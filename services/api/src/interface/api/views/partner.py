@@ -51,7 +51,7 @@ class PartnerRepositoryView:
     async def delete(
         self,
         id: int,
-    ) -> FetchPartner:
+    ) -> None:
         return await self._repository.delete(
             id=id,
         )

@@ -86,7 +86,7 @@ async def delete_partner(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-):
+) -> None:
     return await view.delete(
         id=id,
     )

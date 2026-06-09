@@ -51,7 +51,7 @@ class LinkRepositoryView:
     async def delete(
         self,
         id: int,
-    ) -> FetchLink:
+    ) -> None:
         return await self._repository.delete(
             id=id,
         )

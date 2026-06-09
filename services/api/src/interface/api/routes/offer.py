@@ -82,7 +82,7 @@ async def delete_offer(
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
-) -> FetchOffer:
+) -> None:
     return await view.delete(
         id=id,
     )

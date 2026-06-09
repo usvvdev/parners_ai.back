@@ -1,6 +1,9 @@
 # packages
 
-from pydantic import Field, field_validator
+from pydantic import (
+    Field,
+    field_validator,
+)
 
 # application dependencies
 
@@ -21,17 +24,7 @@ class LinkSummary(BaseModelType):
     )
 
 
-class LinkDetail(BaseModelType):
-    id: int = Field(
-        ...,
-        description="ID ссылки",
-    )
-
-    link: str = Field(
-        ...,
-        description="URL витрины партнера",
-    )
-
+class LinkDetail(LinkSummary):
     is_active: bool = Field(
         ...,
         description="Активность ссылки",

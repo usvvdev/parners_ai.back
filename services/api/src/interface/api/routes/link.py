@@ -80,7 +80,7 @@ async def delete_link(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
-) -> FetchLink:
+):
     return await view.delete(
         id=id,
     )

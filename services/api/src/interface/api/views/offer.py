@@ -51,7 +51,7 @@ class OfferRepositoryView:
     async def delete(
         self,
         id: int,
-    ) -> FetchOffer:
+    ) -> None:
         return await self._repository.delete(
             id=id,
         )
