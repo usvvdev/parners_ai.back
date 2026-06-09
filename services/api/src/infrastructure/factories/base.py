@@ -12,7 +12,7 @@ from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 
 config = ApplicationConfigFactory.create(
-    service_dir=Path(__file__).parents[4],
+    service_dir=Path(__file__).parents[3],
 )
 
 
