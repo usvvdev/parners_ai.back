@@ -14,7 +14,6 @@ class BasePydanticModel:
 
     def orm_model_dump(
         self,
-        data: Any,
     ) -> dict[str, Any]:
         columns = self._table.__table__.columns.keys()
 
