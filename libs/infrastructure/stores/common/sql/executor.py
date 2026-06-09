@@ -259,7 +259,7 @@ class BaseSQLExecutor:
         async def action(
             opened_session: AsyncSession,
         ) -> None:
-            entity = await self._fetch_for_update(
+            entity = await self.fetch_one(
                 id=id,
                 session=opened_session,
             )
