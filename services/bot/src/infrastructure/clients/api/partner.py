@@ -16,6 +16,17 @@ class PartnerAPIClient(BaseAPIClient):
 
         return PartnerDetail.model_validate(data)
 
+    async def create(
+        self,
+        payload: dict,
+    ) -> PartnerDetail:
+        data = await self._post(
+            "/partners",
+            json=payload,
+        )
+
+        return PartnerDetail.model_validate(data)
+
     async def update(
         self,
         id: int,
@@ -27,3 +38,9 @@ class PartnerAPIClient(BaseAPIClient):
         )
 
         return PartnerDetail.model_validate(data)
+
+    async def delete(
+        self,
+        id: int,
+    ) -> None:
+        await self._delete(f"/partners/{id}")

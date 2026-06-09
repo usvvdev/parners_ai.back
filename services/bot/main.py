@@ -8,6 +8,8 @@ from loguru import logger
 
 from aiogram import Bot, Dispatcher
 
+from aiogram.client.session.aiohttp import AiohttpSession
+
 # application dependencies
 
 from .src.config import BotSettings
@@ -34,7 +36,13 @@ async def run_app() -> None:
         base_url=settings.api_base_url,
     )
 
-    bot = Bot(token=settings.bot_token)
+    session = AiohttpSession(settings.proxy_url)
+
+    bot = Bot(
+        token=settings.bot_token,
+        session=session,
+    )
+
     dp = Dispatcher()
 
     dp["partner_client"] = clients.partner

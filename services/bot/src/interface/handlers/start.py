@@ -24,6 +24,15 @@ async def cmd_start(message: Message) -> None:
         text="📂 Список партнеров",
         callback_data=NavCD(level="partners"),
     )
+    builder.button(
+        text="🔗 Список ссылок",
+        callback_data=NavCD(level="links"),
+    )
+    builder.button(
+        text="🎁 Список офферов",
+        callback_data=NavCD(level="offers"),
+    )
+    builder.adjust(1)
 
     await message.answer(
         "👋 Добро пожаловать в CRM!\nВыберите действие:",

@@ -9,6 +9,7 @@ from ..dto import (
     FetchOffer,
     FetchOffers,
     InsertOffer,
+    UpdateOffer,
 )
 
 from ..views import OfferRepositoryView
@@ -58,6 +59,20 @@ async def fetch_offer_by_id(
 ) -> FetchOffer:
     return await view.fetch_by_id(
         id=id,
+    )
+
+
+@offer_router.patch("/{id}")
+async def update_offer(
+    id: int,
+    data: UpdateOffer,
+    view: OfferRepositoryView = Depends(
+        OfferRepositoryViewFactory.create,
+    ),
+) -> FetchOffer:
+    return await view.update(
+        id=id,
+        data=data,
     )
 
 

@@ -61,8 +61,5 @@ class InsertPartner(
     )
 
 
-class UpdatePartner(BasePartnerFields):
-    link_ids: list[int] | None = Field(
-        default=None,
-        description="ID офферов, относящихся к партнеру",
-    )
+class UpdatePartner(InsertPartner):
+    pass

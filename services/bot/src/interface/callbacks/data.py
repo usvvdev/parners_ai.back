@@ -10,6 +10,7 @@ class NavCD(CallbackData, prefix="nav"):
 class PartnerCD(CallbackData, prefix="prt"):
     action: str
     p_id: int
+    is_tracking: int = 0
 
 
 class LinkCD(CallbackData, prefix="lnk"):

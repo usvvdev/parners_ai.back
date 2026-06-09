@@ -190,7 +190,7 @@ class BaseSQLExecutor:
             opened_session: AsyncSession,
         ) -> Any:
             entity = self._table(
-                **data.dump,
+                **data.orm_model_dump(),
             )
 
             await self._before_commit(
