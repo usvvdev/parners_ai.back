@@ -247,28 +247,22 @@ async def create_link_url(
 ) -> None:
     data = await state.get_data()
 
-    await state.update_data(link=message.text.strip())
+    link = message.text.strip()
+
+    await state.update_data(link=link)
 
     try:
         await message.delete()
     except Exception:
         pass
 
-    try:
-        await message.bot.delete_message(
-            chat_id=data["chat_id"],
-            message_id=data["prompt_message_id"],
-        )
-    except Exception:
-        pass
-
-    await state.set_state(LinkForm.create_offer_ids)
-
-    prompt = await message.answer(
-        "Введите ID офферов через запятую или '-' если офферов нет:"
+    await message.bot.edit_message_text(
+        chat_id=data["chat_id"],
+        message_id=data["menu_message_id"],
+        text="Введите ID офферов через запятую или '-' если офферов нет:",
     )
 
-    await state.update_data(prompt_message_id=prompt.message_id)
+    await state.set_state(LinkForm.create_offer_ids)
 
 
 @router.message(LinkForm.create_offer_ids)
@@ -286,6 +280,12 @@ async def create_link_finish(
         await message.answer("ID офферов должны быть числами через запятую")
         return
 
+    # удаляем сообщение пользователя
+    try:
+        await message.delete()
+    except Exception:
+        pass
+
     try:
         link = await link_client.create(
             {
@@ -297,21 +297,37 @@ async def create_link_finish(
 
         p_id = data.get("p_id")
 
-        # привязка к партнеру
+        # =========================
+        # ВАРИАНТ 1: создание из партнёра
+        # =========================
         if p_id:
             partner = await partner_client.fetch_by_id(p_id)
-            link_ids = [item.id for item in partner.links]
+
+            # обновляем привязку ссылки к партнеру
+            link_ids = [l.id for l in partner.links]
 
             await partner_client.update(
                 p_id,
                 {"link_ids": [*link_ids, link.id]},
             )
 
-            # 🔥 ОБНОВЛЯЕМ ЭКРАН ПАРТНЕРА
-            await _render_partner(message, partner)
+            # 🔥 ВАЖНО: просто перерисовываем ТЕКУЩЕЕ сообщение
+            # (берём callback-логику через fake render)
+            builder = _partner_keyboard(partner)
 
+            await message.answer(
+                f"🏢 <b>Партнер:</b> {safe(partner.wmid)}\n"
+                f"🏷 <b>UTM:</b> {safe(partner.utm_source)}\n"
+                f"📊 <b>Трекинг:</b> {'Активен' if partner.is_tracking else 'Выключен'}\n\n"
+                f"🔗 <b>Ссылки ({len(partner.links)}):</b>",
+                reply_markup=builder.as_markup(),
+                parse_mode="HTML",
+            )
+
+        # =========================
+        # ВАРИАНТ 2: обычные ссылки
+        # =========================
         else:
-            # 🔥 если не из партнёра — обновляем список ссылок
             links = await link_client.fetch_all()
 
             builder = InlineKeyboardBuilder()
@@ -346,12 +362,6 @@ async def create_link_finish(
 
     except HTTPStatusError:
         await message.answer("Не удалось создать ссылку")
-        return
 
-    # удалить сообщение пользователя
-    try:
-        await message.delete()
-    except Exception:
-        pass
-
-    await state.clear()
+    finally:
+        await state.clear()
