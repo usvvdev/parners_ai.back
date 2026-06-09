@@ -1,5 +1,5 @@
 services:
-  browser_agent:
+  bot:
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
       API_BASE_URL: ${API_BASE_URL:-api:8000/api}

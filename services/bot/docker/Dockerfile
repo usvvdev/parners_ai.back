@@ -14,7 +14,7 @@ COPY pyproject.toml uv.lock ./
 
 # 3. Синхронизируем ТОЛЬКО внешние зависимости для bot
 # --extra browser-agent указывает uv установить эту конкретную группу
-RUN uv sync --frozen --no-install-project --extra api
+RUN uv sync --frozen --no-install-project --extra bot
 
 # 4. Копируем весь исходный код (включая папки libs и services/bot)
 COPY libs libs/
