@@ -227,8 +227,16 @@ async def create_partner_link_start(
     state: FSMContext,
 ) -> None:
     await state.update_data(p_id=callback_data.p_id)
+
+    prompt = await callback.message.answer("Введите URL новой ссылки:")
+
+    await state.update_data(
+        prompt_message_id=prompt.message_id,
+        chat_id=callback.message.chat.id,
+        links_message_id=callback.message.message_id,
+    )
+
     await state.set_state(LinkForm.create_url)
-    await callback.message.answer("Введите URL новой ссылки:")
     await callback.answer()
 
 
@@ -237,11 +245,30 @@ async def create_link_url(
     message: Message,
     state: FSMContext,
 ) -> None:
+    data = await state.get_data()
+
     await state.update_data(link=message.text.strip())
+
+    try:
+        await message.delete()
+    except Exception:
+        pass
+
+    try:
+        await message.bot.delete_message(
+            chat_id=data["chat_id"],
+            message_id=data["prompt_message_id"],
+        )
+    except Exception:
+        pass
+
     await state.set_state(LinkForm.create_offer_ids)
-    await message.answer(
-        "Введите ID офферов через запятую или '-' если офферов пока нет:"
+
+    prompt = await message.answer(
+        "Введите ID офферов через запятую или '-' если офферов нет:"
     )
+
+    await state.update_data(prompt_message_id=prompt.message_id)
 
 
 @router.message(LinkForm.create_offer_ids)
@@ -252,7 +279,6 @@ async def create_link_finish(
     partner_client: PartnerAPIClient,
 ) -> None:
     data = await state.get_data()
-    await state.clear()
 
     try:
         offer_ids = parse_ids(message.text)
@@ -270,17 +296,62 @@ async def create_link_finish(
         )
 
         p_id = data.get("p_id")
+
+        # привязка к партнеру
         if p_id:
             partner = await partner_client.fetch_by_id(p_id)
             link_ids = [item.id for item in partner.links]
+
             await partner_client.update(
                 p_id,
                 {"link_ids": [*link_ids, link.id]},
             )
+
+            # 🔥 ОБНОВЛЯЕМ ЭКРАН ПАРТНЕРА
+            await _render_partner(message, partner)
+
+        else:
+            # 🔥 если не из партнёра — обновляем список ссылок
+            links = await link_client.fetch_all()
+
+            builder = InlineKeyboardBuilder()
+
+            builder.button(
+                text="➕ Добавить ссылку",
+                callback_data=LinkCD(action="create", p_id=0, l_id=0),
+            )
+
+            for l in links:
+                builder.button(
+                    text=f"🔗 {short_url(l.link)}",
+                    callback_data=LinkCD(
+                        action="view",
+                        p_id=0,
+                        l_id=l.id,
+                    ),
+                )
+
+            builder.button(
+                text="🏠 Главное меню",
+                callback_data=NavCD(level="main"),
+            )
+
+            builder.adjust(1)
+
+            await message.answer(
+                "🔗 <b>Список ссылок:</b>" if links else "🔗 <b>Ссылок пока нет.</b>",
+                reply_markup=builder.as_markup(),
+                parse_mode="HTML",
+            )
+
     except HTTPStatusError:
-        await message.answer("Не удалось создать или привязать ссылку")
+        await message.answer("Не удалось создать ссылку")
         return
 
-    await message.answer(
-        f"Ссылка создана: <b>{safe(short_url(link.link))}</b>", parse_mode="HTML"
-    )
+    # удалить сообщение пользователя
+    try:
+        await message.delete()
+    except Exception:
+        pass
+
+    await state.clear()
