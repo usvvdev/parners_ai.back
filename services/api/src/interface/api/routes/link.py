@@ -1,7 +1,17 @@
+# packages
+
 from fastapi import (
     APIRouter,
     Depends,
 )
+
+from fastapi_pagination import (
+    Page,
+    Params,
+    paginate,
+)
+
+# application depencies
 
 from ..dto import (
     FetchLink,
@@ -11,6 +21,10 @@ from ..dto import (
 )
 
 from ..views import LinkRepositoryView
+
+from ....infrastructure.utils.functions import set_custom_pagination
+
+from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import LinkRepositoryViewFactory
 
@@ -23,14 +37,23 @@ link_router = APIRouter(
 
 @link_router.get(
     "",
-    response_model=list[FetchLinks],
+    response_model=Page[FetchLinks],
 )
+@disable_extension_check
 async def fetch_links(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
-) -> list[FetchLinks]:
-    return await view.fetch()
+    pagination_params: Params = Depends(
+        set_custom_pagination,
+    ),
+) -> Page[FetchLinks]:
+    data = await view.fetch()
+
+    return paginate(
+        data,
+        params=pagination_params,
+    )
 
 
 @link_router.post("")

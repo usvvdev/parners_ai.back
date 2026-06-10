@@ -10,6 +10,8 @@ from fastapi import FastAPI
 
 from contextlib import asynccontextmanager
 
+from fastapi_pagination import add_pagination
+
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -26,11 +28,11 @@ from libs.domain.types.enums.config import AppMode
 
 from libs.domain.utils import app_exception_handler
 
-from .src.infrastructure.utils import run_migrations
-
 from .src.interface.routing import ApplicationRouter
 
 from libs.domain.errors.base import BaseApplicationException
+
+from .src.infrastructure.utils.functions import run_migrations
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
@@ -78,6 +80,8 @@ def create_app() -> FastAPI:
             offer_position_router,
         ]
     )
+
+    add_pagination(app)
 
     return app
 

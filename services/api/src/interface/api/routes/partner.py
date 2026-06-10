@@ -1,7 +1,17 @@
+# packages
+
 from fastapi import (
     APIRouter,
     Depends,
 )
+
+from fastapi_pagination import (
+    Page,
+    Params,
+    paginate,
+)
+
+# application depencies
 
 from ..dto import (
     FetchPartner,
@@ -11,6 +21,10 @@ from ..dto import (
 )
 
 from ..views import PartnerRepositoryView
+
+from ....infrastructure.utils.functions import set_custom_pagination
+
+from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import PartnerRepositoryViewFactory
 
@@ -23,14 +37,23 @@ partner_router = APIRouter(
 
 @partner_router.get(
     "",
-    response_model=list[FetchPartner],
+    response_model=Page[FetchPartner],
 )
+@disable_extension_check
 async def fetch_offers(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-) -> list[FetchPartner]:
-    return await view.fetch()
+    pagination_params: Params = Depends(
+        set_custom_pagination,
+    ),
+) -> Page[FetchPartner]:
+    data = await view.fetch()
+
+    return paginate(
+        data,
+        params=pagination_params,
+    )
 
 
 @partner_router.get(

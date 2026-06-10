@@ -1,9 +1,17 @@
+# packages
+
 from fastapi import (
     APIRouter,
     Depends,
 )
 
-from typing import List
+from fastapi_pagination import (
+    Page,
+    Params,
+    paginate,
+)
+
+# application depencies
 
 from ..dto import (
     FetchOffer,
@@ -13,6 +21,10 @@ from ..dto import (
 )
 
 from ..views import OfferRepositoryView
+
+from ....infrastructure.utils.functions import set_custom_pagination
+
+from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import OfferRepositoryViewFactory
 
@@ -25,14 +37,23 @@ offer_router = APIRouter(
 
 @offer_router.get(
     "",
-    response_model=List[FetchOffers],
+    response_model=Page[FetchOffers],
 )
+@disable_extension_check
 async def fetch_offers(
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
-) -> list[FetchOffers]:
-    return await view.fetch()
+    pagination_params: Params = Depends(
+        set_custom_pagination,
+    ),
+) -> Page[FetchOffers]:
+    data = await view.fetch()
+
+    return paginate(
+        data,
+        params=pagination_params,
+    )
 
 
 @offer_router.post("")
