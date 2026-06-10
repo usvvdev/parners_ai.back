@@ -5,7 +5,10 @@ from typing import (
     Optional,
 )
 
-from sqlalchemy import select
+from sqlalchemy import (
+    select,
+    desc,
+)
 
 from sqlalchemy.orm import joinedload
 
@@ -97,7 +100,7 @@ class PartnerRepository(MySQLRepository[Partners]):
         return await self._fetch_many(
             query=select(
                 self._table,
-            ),
+            ).order_by(desc(self._table.is_selected)),
             session=session,
         )
 

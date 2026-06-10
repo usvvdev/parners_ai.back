@@ -29,8 +29,9 @@ def build_partners_list(
 
     for partner in partners:
         status = "🟢" if partner.is_tracking else "🔴"
+        selected = "⭐" if partner.is_selected else ""
         builder.button(
-            text=f"{status} {partner.wmid}",
+            text=f"{selected} {status} {partner.wmid}",
             callback_data=PartnerCD(action="view", p_id=partner.id),
         )
 
@@ -146,10 +147,7 @@ def build_link_picker(
     )
     builder.adjust(1)
 
-    text = (
-        "🔗 <b>Выберите ссылки партнера</b>\n"
-        "🟢 — привязана, 🔴 — не привязана"
-    )
+    text = "🔗 <b>Выберите ссылки партнера</b>\n🟢 — привязана, 🔴 — не привязана"
 
     if not links:
         text = (

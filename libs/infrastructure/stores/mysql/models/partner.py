@@ -39,6 +39,13 @@ class Partners(
         nullable=False,
     )
 
+    is_selected: Mapped[bool] = mapped_column(
+        TINYINT,
+        default=False,
+        server_default="0",
+        nullable=False,
+    )
+
     is_tracking: Mapped[bool] = mapped_column(
         TINYINT,
         default=True,

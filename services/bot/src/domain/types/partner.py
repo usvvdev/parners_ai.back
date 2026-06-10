@@ -30,6 +30,11 @@ class Partner(BaseModelType):
         description="Статус трекинга",
     )
 
+    is_selected: bool = Field(
+        ...,
+        description="В избранном",
+    )
+
 
 class PartnerDetail(Partner):
     links: list[LinkSummary] = Field(
