@@ -6,12 +6,20 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ..callbacks import NavCD, PartnerCD, LinkCD, OfferCD
 
+from ..views.pagination import append_list_pagination
+
 from ..utils import safe, short_url
 
 from ...domain.types import LinkSummary, LinkDetail, OfferSummary
 
 
-def build_links_list(links: list[LinkSummary]) -> tuple[str, InlineKeyboardBuilder]:
+def build_links_list(
+    links: list[LinkSummary],
+    *,
+    page: int = 1,
+    pages: int = 1,
+    total: int = 0,
+) -> tuple[str, InlineKeyboardBuilder]:
     builder = InlineKeyboardBuilder()
 
     builder.button(
@@ -25,13 +33,28 @@ def build_links_list(links: list[LinkSummary]) -> tuple[str, InlineKeyboardBuild
             callback_data=LinkCD(action="view", p_id=0, l_id=link.id),
         )
 
+    append_list_pagination(
+        builder,
+        level="links",
+        page=page,
+        pages=pages,
+    )
+
     builder.button(
         text="🏠 Главное меню",
         callback_data=NavCD(level="main"),
     )
     builder.adjust(1)
 
-    text = "🔗 <b>Список ссылок:</b>" if links else "🔗 <b>Ссылок пока нет.</b>"
+    if total:
+        text = f"🔗 <b>Список ссылок</b> ({total})"
+    elif links:
+        text = "🔗 <b>Список ссылок:</b>"
+    else:
+        text = "🔗 <b>Ссылок пока нет.</b>"
+
+    if pages > 1:
+        text += f"\nСтраница {page} из {pages}"
 
     return text, builder
 

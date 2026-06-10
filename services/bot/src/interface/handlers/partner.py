@@ -60,15 +60,21 @@ async def _render_link_picker(
 @router.callback_query(NavCD.filter(F.level == "partners"))
 async def show_partners(
     callback: CallbackQuery,
+    callback_data: NavCD,
     partner_client: PartnerAPIClient,
 ) -> None:
     try:
-        partners = await partner_client.fetch_all()
+        result = await partner_client.fetch_page(page=callback_data.page)
     except HTTPStatusError:
         await callback.answer("Ошибка загрузки партнеров", show_alert=True)
         return
 
-    text, builder = build_partners_list(partners)
+    text, builder = build_partners_list(
+        result.items,
+        page=result.page,
+        pages=result.pages,
+        total=result.total,
+    )
 
     await callback.message.edit_text(
         text,
@@ -167,7 +173,7 @@ async def create_partner_finish(
                 "link_ids": [],
             }
         )
-        partners = await partner_client.fetch_all()
+        partners = await partner_client.fetch_page(page=1)
     except HTTPStatusError:
         await edit_menu_message(
             message.bot,
@@ -177,7 +183,12 @@ async def create_partner_finish(
         await state.clear()
         return
 
-    text, builder = build_partners_list(partners)
+    text, builder = build_partners_list(
+        partners.items,
+        page=partners.page,
+        pages=partners.pages,
+        total=partners.total,
+    )
     await edit_menu_message(
         message.bot,
         state,

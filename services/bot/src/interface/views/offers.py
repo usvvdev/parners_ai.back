@@ -6,12 +6,20 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ..callbacks import NavCD, LinkCD, OfferCD
 
+from ..views.pagination import append_list_pagination
+
 from ..utils import safe
 
 from ...domain.types import OfferSummary
 
 
-def build_offers_list(offers: list[OfferSummary]) -> tuple[str, InlineKeyboardBuilder]:
+def build_offers_list(
+    offers: list[OfferSummary],
+    *,
+    page: int = 1,
+    pages: int = 1,
+    total: int = 0,
+) -> tuple[str, InlineKeyboardBuilder]:
     builder = InlineKeyboardBuilder()
 
     builder.button(
@@ -25,13 +33,28 @@ def build_offers_list(offers: list[OfferSummary]) -> tuple[str, InlineKeyboardBu
             callback_data=OfferCD(action="view", p_id=0, l_id=0, o_id=offer.id),
         )
 
+    append_list_pagination(
+        builder,
+        level="offers",
+        page=page,
+        pages=pages,
+    )
+
     builder.button(
         text="🏠 Главное меню",
         callback_data=NavCD(level="main"),
     )
     builder.adjust(1)
 
-    text = "🎁 <b>Список офферов:</b>" if offers else "🎁 <b>Офферов пока нет.</b>"
+    if total:
+        text = f"🎁 <b>Список офферов</b> ({total})"
+    elif offers:
+        text = "🎁 <b>Список офферов:</b>"
+    else:
+        text = "🎁 <b>Офферов пока нет.</b>"
+
+    if pages > 1:
+        text += f"\nСтраница {page} из {pages}"
 
     return text, builder
 

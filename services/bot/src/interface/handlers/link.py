@@ -68,15 +68,21 @@ async def _render_offer_picker(
 @router.callback_query(NavCD.filter(F.level == "links"))
 async def show_links(
     callback: CallbackQuery,
+    callback_data: NavCD,
     link_client: LinkAPIClient,
 ) -> None:
     try:
-        links = await link_client.fetch_all()
+        result = await link_client.fetch_page(page=callback_data.page)
     except HTTPStatusError:
         await callback.answer("Ошибка загрузки ссылок", show_alert=True)
         return
 
-    text, builder = build_links_list(links)
+    text, builder = build_links_list(
+        result.items,
+        page=result.page,
+        pages=result.pages,
+        total=result.total,
+    )
 
     await callback.message.edit_text(
         text,
@@ -207,12 +213,17 @@ async def create_link_cancel(
         text, builder = build_partner_detail(partner)
     else:
         try:
-            links = await link_client.fetch_all()
+            result = await link_client.fetch_page(page=1)
         except HTTPStatusError:
             await callback.answer("Ошибка", show_alert=True)
             return
 
-        text, builder = build_links_list(links)
+        text, builder = build_links_list(
+            result.items,
+            page=result.page,
+            pages=result.pages,
+            total=result.total,
+        )
 
     await callback.message.edit_text(
         text,
@@ -287,12 +298,17 @@ async def pick_offer_cancel(
         text, builder = build_partner_detail(partner)
     else:
         try:
-            links = await link_client.fetch_all()
+            result = await link_client.fetch_page(page=1)
         except HTTPStatusError:
             await callback.answer("Ошибка", show_alert=True)
             return
 
-        text, builder = build_links_list(links)
+        text, builder = build_links_list(
+            result.items,
+            page=result.page,
+            pages=result.pages,
+            total=result.total,
+        )
 
     await callback.message.edit_text(
         text,
@@ -334,8 +350,13 @@ async def pick_offer_confirm(
                 )
                 text, builder = build_partner_detail(partner)
             else:
-                links = await link_client.fetch_all()
-                text, builder = build_links_list(links)
+                result = await link_client.fetch_page(page=1)
+                text, builder = build_links_list(
+                    result.items,
+                    page=result.page,
+                    pages=result.pages,
+                    total=result.total,
+                )
         else:
             await link_client.update(
                 data["l_id"],

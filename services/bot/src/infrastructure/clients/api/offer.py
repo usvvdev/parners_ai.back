@@ -2,14 +2,46 @@
 
 from .base import BaseAPIClient
 
-from ....domain.types import OfferSummary
+from .pagination import (
+    DEFAULT_PAGE_SIZE,
+    parse_paginated_response,
+)
+
+from ....domain.types import OfferSummary, PaginatedResponse
 
 
 class OfferAPIClient(BaseAPIClient):
-    async def fetch_all(self) -> list[OfferSummary]:
-        data = await self._get("/offers")
+    async def fetch_page(
+        self,
+        *,
+        page: int = 1,
+        size: int = DEFAULT_PAGE_SIZE,
+    ) -> PaginatedResponse[OfferSummary]:
+        data = await self._get(
+            "/offers",
+            params={"page": page, "size": size},
+        )
 
-        return [OfferSummary.model_validate(item) for item in data]
+        return parse_paginated_response(data, OfferSummary)
+
+    async def fetch_all(
+        self,
+        *,
+        size: int = DEFAULT_PAGE_SIZE,
+    ) -> list[OfferSummary]:
+        items: list[OfferSummary] = []
+        page = 1
+
+        while True:
+            result = await self.fetch_page(page=page, size=size)
+            items.extend(result.items)
+
+            if page >= result.pages:
+                break
+
+            page += 1
+
+        return items
 
     async def fetch_by_id(self, id: int) -> OfferSummary:
         data = await self._get(f"/offers/{id}")

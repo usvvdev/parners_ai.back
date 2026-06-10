@@ -2,14 +2,46 @@
 
 from .base import BaseAPIClient
 
-from ....domain.types import LinkSummary, LinkDetail
+from .pagination import (
+    DEFAULT_PAGE_SIZE,
+    parse_paginated_response,
+)
+
+from ....domain.types import LinkSummary, LinkDetail, PaginatedResponse
 
 
 class LinkAPIClient(BaseAPIClient):
-    async def fetch_all(self) -> list[LinkSummary]:
-        data = await self._get("/links")
+    async def fetch_page(
+        self,
+        *,
+        page: int = 1,
+        size: int = DEFAULT_PAGE_SIZE,
+    ) -> PaginatedResponse[LinkSummary]:
+        data = await self._get(
+            "/links",
+            params={"page": page, "size": size},
+        )
 
-        return [LinkSummary.model_validate(item) for item in data]
+        return parse_paginated_response(data, LinkSummary)
+
+    async def fetch_all(
+        self,
+        *,
+        size: int = DEFAULT_PAGE_SIZE,
+    ) -> list[LinkSummary]:
+        items: list[LinkSummary] = []
+        page = 1
+
+        while True:
+            result = await self.fetch_page(page=page, size=size)
+            items.extend(result.items)
+
+            if page >= result.pages:
+                break
+
+            page += 1
+
+        return items
 
     async def fetch_by_id(self, id: int) -> LinkDetail:
         data = await self._get(f"/links/{id}")

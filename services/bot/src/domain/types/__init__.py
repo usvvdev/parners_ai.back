@@ -10,10 +10,13 @@ from .partner import (
     PartnerDetail,
 )
 
+from .pagination import PaginatedResponse
+
 __all__: list[str] = [
     "OfferSummary",
     "LinkSummary",
     "LinkDetail",
     "Partner",
     "PartnerDetail",
+    "PaginatedResponse",
 ]

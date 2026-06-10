@@ -6,12 +6,20 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ..callbacks import NavCD, PartnerCD, LinkCD
 
+from ..views.pagination import append_list_pagination
+
 from ..utils import safe, short_url
 
 from ...domain.types import Partner, PartnerDetail
 
 
-def build_partners_list(partners: list[Partner]) -> tuple[str, InlineKeyboardBuilder]:
+def build_partners_list(
+    partners: list[Partner],
+    *,
+    page: int = 1,
+    pages: int = 1,
+    total: int = 0,
+) -> tuple[str, InlineKeyboardBuilder]:
     builder = InlineKeyboardBuilder()
 
     builder.button(
@@ -26,15 +34,28 @@ def build_partners_list(partners: list[Partner]) -> tuple[str, InlineKeyboardBui
             callback_data=PartnerCD(action="view", p_id=partner.id),
         )
 
+    append_list_pagination(
+        builder,
+        level="partners",
+        page=page,
+        pages=pages,
+    )
+
     builder.button(
         text="🏠 Главное меню",
         callback_data=NavCD(level="main"),
     )
     builder.adjust(1)
 
-    text = (
-        "📂 <b>Список партнеров:</b>" if partners else "📂 <b>Партнеров пока нет.</b>"
-    )
+    if total:
+        text = f"📂 <b>Список партнеров</b> ({total})"
+    elif partners:
+        text = "📂 <b>Список партнеров:</b>"
+    else:
+        text = "📂 <b>Партнеров пока нет.</b>"
+
+    if pages > 1:
+        text += f"\nСтраница {page} из {pages}"
 
     return text, builder
 

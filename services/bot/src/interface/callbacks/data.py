@@ -5,6 +5,7 @@ from aiogram.filters.callback_data import CallbackData
 
 class NavCD(CallbackData, prefix="nav"):
     level: str
+    page: int = 1
 
 
 class PartnerCD(CallbackData, prefix="prt"):

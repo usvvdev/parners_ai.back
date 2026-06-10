@@ -35,15 +35,21 @@ router = Router()
 @router.callback_query(NavCD.filter(F.level == "offers"))
 async def show_offers(
     callback: CallbackQuery,
+    callback_data: NavCD,
     offer_client: OfferAPIClient,
 ) -> None:
     try:
-        offers = await offer_client.fetch_all()
+        result = await offer_client.fetch_page(page=callback_data.page)
     except HTTPStatusError:
         await callback.answer("Ошибка загрузки офферов", show_alert=True)
         return
 
-    text, builder = build_offers_list(offers)
+    text, builder = build_offers_list(
+        result.items,
+        page=result.page,
+        pages=result.pages,
+        total=result.total,
+    )
 
     await callback.message.edit_text(
         text,
@@ -159,8 +165,13 @@ async def create_offer_finish(
             link = await link_client.fetch_by_id(l_id)
             text, builder = build_link_detail(link, data.get("p_id", 0))
         else:
-            offers = await offer_client.fetch_all()
-            text, builder = build_offers_list(offers)
+            result = await offer_client.fetch_page(page=1)
+            text, builder = build_offers_list(
+                result.items,
+                page=result.page,
+                pages=result.pages,
+                total=result.total,
+            )
     except HTTPStatusError:
         await edit_menu_message(
             message.bot,
