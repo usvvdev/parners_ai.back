@@ -6,10 +6,10 @@ from sqlalchemy.orm import declared_attr
 
 # application dependencies
 
-from ...base import ETableModel
+from ...base import BaseMySQLModel
 
 
-class LinkModel(ETableModel):
+class LinkModel(BaseMySQLModel):
     __abstract__ = True
 
     @declared_attr

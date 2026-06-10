@@ -9,10 +9,10 @@ from sqlalchemy.orm import (
 
 # application dependencies
 
-from ...base import ETableModel
+from ...base import BaseMySQLModel
 
 
-class BaseModel(ETableModel):
+class BaseModel(BaseMySQLModel):
     __abstract__ = True
 
     id: Mapped[int] = mapped_column(
