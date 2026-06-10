@@ -1,6 +1,6 @@
-from .gemini import Gemini
+from .ai.gemini import Gemini
 
-from .crawler import Crawler
+from .ai.crawler import Crawler
 
 __all__: list[str] = [
     "Crawler",

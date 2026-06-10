@@ -14,11 +14,19 @@ from httpx import HTTPStatusError
 
 from ..callbacks import NavCD, PartnerCD, LinkCD
 
-from ..states import PartnerForm, LinkForm
+from ..states import PartnerForm
 
-from ..utils import safe, short_url, parse_ids
+from ..utils import (
+    init_form_context,
+    edit_menu_message,
+    delete_user_message,
+)
 
-from ...domain.types import PartnerDetail
+from ..views.partners import (
+    build_partners_list,
+    build_partner_detail,
+    build_link_picker,
+)
 
 from ...infrastructure.clients.api import PartnerAPIClient, LinkAPIClient
 
@@ -26,57 +34,26 @@ from ...infrastructure.clients.api import PartnerAPIClient, LinkAPIClient
 router = Router()
 
 
-def _partner_keyboard(partner: PartnerDetail) -> InlineKeyboardBuilder:
-    builder = InlineKeyboardBuilder()
-
-    toggle_text = (
-        "🔕 Выключить трекинг" if partner.is_tracking else "🔔 Включить трекинг"
-    )
-    builder.button(
-        text=toggle_text,
-        callback_data=PartnerCD(
-            action="toggle",
-            p_id=partner.id,
-            is_tracking=int(partner.is_tracking),
-        ),
-    )
-    builder.button(
-        text="➕ Добавить ссылку",
-        callback_data=LinkCD(action="create_for_partner", p_id=partner.id, l_id=0),
-    )
-
-    for link in partner.links:
-        builder.button(
-            text=f"🔗 {short_url(link.link)}",
-            callback_data=LinkCD(action="view", p_id=partner.id, l_id=link.id),
-        )
-
-    builder.button(
-        text="🗑 Удалить партнера",
-        callback_data=PartnerCD(action="delete", p_id=partner.id),
-    )
-    builder.button(
-        text="🔙 Назад к партнерам",
-        callback_data=NavCD(level="partners"),
-    )
-    builder.adjust(1)
-
-    return builder
-
-
-async def _render_partner(
-    callback: CallbackQuery,
-    partner: PartnerDetail,
+async def _render_link_picker(
+    bot,
+    state: FSMContext,
+    link_client: LinkAPIClient,
 ) -> None:
-    builder = _partner_keyboard(partner)
+    data = await state.get_data()
+    links = await link_client.fetch_all()
+    selected_ids = set(data.get("selected_link_ids", []))
 
-    await callback.message.edit_text(
-        f"🏢 <b>Партнер:</b> {safe(partner.wmid)}\n"
-        f"🏷 <b>UTM:</b> {safe(partner.utm_source)}\n"
-        f"📊 <b>Трекинг:</b> {'Активен' if partner.is_tracking else 'Выключен'}\n\n"
-        f"🔗 <b>Ссылки ({len(partner.links)}):</b>",
-        reply_markup=builder.as_markup(),
-        parse_mode="HTML",
+    text, builder = build_link_picker(
+        links,
+        selected_ids,
+        p_id=data["p_id"],
+    )
+
+    await edit_menu_message(
+        bot,
+        state,
+        text,
+        builder.as_markup(),
     )
 
 
@@ -91,28 +68,10 @@ async def show_partners(
         await callback.answer("Ошибка загрузки партнеров", show_alert=True)
         return
 
-    builder = InlineKeyboardBuilder()
-    builder.button(
-        text="➕ Добавить партнера",
-        callback_data=PartnerCD(action="create", p_id=0),
-    )
-
-    for p in partners:
-        status = "🟢" if p.is_tracking else "🔴"
-        builder.button(
-            text=f"{status} {p.wmid}",
-            callback_data=PartnerCD(action="view", p_id=p.id),
-        )
-
-    builder.button(
-        text="🏠 Главное меню",
-        callback_data=NavCD(level="main"),
-    )
-
-    builder.adjust(1)
+    text, builder = build_partners_list(partners)
 
     await callback.message.edit_text(
-        "📂 <b>Список партнеров:</b>" if partners else "📂 <b>Партнеров пока нет.</b>",
+        text,
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -131,7 +90,13 @@ async def show_partner(
         await callback.answer("Партнер не найден", show_alert=True)
         return
 
-    await _render_partner(callback, partner)
+    text, builder = build_partner_detail(partner)
+
+    await callback.message.edit_text(
+        text,
+        reply_markup=builder.as_markup(),
+        parse_mode="HTML",
+    )
     await callback.answer()
 
 
@@ -140,8 +105,22 @@ async def create_partner_start(
     callback: CallbackQuery,
     state: FSMContext,
 ) -> None:
+    await init_form_context(state, callback)
+
+    cancel = InlineKeyboardBuilder()
+    cancel.button(
+        text="❌ Отмена",
+        callback_data=NavCD(level="partners"),
+    )
+    cancel.adjust(1)
+
+    await edit_menu_message(
+        callback.bot,
+        state,
+        "🏢 <b>Введите WMID партнера:</b>",
+        cancel.as_markup(),
+    )
     await state.set_state(PartnerForm.create_wmid)
-    await callback.message.answer("Введите WMID партнера:")
     await callback.answer()
 
 
@@ -150,9 +129,23 @@ async def create_partner_wmid(
     message: Message,
     state: FSMContext,
 ) -> None:
+    await delete_user_message(message)
     await state.update_data(wmid=message.text.strip())
+
+    cancel = InlineKeyboardBuilder()
+    cancel.button(
+        text="❌ Отмена",
+        callback_data=NavCD(level="partners"),
+    )
+    cancel.adjust(1)
+
+    await edit_menu_message(
+        message.bot,
+        state,
+        "🏷 <b>Введите UTM source партнера:</b>",
+        cancel.as_markup(),
+    )
     await state.set_state(PartnerForm.create_utm_source)
-    await message.answer("Введите UTM source партнера:")
 
 
 @router.message(PartnerForm.create_utm_source)
@@ -161,11 +154,12 @@ async def create_partner_finish(
     state: FSMContext,
     partner_client: PartnerAPIClient,
 ) -> None:
+    await delete_user_message(message)
+
     data = await state.get_data()
-    await state.clear()
 
     try:
-        partner = await partner_client.create(
+        await partner_client.create(
             {
                 "wmid": data["wmid"],
                 "utm_source": message.text.strip(),
@@ -173,13 +167,24 @@ async def create_partner_finish(
                 "link_ids": [],
             }
         )
+        partners = await partner_client.fetch_all()
     except HTTPStatusError:
-        await message.answer("Не удалось создать партнера")
+        await edit_menu_message(
+            message.bot,
+            state,
+            "❌ Не удалось создать партнера",
+        )
+        await state.clear()
         return
 
-    await message.answer(
-        f"Партнер создан: <b>{safe(partner.wmid)}</b>", parse_mode="HTML"
+    text, builder = build_partners_list(partners)
+    await edit_menu_message(
+        message.bot,
+        state,
+        text,
+        builder.as_markup(),
     )
+    await state.clear()
 
 
 @router.callback_query(PartnerCD.filter(F.action == "toggle"))
@@ -201,7 +206,13 @@ async def toggle_partner(
 
     status_text = "включен" if new_status else "выключен"
     await callback.answer(f"Трекинг {status_text}")
-    await _render_partner(callback, partner)
+
+    text, builder = build_partner_detail(partner)
+    await callback.message.edit_text(
+        text,
+        reply_markup=builder.as_markup(),
+        parse_mode="HTML",
+    )
 
 
 @router.callback_query(PartnerCD.filter(F.action == "delete"))
@@ -220,150 +231,100 @@ async def delete_partner(
     await show_partners(callback, partner_client)
 
 
-@router.callback_query(LinkCD.filter(F.action == "create_for_partner"))
-async def create_partner_link_start(
+@router.callback_query(PartnerCD.filter(F.action == "edit_links"))
+async def edit_partner_links_start(
     callback: CallbackQuery,
-    callback_data: LinkCD,
+    callback_data: PartnerCD,
     state: FSMContext,
+    partner_client: PartnerAPIClient,
+    link_client: LinkAPIClient,
 ) -> None:
-    await state.update_data(
+    try:
+        partner = await partner_client.fetch_by_id(callback_data.p_id)
+    except HTTPStatusError:
+        await callback.answer("Партнер не найден", show_alert=True)
+        return
+
+    await init_form_context(
+        state,
+        callback,
         p_id=callback_data.p_id,
-        chat_id=callback.message.chat.id,
-        menu_message_id=callback.message.message_id,
+        selected_link_ids=[link.id for link in partner.links],
     )
-
-    prompt = await callback.message.answer("Введите URL новой ссылки:")
-
-    await state.update_data(
-        prompt_message_id=prompt.message_id,
-    )
-
-    await state.set_state(LinkForm.create_url)
+    await state.set_state(PartnerForm.select_links)
+    await _render_link_picker(callback.bot, state, link_client)
     await callback.answer()
 
 
-@router.message(LinkForm.create_url)
-async def create_link_url(
-    message: Message,
-    state: FSMContext,
-) -> None:
-    data = await state.get_data()
-
-    link = message.text.strip()
-
-    await state.update_data(link=link)
-
-    try:
-        await message.delete()
-    except Exception:
-        pass
-
-    await message.bot.edit_message_text(
-        chat_id=data["chat_id"],
-        message_id=data["menu_message_id"],
-        text="Введите ID офферов через запятую или '-' если офферов нет:",
-    )
-
-    await state.set_state(LinkForm.create_offer_ids)
-
-
-@router.message(LinkForm.create_offer_ids)
-async def create_link_finish(
-    message: Message,
+@router.callback_query(LinkCD.filter(F.action == "link_pick_toggle"))
+async def link_pick_toggle(
+    callback: CallbackQuery,
+    callback_data: LinkCD,
     state: FSMContext,
     link_client: LinkAPIClient,
+) -> None:
+    data = await state.get_data()
+    selected_ids = set(data.get("selected_link_ids", []))
+
+    if callback_data.l_id in selected_ids:
+        selected_ids.remove(callback_data.l_id)
+    else:
+        selected_ids.add(callback_data.l_id)
+
+    await state.update_data(selected_link_ids=list(selected_ids))
+    await _render_link_picker(callback.bot, state, link_client)
+    await callback.answer()
+
+
+@router.callback_query(LinkCD.filter(F.action == "link_pick_cancel"))
+async def link_pick_cancel(
+    callback: CallbackQuery,
+    callback_data: LinkCD,
+    state: FSMContext,
+    partner_client: PartnerAPIClient,
+) -> None:
+    await state.clear()
+
+    try:
+        partner = await partner_client.fetch_by_id(callback_data.p_id)
+    except HTTPStatusError:
+        await callback.answer("Ошибка", show_alert=True)
+        return
+
+    text, builder = build_partner_detail(partner)
+    await callback.message.edit_text(
+        text,
+        reply_markup=builder.as_markup(),
+        parse_mode="HTML",
+    )
+    await callback.answer()
+
+
+@router.callback_query(LinkCD.filter(F.action == "link_pick_confirm"))
+async def link_pick_confirm(
+    callback: CallbackQuery,
+    callback_data: LinkCD,
+    state: FSMContext,
     partner_client: PartnerAPIClient,
 ) -> None:
     data = await state.get_data()
+    link_ids = data.get("selected_link_ids", [])
 
     try:
-        offer_ids = parse_ids(message.text)
-    except ValueError:
-        await message.answer("ID офферов должны быть числами через запятую")
+        partner = await partner_client.update(
+            callback_data.p_id,
+            {"link_ids": link_ids},
+        )
+    except HTTPStatusError:
+        await callback.answer("Не удалось обновить ссылки", show_alert=True)
         return
 
-    # удаляем сообщение пользователя
-    try:
-        await message.delete()
-    except Exception:
-        pass
+    await state.clear()
 
-    try:
-        link = await link_client.create(
-            {
-                "link": data["link"],
-                "is_active": True,
-                "offer_ids": offer_ids,
-            }
-        )
-
-        p_id = data.get("p_id")
-
-        # =========================
-        # ВАРИАНТ 1: создание из партнёра
-        # =========================
-        if p_id:
-            partner = await partner_client.fetch_by_id(p_id)
-
-            # обновляем привязку ссылки к партнеру
-            link_ids = [l.id for l in partner.links]
-
-            await partner_client.update(
-                p_id,
-                {"link_ids": [*link_ids, link.id]},
-            )
-
-            # 🔥 ВАЖНО: просто перерисовываем ТЕКУЩЕЕ сообщение
-            # (берём callback-логику через fake render)
-            builder = _partner_keyboard(partner)
-
-            await message.answer(
-                f"🏢 <b>Партнер:</b> {safe(partner.wmid)}\n"
-                f"🏷 <b>UTM:</b> {safe(partner.utm_source)}\n"
-                f"📊 <b>Трекинг:</b> {'Активен' if partner.is_tracking else 'Выключен'}\n\n"
-                f"🔗 <b>Ссылки ({len(partner.links)}):</b>",
-                reply_markup=builder.as_markup(),
-                parse_mode="HTML",
-            )
-
-        # =========================
-        # ВАРИАНТ 2: обычные ссылки
-        # =========================
-        else:
-            links = await link_client.fetch_all()
-
-            builder = InlineKeyboardBuilder()
-
-            builder.button(
-                text="➕ Добавить ссылку",
-                callback_data=LinkCD(action="create", p_id=0, l_id=0),
-            )
-
-            for l in links:
-                builder.button(
-                    text=f"🔗 {short_url(l.link)}",
-                    callback_data=LinkCD(
-                        action="view",
-                        p_id=0,
-                        l_id=l.id,
-                    ),
-                )
-
-            builder.button(
-                text="🏠 Главное меню",
-                callback_data=NavCD(level="main"),
-            )
-
-            builder.adjust(1)
-
-            await message.answer(
-                "🔗 <b>Список ссылок:</b>" if links else "🔗 <b>Ссылок пока нет.</b>",
-                reply_markup=builder.as_markup(),
-                parse_mode="HTML",
-            )
-
-    except HTTPStatusError:
-        await message.answer("Не удалось создать ссылку")
-
-    finally:
-        await state.clear()
+    text, builder = build_partner_detail(partner)
+    await callback.message.edit_text(
+        text,
+        reply_markup=builder.as_markup(),
+        parse_mode="HTML",
+    )
+    await callback.answer("Ссылки обновлены")

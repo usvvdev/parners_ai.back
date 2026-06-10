@@ -10,11 +10,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from libs.core.config import TApplicationConfig
 
-from ...domain.types import PartnerResult
+from ....domain.types import PartnerResult
 
 from libs.core.constants import SYSTEM_PROMPT
 
-from ...domain.protocols import IGeminiProtocol
+from ....domain.protocols import IGeminiProtocol
 
 from libs.domain.types._types.shared import ImagePayload
 

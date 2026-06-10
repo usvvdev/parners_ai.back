@@ -16,7 +16,15 @@ from ..callbacks import NavCD, LinkCD, OfferCD
 
 from ..states import OfferForm
 
-from ..utils import safe
+from ..utils import (
+    init_form_context,
+    edit_menu_message,
+    delete_user_message,
+)
+
+from ..views.offers import build_offers_list, build_offer_detail
+
+from ..views.links import build_link_detail
 
 from ...infrastructure.clients.api import OfferAPIClient, LinkAPIClient
 
@@ -35,27 +43,10 @@ async def show_offers(
         await callback.answer("Ошибка загрузки офферов", show_alert=True)
         return
 
-    builder = InlineKeyboardBuilder()
-    builder.button(
-        text="➕ Добавить оффер",
-        callback_data=OfferCD(action="create", p_id=0, l_id=0, o_id=0),
-    )
-
-    for offer in offers:
-        builder.button(
-            text=f"🎁 {offer.title}",
-            callback_data=OfferCD(action="view", p_id=0, l_id=0, o_id=offer.id),
-        )
-
-    builder.button(
-        text="🏠 Главное меню",
-        callback_data=NavCD(level="main"),
-    )
-
-    builder.adjust(1)
+    text, builder = build_offers_list(offers)
 
     await callback.message.edit_text(
-        "🎁 <b>Список офферов:</b>" if offers else "🎁 <b>Офферов пока нет.</b>",
+        text,
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -74,46 +65,49 @@ async def show_offer(
         await callback.answer("Оффер не найден", show_alert=True)
         return
 
-    builder = InlineKeyboardBuilder()
-
-    builder.button(
-        text="✏️ Изменить название",
-        callback_data=OfferCD(
-            action="edit_title",
-            p_id=callback_data.p_id,
-            l_id=callback_data.l_id,
-            o_id=offer.id,
-        ),
+    text, builder = build_offer_detail(
+        offer,
+        p_id=callback_data.p_id,
+        l_id=callback_data.l_id,
     )
-    builder.button(
-        text="🗑 Удалить оффер",
-        callback_data=OfferCD(
-            action="delete",
-            p_id=callback_data.p_id,
-            l_id=callback_data.l_id,
-            o_id=offer.id,
-        ),
-    )
-    builder.button(
-        text="🔙 Назад к ссылке" if callback_data.l_id else "🔙 Назад к офферам",
-        callback_data=(
-            LinkCD(
-                action="view",
-                p_id=callback_data.p_id,
-                l_id=callback_data.l_id,
-            )
-            if callback_data.l_id
-            else NavCD(level="offers")
-        ),
-    )
-    builder.adjust(1)
 
     await callback.message.edit_text(
-        f"🎁 <b>Оффер:</b> {safe(offer.title)}\n🆔 <b>ID:</b> {offer.id}",
+        text,
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
     await callback.answer()
+
+
+async def _start_offer_create(
+    callback: CallbackQuery,
+    state: FSMContext,
+    p_id: int,
+    l_id: int,
+) -> None:
+    await init_form_context(
+        state,
+        callback,
+        p_id=p_id,
+        l_id=l_id,
+    )
+
+    if l_id:
+        cancel_data = LinkCD(action="view", p_id=p_id, l_id=l_id)
+    else:
+        cancel_data = NavCD(level="offers")
+
+    cancel = InlineKeyboardBuilder()
+    cancel.button(text="❌ Отмена", callback_data=cancel_data)
+    cancel.adjust(1)
+
+    await edit_menu_message(
+        callback.bot,
+        state,
+        "🎁 <b>Введите название нового оффера:</b>",
+        cancel.as_markup(),
+    )
+    await state.set_state(OfferForm.create_title)
 
 
 @router.callback_query(OfferCD.filter(F.action == "create"))
@@ -121,8 +115,7 @@ async def create_offer_start(
     callback: CallbackQuery,
     state: FSMContext,
 ) -> None:
-    await state.set_state(OfferForm.create_title)
-    await callback.message.answer("Введите название нового оффера:")
+    await _start_offer_create(callback, state, p_id=0, l_id=0)
     await callback.answer()
 
 
@@ -132,9 +125,12 @@ async def create_offer_for_link_start(
     callback_data: OfferCD,
     state: FSMContext,
 ) -> None:
-    await state.update_data(p_id=callback_data.p_id, l_id=callback_data.l_id)
-    await state.set_state(OfferForm.create_title)
-    await callback.message.answer("Введите название нового оффера:")
+    await _start_offer_create(
+        callback,
+        state,
+        p_id=callback_data.p_id,
+        l_id=callback_data.l_id,
+    )
     await callback.answer()
 
 
@@ -145,13 +141,14 @@ async def create_offer_finish(
     offer_client: OfferAPIClient,
     link_client: LinkAPIClient,
 ) -> None:
+    await delete_user_message(message)
+
     data = await state.get_data()
-    await state.clear()
 
     try:
         offer = await offer_client.create({"title": message.text.strip()})
 
-        l_id = data.get("l_id")
+        l_id = data.get("l_id", 0)
         if l_id:
             link = await link_client.fetch_by_id(l_id)
             offer_ids = [item.id for item in link.offers]
@@ -159,11 +156,27 @@ async def create_offer_finish(
                 l_id,
                 {"offer_ids": [*offer_ids, offer.id]},
             )
+            link = await link_client.fetch_by_id(l_id)
+            text, builder = build_link_detail(link, data.get("p_id", 0))
+        else:
+            offers = await offer_client.fetch_all()
+            text, builder = build_offers_list(offers)
     except HTTPStatusError:
-        await message.answer("Не удалось создать или привязать оффер")
+        await edit_menu_message(
+            message.bot,
+            state,
+            "❌ Не удалось создать оффер",
+        )
+        await state.clear()
         return
 
-    await message.answer(f"Оффер создан: <b>{safe(offer.title)}</b>", parse_mode="HTML")
+    await edit_menu_message(
+        message.bot,
+        state,
+        text,
+        builder.as_markup(),
+    )
+    await state.clear()
 
 
 @router.callback_query(OfferCD.filter(F.action == "edit_title"))
@@ -172,9 +185,33 @@ async def edit_offer_title_start(
     callback_data: OfferCD,
     state: FSMContext,
 ) -> None:
-    await state.update_data(o_id=callback_data.o_id)
+    await init_form_context(
+        state,
+        callback,
+        o_id=callback_data.o_id,
+        p_id=callback_data.p_id,
+        l_id=callback_data.l_id,
+    )
+
+    cancel = InlineKeyboardBuilder()
+    cancel.button(
+        text="❌ Отмена",
+        callback_data=OfferCD(
+            action="view",
+            p_id=callback_data.p_id,
+            l_id=callback_data.l_id,
+            o_id=callback_data.o_id,
+        ),
+    )
+    cancel.adjust(1)
+
+    await edit_menu_message(
+        callback.bot,
+        state,
+        "🎁 <b>Введите новое название оффера:</b>",
+        cancel.as_markup(),
+    )
     await state.set_state(OfferForm.edit_title)
-    await callback.message.answer("Введите новое название оффера:")
     await callback.answer()
 
 
@@ -184,16 +221,36 @@ async def edit_offer_title_finish(
     state: FSMContext,
     offer_client: OfferAPIClient,
 ) -> None:
+    await delete_user_message(message)
+
     data = await state.get_data()
-    await state.clear()
 
     try:
-        await offer_client.update(data["o_id"], {"title": message.text.strip()})
+        offer = await offer_client.update(
+            data["o_id"],
+            {"title": message.text.strip()},
+        )
     except HTTPStatusError:
-        await message.answer("Не удалось обновить оффер")
+        await edit_menu_message(
+            message.bot,
+            state,
+            "❌ Не удалось обновить оффер",
+        )
+        await state.clear()
         return
 
-    await message.answer("Оффер обновлен")
+    text, builder = build_offer_detail(
+        offer,
+        p_id=data.get("p_id", 0),
+        l_id=data.get("l_id", 0),
+    )
+    await edit_menu_message(
+        message.bot,
+        state,
+        text,
+        builder.as_markup(),
+    )
+    await state.clear()
 
 
 @router.callback_query(OfferCD.filter(F.action == "delete"))
@@ -201,6 +258,7 @@ async def delete_offer(
     callback: CallbackQuery,
     callback_data: OfferCD,
     offer_client: OfferAPIClient,
+    link_client: LinkAPIClient,
 ) -> None:
     try:
         await offer_client.delete(callback_data.o_id)
@@ -209,7 +267,19 @@ async def delete_offer(
         return
 
     await callback.answer("Оффер удален")
+
     if callback_data.l_id:
-        await callback.message.edit_text("Оффер удален. Вернитесь к ссылке из меню.")
+        try:
+            link = await link_client.fetch_by_id(callback_data.l_id)
+        except HTTPStatusError:
+            await callback.message.edit_text("Оффер удален.")
+            return
+
+        text, builder = build_link_detail(link, callback_data.p_id)
+        await callback.message.edit_text(
+            text,
+            reply_markup=builder.as_markup(),
+            parse_mode="HTML",
+        )
     else:
         await show_offers(callback, offer_client)

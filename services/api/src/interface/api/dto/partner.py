@@ -62,7 +62,7 @@ class InsertPartner(
 
 
 class UpdatePartner(BasePartnerFields):
-    link_ids: list[int] = Field(
-        default_factory=list,
+    link_ids: Optional[list[int]] = Field(
+        default=None,
         description="ID офферов, относящихся к партнеру",
     )

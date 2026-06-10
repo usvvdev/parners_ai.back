@@ -14,6 +14,6 @@ class OfferAPIService:
         self,
     ) -> list[Any]:
         data = await self._api_client.fetch(
-            "/offers",
+            "/links",
         )
         return [LinkDTO.model_validate(item) for item in data]

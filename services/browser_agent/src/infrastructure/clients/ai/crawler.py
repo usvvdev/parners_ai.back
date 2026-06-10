@@ -10,7 +10,7 @@ from crawl4ai import (
 
 # application dependencies
 
-from ...domain.protocols import ICrawlerProtocol
+from ....domain.protocols import ICrawlerProtocol
 
 
 class Crawler(
