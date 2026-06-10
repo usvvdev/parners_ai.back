@@ -19,6 +19,11 @@ class BasePartnerFields(BaseModelType):
         description="Активность оффера",
     )
 
+    is_selected: bool = Field(
+        default=False,
+        description="Избранный партнер",
+    )
+
 
 class PartnerIdentity(BaseModelType):
     wmid: str = Field(
