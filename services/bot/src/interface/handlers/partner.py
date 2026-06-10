@@ -25,6 +25,7 @@ from ..utils import (
 from ..views.partners import (
     build_partners_list,
     build_partner_detail,
+    build_partner_settings,
     build_link_picker,
 )
 
@@ -170,6 +171,7 @@ async def create_partner_finish(
                 "wmid": data["wmid"],
                 "utm_source": message.text.strip(),
                 "is_tracking": True,
+                "is_selected": False,
                 "link_ids": [],
             }
         )
@@ -198,8 +200,30 @@ async def create_partner_finish(
     await state.clear()
 
 
-@router.callback_query(PartnerCD.filter(F.action == "toggle"))
-async def toggle_partner(
+@router.callback_query(PartnerCD.filter(F.action == "settings"))
+async def show_partner_settings(
+    callback: CallbackQuery,
+    callback_data: PartnerCD,
+    partner_client: PartnerAPIClient,
+) -> None:
+    try:
+        partner = await partner_client.fetch_by_id(callback_data.p_id)
+    except HTTPStatusError:
+        await callback.answer("Партнер не найден", show_alert=True)
+        return
+
+    text, builder = build_partner_settings(partner)
+
+    await callback.message.edit_text(
+        text,
+        reply_markup=builder.as_markup(),
+        parse_mode="HTML",
+    )
+    await callback.answer()
+
+
+@router.callback_query(PartnerCD.filter(F.action == "toggle_tracking"))
+async def toggle_partner_tracking(
     callback: CallbackQuery,
     callback_data: PartnerCD,
     partner_client: PartnerAPIClient,
@@ -212,13 +236,41 @@ async def toggle_partner(
             {"is_tracking": new_status},
         )
     except HTTPStatusError:
-        await callback.answer("Ошибка обновления статуса", show_alert=True)
+        await callback.answer("Ошибка обновления трекинга", show_alert=True)
         return
 
     status_text = "включен" if new_status else "выключен"
     await callback.answer(f"Трекинг {status_text}")
 
-    text, builder = build_partner_detail(partner)
+    text, builder = build_partner_settings(partner)
+    await callback.message.edit_text(
+        text,
+        reply_markup=builder.as_markup(),
+        parse_mode="HTML",
+    )
+
+
+@router.callback_query(PartnerCD.filter(F.action == "toggle_selected"))
+async def toggle_partner_selected(
+    callback: CallbackQuery,
+    callback_data: PartnerCD,
+    partner_client: PartnerAPIClient,
+) -> None:
+    new_status = not bool(callback_data.is_selected)
+
+    try:
+        partner = await partner_client.update(
+            callback_data.p_id,
+            {"is_selected": new_status},
+        )
+    except HTTPStatusError:
+        await callback.answer("Ошибка обновления избранного", show_alert=True)
+        return
+
+    status_text = "добавлен в избранное" if new_status else "убран из избранного"
+    await callback.answer(status_text)
+
+    text, builder = build_partner_settings(partner)
     await callback.message.edit_text(
         text,
         reply_markup=builder.as_markup(),

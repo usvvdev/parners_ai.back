@@ -29,9 +29,9 @@ def build_partners_list(
 
     for partner in partners:
         status = "🟢" if partner.is_tracking else "🔴"
-        selected = "⭐" if partner.is_selected else ""
+        favorite = "⭐ " if partner.is_selected else ""
         builder.button(
-            text=f"{selected} {status} {partner.wmid}",
+            text=f"{favorite}{status} {partner.wmid}",
             callback_data=PartnerCD(action="view", p_id=partner.id),
         )
 
@@ -64,15 +64,13 @@ def build_partners_list(
 def build_partner_detail(partner: PartnerDetail) -> tuple[str, InlineKeyboardBuilder]:
     builder = InlineKeyboardBuilder()
 
-    toggle_text = (
-        "🔕 Выключить трекинг" if partner.is_tracking else "🔔 Включить трекинг"
-    )
     builder.button(
-        text=toggle_text,
+        text="⚙️ Статус и избранное",
         callback_data=PartnerCD(
-            action="toggle",
+            action="settings",
             p_id=partner.id,
             is_tracking=int(partner.is_tracking),
+            is_selected=int(partner.is_selected),
         ),
     )
     builder.button(
@@ -103,8 +101,53 @@ def build_partner_detail(partner: PartnerDetail) -> tuple[str, InlineKeyboardBui
     text = (
         f"🏢 <b>Партнер:</b> {safe(partner.wmid)}\n"
         f"🏷 <b>UTM:</b> {safe(partner.utm_source)}\n"
+        f"⭐ <b>Избранное:</b> {'Да' if partner.is_selected else 'Нет'}\n"
         f"📊 <b>Трекинг:</b> {'Активен' if partner.is_tracking else 'Выключен'}\n\n"
         f"🔗 <b>Ссылки ({len(partner.links)}):</b>"
+    )
+
+    return text, builder
+
+
+def build_partner_settings(partner: PartnerDetail) -> tuple[str, InlineKeyboardBuilder]:
+    builder = InlineKeyboardBuilder()
+
+    favorite_text = (
+        "⭐ Убрать из избранного" if partner.is_selected else "☆ Добавить в избранное"
+    )
+    builder.button(
+        text=favorite_text,
+        callback_data=PartnerCD(
+            action="toggle_selected",
+            p_id=partner.id,
+            is_tracking=int(partner.is_tracking),
+            is_selected=int(partner.is_selected),
+        ),
+    )
+
+    tracking_text = (
+        "🔕 Выключить трекинг" if partner.is_tracking else "🔔 Включить трекинг"
+    )
+    builder.button(
+        text=tracking_text,
+        callback_data=PartnerCD(
+            action="toggle_tracking",
+            p_id=partner.id,
+            is_tracking=int(partner.is_tracking),
+            is_selected=int(partner.is_selected),
+        ),
+    )
+
+    builder.button(
+        text="🔙 Назад к партнеру",
+        callback_data=PartnerCD(action="view", p_id=partner.id),
+    )
+    builder.adjust(1)
+
+    text = (
+        f"⚙️ <b>Настройки партнера:</b> {safe(partner.wmid)}\n\n"
+        f"⭐ <b>Избранное:</b> {'Да' if partner.is_selected else 'Нет'}\n"
+        f"📊 <b>Трекинг:</b> {'Активен' if partner.is_tracking else 'Выключен'}"
     )
 
     return text, builder

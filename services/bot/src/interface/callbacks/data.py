@@ -12,6 +12,7 @@ class PartnerCD(CallbackData, prefix="prt"):
     action: str
     p_id: int
     is_tracking: int = 0
+    is_selected: int = 0
 
 
 class LinkCD(CallbackData, prefix="lnk"):
