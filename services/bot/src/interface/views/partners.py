@@ -74,10 +74,6 @@ def build_partner_detail(partner: PartnerDetail) -> tuple[str, InlineKeyboardBui
         ),
     )
     builder.button(
-        text="➕ Добавить ссылку",
-        callback_data=LinkCD(action="create_for_partner", p_id=partner.id, l_id=0),
-    )
-    builder.button(
         text="✏️ Изменить ссылки",
         callback_data=PartnerCD(action="edit_links", p_id=partner.id),
     )
