@@ -499,4 +499,4 @@ async def delete_link(
             parse_mode="HTML",
         )
     else:
-        await show_links(callback, link_client)
+        await show_links(callback, NavCD(level="links"), link_client)

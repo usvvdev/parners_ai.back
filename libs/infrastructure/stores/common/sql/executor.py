@@ -230,7 +230,10 @@ class BaseSQLExecutor:
                 session=opened_session,
             )
 
-            for field, value in data.dump.items():
+            for field, value in orm_model_dump(
+                data,
+                self._table.__table__,
+            ).items():
                 setattr(entity, field, value)
 
             await self._before_commit(

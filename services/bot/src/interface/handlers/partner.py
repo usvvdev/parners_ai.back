@@ -291,7 +291,7 @@ async def delete_partner(
         return
 
     await callback.answer("Партнер удален")
-    await show_partners(callback, partner_client)
+    await show_partners(callback, NavCD(level="partners"), partner_client)
 
 
 @router.callback_query(PartnerCD.filter(F.action == "edit_links"))

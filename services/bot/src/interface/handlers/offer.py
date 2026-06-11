@@ -293,4 +293,4 @@ async def delete_offer(
             parse_mode="HTML",
         )
     else:
-        await show_offers(callback, offer_client)
+        await show_offers(callback, NavCD(level="offers"), offer_client)
