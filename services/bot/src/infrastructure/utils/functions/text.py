@@ -6,7 +6,7 @@ def safe(value: str) -> str:
 
 
 def short_url(value: str, limit: int = 35) -> str:
-    url = value.replace("https://", "").replace("http://", "")
+    url = value.replace("https://", "").replace("http://", "").rstrip("/")
 
     return f"{url[:limit]}..." if len(url) > limit else url
 
