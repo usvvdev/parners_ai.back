@@ -34,7 +34,7 @@ class APIOptions(BaseModelType):
     @computed_field
     @property
     def base_url(self) -> str:
-        return f"{self.host}:{self.port}{self.prefix}"
+        return f"https://{self.host}:{self.port}{self.prefix}"
 
 
 class TelegramOptions(BaseModelType):
