@@ -19,6 +19,13 @@ from .link import (
     UpdateLink,
 )
 
+from .utm_source import (
+    FetchUTMSource,
+    FetchUTMSources,
+    InsertUTMSource,
+    UpdateUTMSource,
+)
+
 from .offer_position import (
     FetchOfferPosition,
     InsertOfferPosition,
@@ -38,6 +45,10 @@ __all__: list[str] = [
     "FetchLinks",
     "InsertLink",
     "UpdateLink",
+    "FetchUTMSource",
+    "FetchUTMSources",
+    "InsertUTMSource",
+    "UpdateUTMSource",
     "FetchOfferPosition",
     "InsertOfferPosition",
     "FiltersOfferPosition",

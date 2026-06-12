@@ -4,6 +4,8 @@ from pydantic import Field
 
 from typing import Optional
 
+from datetime import datetime
+
 from fastapi_pagination import Page
 
 # application dependencies
@@ -33,7 +35,7 @@ class PartnerIdentity(BaseModelType):
         description="Название оффера",
     )
 
-    utm_source: str = Field(
+    utm_source_id: int = Field(
         ...,
         description="Название оффера",
     )
@@ -72,4 +74,9 @@ class UpdatePartner(BasePartnerFields):
     link_ids: Optional[list[int]] = Field(
         default=None,
         description="ID офферов, относящихся к партнеру",
+    )
+
+    updated_at: datetime = Field(
+        default=datetime.now(),
+        description="Текущее время обновления",
     )

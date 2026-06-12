@@ -21,6 +21,7 @@ from .src.interface.api.routes import (
     offer_router,
     partner_router,
     link_router,
+    utm_source_router,
     offer_position_router,
 )
 
@@ -77,6 +78,7 @@ def create_app() -> FastAPI:
             partner_router,
             link_router,
             offer_router,
+            utm_source_router,
             offer_position_router,
         ]
     )

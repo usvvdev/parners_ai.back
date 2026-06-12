@@ -2,7 +2,12 @@
 
 from typing import Optional
 
-from pydantic import Field, field_validator
+from pydantic import (
+    Field,
+    field_validator,
+)
+
+from datetime import datetime
 
 from fastapi_pagination import Page
 
@@ -74,4 +79,9 @@ class UpdateLink(BaseLinkFields):
     offer_ids: Optional[list[int]] = Field(
         default=None,
         description="ID офферов, относящихся к партнеру",
+    )
+
+    updated_at: datetime = Field(
+        default=datetime.now(),
+        description="Текущее время обновления",
     )

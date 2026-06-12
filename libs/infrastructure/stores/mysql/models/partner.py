@@ -3,6 +3,8 @@
 from sqlalchemy import (
     String,
     Index,
+    Integer,
+    ForeignKey,
 )
 
 from sqlalchemy.orm import (
@@ -34,8 +36,13 @@ class Partners(
         nullable=False,
     )
 
-    utm_source: Mapped[str] = mapped_column(
-        String(64),
+    utm_source_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey(
+            "utm_sources.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
         nullable=False,
     )
 
