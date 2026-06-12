@@ -23,6 +23,8 @@ from ..views import OfferRepositoryView
 
 from libs.core.constants import DEFAULT_LIST_PARAMS
 
+from ....infrastructure.utils.functions import verify_token
+
 from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import OfferRepositoryViewFactory
@@ -43,6 +45,9 @@ async def fetch_offers(
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> Page[FetchOffers]:
     data = await view.fetch()
 
@@ -57,6 +62,9 @@ async def create_offer(
     data: InsertOffer,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> FetchOffer:
     return await view.insert(
@@ -73,6 +81,9 @@ async def fetch_offer_by_id(
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchOffer:
     return await view.fetch_by_id(
         id=id,
@@ -86,6 +97,9 @@ async def update_offer(
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchOffer:
     return await view.update(
         id=id,
@@ -98,6 +112,9 @@ async def delete_offer(
     id: int,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> None:
     return await view.delete(

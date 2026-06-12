@@ -23,6 +23,8 @@ from ..views import LinkRepositoryView
 
 from libs.core.constants import DEFAULT_LIST_PARAMS
 
+from ....infrastructure.utils.functions import verify_token
+
 from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import LinkRepositoryViewFactory
@@ -43,6 +45,9 @@ async def fetch_links(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> Page[FetchLinks]:
     data = await view.fetch()
 
@@ -61,6 +66,9 @@ async def fetch_link_by_id(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchLink:
     return await view.fetch_by_id(
         id=id,
@@ -73,6 +81,9 @@ async def create_link(
     data: InsertLink,
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> FetchLink:
     return await view.insert(
@@ -87,6 +98,9 @@ async def update_link(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchLink:
     return await view.update(
         id=id,
@@ -100,7 +114,10 @@ async def delete_link(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
-):
+    _: str = Depends(
+        verify_token,
+    ),
+) -> None:
     return await view.delete(
         id=id,
     )

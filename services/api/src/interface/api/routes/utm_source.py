@@ -23,6 +23,8 @@ from ..views import UTMSourceRepositoryView
 
 from libs.core.constants import DEFAULT_LIST_PARAMS
 
+from ....infrastructure.utils.functions import verify_token
+
 from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import UTMSourceRepositoryViewFactory
@@ -43,12 +45,14 @@ async def fetch_utm_sources(
     view: UTMSourceRepositoryView = Depends(
         UTMSourceRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> Page[FetchUTMSources]:
     data = await view.fetch()
-
     return paginate(
         data,
-        params=params,
+        params=DEFAULT_LIST_PARAMS,
     )
 
 
@@ -57,6 +61,9 @@ async def create_utm_source(
     data: InsertUTMSource,
     view: UTMSourceRepositoryView = Depends(
         UTMSourceRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> FetchUTMSource:
     return await view.insert(
@@ -73,6 +80,9 @@ async def fetch_utm_source_by_id(
     view: UTMSourceRepositoryView = Depends(
         UTMSourceRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchUTMSource:
     return await view.fetch_by_id(
         id=id,
@@ -86,6 +96,9 @@ async def update_utm_source(
     view: UTMSourceRepositoryView = Depends(
         UTMSourceRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchUTMSource:
     return await view.update(
         id=id,
@@ -98,6 +111,9 @@ async def delete_utm_source(
     id: int,
     view: UTMSourceRepositoryView = Depends(
         UTMSourceRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> None:
     return await view.delete(

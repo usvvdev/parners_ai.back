@@ -23,6 +23,8 @@ from ..views import PartnerRepositoryView
 
 from libs.core.constants import DEFAULT_LIST_PARAMS
 
+from ....infrastructure.utils.functions import verify_token
+
 from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import PartnerRepositoryViewFactory
@@ -43,6 +45,9 @@ async def fetch_offers(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> Page[FetchPartner]:
     data = await view.fetch()
 
@@ -61,6 +66,9 @@ async def fetch_partner(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchPartners:
     return await view.fetch_by_id(
         id=id,
@@ -76,6 +84,9 @@ async def create_partner(
     data: InsertPartner,
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> FetchPartners:
     return await view.insert(
@@ -93,6 +104,9 @@ async def update_partner(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchPartners:
     return await view.update(
         id=id,
@@ -105,6 +119,9 @@ async def delete_partner(
     id: int,
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> None:
     return await view.delete(

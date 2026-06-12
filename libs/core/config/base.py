@@ -72,10 +72,16 @@ class ApplicationBaseConfig(
         description="Tuple of logger names to configure",
     )
 
-    # proxy pass
+    # Proxy URL
     proxy_url: Optional[str] = Field(
         default=None,
         description="Proxy url",
+    )
+
+    # Secret key(like JWT auth)
+    access_token: Optional[str] = Field(
+        default=None,
+        description="Secret key for the application",
     )
 
     @classmethod

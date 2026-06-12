@@ -11,6 +11,8 @@ from ..dto import (
 
 from ..views import OfferPositionRepositoryView
 
+from ....infrastructure.utils.functions import verify_token
+
 from ....infrastructure.factories.api.view import OfferPositionRepositoryViewFactory
 
 
@@ -29,6 +31,9 @@ async def fetch(
     view: OfferPositionRepositoryView = Depends(
         OfferPositionRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> list[FetchOfferPosition]:
     return await view.fetch(
         filters=filters,
@@ -43,6 +48,9 @@ async def create_offer_position(
     data: InsertOfferPosition,
     view: OfferPositionRepositoryView = Depends(
         OfferPositionRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> FetchOfferPosition:
     return await view.insert(

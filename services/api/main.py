@@ -27,13 +27,13 @@ from .src.interface.api.routes import (
 
 from libs.domain.types.enums.config import AppMode
 
-from libs.domain.utils.exception_handler import app_exception_handler
-
 from .src.interface.routing import ApplicationRouter
 
 from libs.domain.errors.base import BaseApplicationException
 
 from .src.infrastructure.utils.functions import run_migrations
+
+from libs.domain.utils.exception_handler import app_exception_handler
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
