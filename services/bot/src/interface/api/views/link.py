@@ -78,8 +78,8 @@ class LinkView:
 
         text = build_list_text(
             data,
-            title="🔗 <b>Список ссылок</b>",
-            empty="🔗 <b>Ссылок пока нет.</b>",
+            title="🔗 <b>Список витрин</b>",
+            empty="🔗 <b>Витрин пока нет.</b>",
         )
 
         return text, builder

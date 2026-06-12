@@ -19,7 +19,7 @@ class MainView:
             callback_data=NavigationCD(level=NavLevel.PARTNERS),
         )
         builder.button(
-            text="🔗 Список ссылок",
+            text="🔗 Список витрин",
             callback_data=NavigationCD(level=NavLevel.LINKS),
         )
         builder.button(
