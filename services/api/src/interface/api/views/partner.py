@@ -11,6 +11,8 @@ from ..dto import (
     UpdatePartner,
 )
 
+from ....infrastructure.utils.functions import set_custom_pagination
+
 from libs.infrastructure.stores.mysql.repositories import PartnerRepository
 
 
@@ -33,7 +35,7 @@ class PartnerRepositoryView:
     ) -> FetchPartners:
         partner, links = await self._repository.fetch_one(
             id=id,
-            params=params,
+            params=params or set_custom_pagination(),
         )
         return FetchPartners(
             **partner.__dict__,
