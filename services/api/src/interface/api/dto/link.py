@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from fastapi_pagination import Page
 
@@ -33,7 +33,19 @@ class FetchLinks(
     LinkIdentity,
     BaseFetch,
 ):
-    pass
+    offers: Optional[list[FetchOffers | str]] = Field(
+        default=None,
+        description="Список офферов, связанных с данной ссылкой",
+    )
+
+    @field_validator("offers", mode="after")
+    def validate_offers(
+        cls,
+        value: Optional[list[FetchOffers]],
+    ) -> list[str] | None:
+        if value is not None:
+            return [item.symbol for item in value]
+        return value
 
 
 class FetchLink(

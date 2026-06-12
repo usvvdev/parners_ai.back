@@ -7,6 +7,8 @@ from typing import (
 
 from sqlalchemy import select
 
+from sqlalchemy.orm import selectinload
+
 from fastapi_pagination import Params
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,6 +107,8 @@ class LinkRepository(MySQLRepository[Links]):
         return await self._fetch_many(
             query=select(
                 self._table,
+            ).options(
+                selectinload(self._table.offers),
             ),
             session=session,
         )
