@@ -82,4 +82,4 @@ docker-compose.override.yml
 config.json
 
 # Migrations
-*/migrations/versions
+*/migrations/versions/
