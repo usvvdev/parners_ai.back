@@ -148,8 +148,12 @@ class LinkService:
 
         return offer_ids
 
-    async def fetch_all_offers(self) -> list[FetchOffer]:
-        return await self._offer_client.fetch_all()
+    async def fetch_offers(
+        self,
+        *,
+        page: int = 1,
+    ) -> PaginatedResponse[FetchOffer]:
+        return await self._offer_client.fetch_page(page=page)
 
     async def _fetch_all_partner_link_ids(
         self,

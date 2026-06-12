@@ -57,11 +57,16 @@ async def _render_link_picker(
     bot,
     state: FSMContext,
     partner_service: PartnerService,
+    *,
+    page: int | None = None,
 ) -> None:
     data = await state.get_data()
+    current_page = page if page is not None else data.get("picker_page", 1)
     selected_ids = set(data.get("selected_link_ids", []))
 
-    links = await partner_service.fetch_all_links()
+    await state.update_data(picker_page=current_page)
+
+    links = await partner_service.fetch_links(page=current_page)
     text, builder = PartnerView.link_picker(
         links,
         selected_ids,
@@ -233,6 +238,8 @@ async def edit_partner_links_start(
         callback,
         p_id=callback_data.p_id,
         selected_link_ids=selected_link_ids,
+        detail_page=callback_data.page,
+        picker_page=1,
     )
     await state.set_state(PartnerForm.select_links)
     await _render_link_picker(callback.bot, state, partner_service)
@@ -255,7 +262,28 @@ async def link_pick_toggle(
         selected_ids.add(callback_data.l_id)
 
     await state.update_data(selected_link_ids=list(selected_ids))
-    await _render_link_picker(callback.bot, state, partner_service)
+    await _render_link_picker(
+        callback.bot,
+        state,
+        partner_service,
+        page=callback_data.page,
+    )
+    await callback.answer()
+
+
+@partner_router.callback_query(LinkCD.filter(F.action == LinkAction.PICK_PAGE))
+async def link_pick_page(
+    callback: CallbackQuery,
+    callback_data: LinkCD,
+    state: FSMContext,
+    partner_service: PartnerService,
+) -> None:
+    await _render_link_picker(
+        callback.bot,
+        state,
+        partner_service,
+        page=callback_data.page,
+    )
     await callback.answer()
 
 
@@ -267,10 +295,13 @@ async def link_pick_cancel(
     state: FSMContext,
     partner_service: PartnerService,
 ) -> None:
+    data = await state.get_data()
+    detail_page = data.get("detail_page", callback_data.page)
     await state.clear()
+
     partner = await partner_service.fetch_by_id(
         callback_data.p_id,
-        page=callback_data.page,
+        page=detail_page,
     )
     text, builder = PartnerView.detail(partner)
     await render_callback(callback, text, builder)
@@ -285,11 +316,18 @@ async def link_pick_confirm(
     partner_service: PartnerService,
 ) -> None:
     data = await state.get_data()
-    partner = await partner_service.update_links(
+    detail_page = data.get("detail_page", 1)
+
+    await partner_service.update_links(
         callback_data.p_id,
         data.get("selected_link_ids", []),
     )
 
     await state.clear()
+
+    partner = await partner_service.fetch_by_id(
+        callback_data.p_id,
+        page=detail_page,
+    )
     text, builder = PartnerView.detail(partner)
     await render_callback(callback, text, builder, answer="Витрины обновлены")

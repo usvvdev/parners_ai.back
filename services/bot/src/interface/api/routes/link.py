@@ -68,11 +68,16 @@ async def _render_offer_picker(
     bot,
     state: FSMContext,
     link_service: LinkService,
+    *,
+    page: int | None = None,
 ) -> None:
     data = await state.get_data()
+    current_page = page if page is not None else data.get("picker_page", 1)
     selected_ids = set(data.get("selected_offer_ids", []))
 
-    offers = await link_service.fetch_all_offers()
+    await state.update_data(picker_page=current_page)
+
+    offers = await link_service.fetch_offers(page=current_page)
     text, builder = LinkView.offer_picker(
         offers,
         selected_ids,
@@ -200,6 +205,7 @@ async def create_link_url(
     await state.update_data(
         link=message.text.strip(),
         selected_offer_ids=[],
+        picker_page=1,
     )
     await state.set_state(LinkForm.select_offers)
 
@@ -230,7 +236,28 @@ async def pick_offer_toggle(
         selected_ids.add(callback_data.o_id)
 
     await state.update_data(selected_offer_ids=list(selected_ids))
-    await _render_offer_picker(callback.bot, state, link_service)
+    await _render_offer_picker(
+        callback.bot,
+        state,
+        link_service,
+        page=callback_data.page,
+    )
+    await callback.answer()
+
+
+@link_router.callback_query(OfferCD.filter(F.action == OfferAction.PICK_PAGE))
+async def pick_offer_page(
+    callback: CallbackQuery,
+    callback_data: OfferCD,
+    state: FSMContext,
+    link_service: LinkService,
+) -> None:
+    await _render_offer_picker(
+        callback.bot,
+        state,
+        link_service,
+        page=callback_data.page,
+    )
     await callback.answer()
 
 
@@ -247,10 +274,12 @@ async def pick_offer_cancel(
     mode = data.get("offer_pick_mode", PickMode.CREATE)
     await state.clear()
 
+    detail_page = data.get("detail_page", 1)
+
     if mode == PickMode.EDIT and callback_data.l_id:
         link = await link_service.fetch_by_id(
             callback_data.l_id,
-            page=callback_data.page,
+            page=detail_page,
         )
         text, builder = LinkView.detail(link, p_id=callback_data.p_id)
     elif callback_data.p_id:
@@ -283,7 +312,7 @@ async def pick_offer_confirm(
         result = await link_service.update_offers(
             data["l_id"],
             offer_ids,
-            page=data.get("page", 1),
+            page=data.get("detail_page", 1),
         )
 
     await state.clear()
@@ -313,6 +342,8 @@ async def edit_link_offers_start(
         p_id=callback_data.p_id,
         offer_pick_mode=PickMode.EDIT,
         selected_offer_ids=selected_offer_ids,
+        detail_page=callback_data.page,
+        picker_page=1,
     )
     await state.set_state(LinkForm.select_offers)
     await _render_offer_picker(callback.bot, state, link_service)

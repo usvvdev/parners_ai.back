@@ -163,7 +163,7 @@ class LinkView:
 
     @staticmethod
     def offer_picker(
-        offers: list[FetchOffer],
+        data: PaginatedResponse[FetchOffer],
         selected_ids: set[int],
         *,
         p_id: int,
@@ -172,7 +172,7 @@ class LinkView:
     ) -> tuple[str, InlineKeyboardBuilder]:
         builder = InlineKeyboardBuilder()
 
-        for offer in offers:
+        for offer in data.items:
             status = "🟢" if offer.id in selected_ids else "🔴"
             builder.button(
                 text=f"{status} {format_offer_button_label(symbol=offer.symbol, title=offer.title)}",
@@ -181,8 +181,22 @@ class LinkView:
                     p_id=p_id,
                     l_id=l_id,
                     o_id=offer.id,
+                    page=data.page,
                 ),
             )
+
+        append_detail_pagination(
+            builder,
+            page=data.page,
+            pages=data.pages,
+            build_callback=lambda page: OfferCD(
+                action=OfferAction.PICK_PAGE,
+                p_id=p_id,
+                l_id=l_id,
+                o_id=0,
+                page=page,
+            ).pack(),
+        )
 
         builder.button(
             text="✅ Готово",
@@ -191,6 +205,7 @@ class LinkView:
                 p_id=p_id,
                 l_id=l_id,
                 o_id=0,
+                page=data.page,
             ),
         )
         builder.button(
@@ -200,20 +215,25 @@ class LinkView:
                 p_id=p_id,
                 l_id=l_id,
                 o_id=0,
+                page=data.page,
             ),
         )
         builder.adjust(1)
 
         action_text = "создания" if mode == PickMode.CREATE else "редактирования"
-        text = (
-            f"📋 <b>Выберите офферы для {action_text} ссылки</b>\n"
-            f"🟢 — выбран, 🔴 — не выбран"
-        )
 
-        if not offers:
+        if data.total:
+            text = (
+                f"📋 <b>Выберите офферы для {action_text} ссылки</b> ({data.total})\n"
+                f"🟢 — выбран, 🔴 — не выбран"
+            )
+        else:
             text = (
                 "📋 <b>Офферов пока нет.</b>\n"
                 "Создайте оффер в разделе «Список офферов» или нажмите «Готово» без выбора."
             )
+
+        if data.pages > 1:
+            text += f"\nСтраница {data.page} из {data.pages}"
 
         return text, builder

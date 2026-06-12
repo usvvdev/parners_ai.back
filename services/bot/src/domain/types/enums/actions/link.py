@@ -18,6 +18,8 @@ class LinkAction(StrEnum):
 
     PICK_TOGGLE = "link_pick_toggle"
 
+    PICK_PAGE = "link_pick_page"
+
     PICK_CANCEL = "link_pick_cancel"
 
     PICK_CONFIRM = "link_pick_confirm"

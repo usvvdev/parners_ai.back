@@ -12,6 +12,8 @@ class OfferAction(StrEnum):
 
     PICK_TOGGLE = "pick_toggle"
 
+    PICK_PAGE = "pick_page"
+
     PICK_CANCEL = "pick_cancel"
 
     PICK_CONFIRM = "pick_confirm"

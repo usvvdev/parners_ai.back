@@ -109,5 +109,9 @@ class PartnerService:
 
         return link_ids
 
-    async def fetch_all_links(self) -> list[FetchLinks]:
-        return await self._link_client.fetch_all()
+    async def fetch_links(
+        self,
+        *,
+        page: int = 1,
+    ) -> PaginatedResponse[FetchLinks]:
+        return await self._link_client.fetch_page(page=page)

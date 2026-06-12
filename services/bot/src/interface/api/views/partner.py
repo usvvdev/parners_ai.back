@@ -191,23 +191,36 @@ class PartnerView:
 
     @staticmethod
     def link_picker(
-        links: list[FetchLinks],
+        data: PaginatedResponse[FetchLinks],
         selected_ids: set[int],
         *,
         p_id: int,
     ) -> tuple[str, InlineKeyboardBuilder]:
         builder = InlineKeyboardBuilder()
 
-        for link in links:
+        for link in data.items:
             status = "🟢" if link.id in selected_ids else "🔴"
             builder.button(
-                text=f"{status} {format_link_list_label(link.link, link.offers, url_limit=24)}",
+                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=24)}",
                 callback_data=LinkCD(
                     action=LinkAction.PICK_TOGGLE,
                     p_id=p_id,
                     l_id=link.id,
+                    page=data.page,
                 ),
             )
+
+        append_detail_pagination(
+            builder,
+            page=data.page,
+            pages=data.pages,
+            build_callback=lambda page: LinkCD(
+                action=LinkAction.PICK_PAGE,
+                p_id=p_id,
+                l_id=0,
+                page=page,
+            ).pack(),
+        )
 
         builder.button(
             text="✅ Готово",
@@ -215,6 +228,7 @@ class PartnerView:
                 action=LinkAction.PICK_CONFIRM,
                 p_id=p_id,
                 l_id=0,
+                page=data.page,
             ),
         )
         builder.button(
@@ -223,16 +237,23 @@ class PartnerView:
                 action=LinkAction.PICK_CANCEL,
                 p_id=p_id,
                 l_id=0,
+                page=data.page,
             ),
         )
         builder.adjust(1)
 
-        text = "🔗 <b>Выберите витрину партнера</b>\n🟢 — привязана, 🔴 — не привязана"
-
-        if not links:
+        if data.total:
+            text = (
+                f"🔗 <b>Выберите витрину партнера</b> ({data.total})\n"
+                f"🟢 — привязана, 🔴 — не привязана"
+            )
+        else:
             text = (
                 "🔗 <b>Витрин пока нет.</b>\n"
                 "Создайте витрину в разделе «Список витрин» или нажмите «Готово» без выбора."
             )
+
+        if data.pages > 1:
+            text += f"\nСтраница {data.page} из {data.pages}"
 
         return text, builder

@@ -11,3 +11,4 @@ class OfferCD(
     p_id: int
     l_id: int
     o_id: int
+    page: int = 1
