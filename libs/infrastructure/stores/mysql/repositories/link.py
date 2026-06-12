@@ -79,7 +79,7 @@ class LinkRepository(MySQLRepository[Links]):
     async def fetch_one(
         self,
         id: int,
-        params: Params,
+        params: Params | None = None,
         session: AsyncSession | None = None,
     ) -> Optional[Links]:
         return await self._fetch_one(
