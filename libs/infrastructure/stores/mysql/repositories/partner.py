@@ -12,6 +12,8 @@ from sqlalchemy import (
 
 from fastapi_pagination import Params
 
+from sqlalchemy.orm import selectinload
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # application dependencies
@@ -45,8 +47,12 @@ class PartnerRepository(MySQLRepository[Partners]):
         link_ids: list[int] = [],
     ) -> list[Links]:
         return await self._fetch_many(
-            query=select(Links).where(
+            query=select(Links)
+            .where(
                 Links.id.in_(link_ids),
+            )
+            .options(
+                selectinload(Links.offers),
             ),
             session=session,
         )
@@ -95,6 +101,9 @@ class PartnerRepository(MySQLRepository[Partners]):
                 )
                 .where(
                     PartnerLinks.partner_id == id,
+                )
+                .options(
+                    selectinload(Links.offers),
                 )
             ),
             id=id,
