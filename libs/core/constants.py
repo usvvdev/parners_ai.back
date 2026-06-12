@@ -1,3 +1,5 @@
+from fastapi_pagination import Params
+
 # Configuration variables
 
 BASE_ENCODING = "utf-8"
@@ -30,3 +32,7 @@ SYSTEM_PROMPT = """
     Markdown код для справки:
     {markdown}
 """
+
+# Pagination params
+
+DEFAULT_LIST_PARAMS = Params(page=1, size=5)

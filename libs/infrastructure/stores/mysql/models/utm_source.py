@@ -14,8 +14,13 @@ from sqlalchemy.orm import (
 
 from ...common.sql.models import BaseModel
 
+from .mixins.relations import PartnerRelationMixin
 
-class UtmSources(BaseModel):
+
+class UtmSources(
+    BaseModel,
+    PartnerRelationMixin,
+):
     title: Mapped[str] = mapped_column(
         String(128),
         nullable=False,

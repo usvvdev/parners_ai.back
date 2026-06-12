@@ -43,12 +43,12 @@ from libs.domain.errors.stores import (
     QueryExecutionException,
 )
 
+from libs.core.constants import DEFAULT_LIST_PARAMS
+
 from libs.domain.utils.orm_dump import orm_model_dump
 
 
 T = TypeVar("T")
-
-DEFAULT_LIST_PARAMS = Params(page=1, size=5)
 
 
 class BaseSQLExecutor:

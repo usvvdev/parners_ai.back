@@ -7,7 +7,6 @@ from fastapi import (
 
 from fastapi_pagination import (
     Page,
-    Params,
     paginate,
 )
 
@@ -22,7 +21,7 @@ from ..dto import (
 
 from ..views import PartnerRepositoryView
 
-from ....infrastructure.utils.functions import set_custom_pagination
+from libs.core.constants import DEFAULT_LIST_PARAMS
 
 from ....infrastructure.utils.decorators import disable_extension_check
 
@@ -44,15 +43,12 @@ async def fetch_offers(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-    params: Params = Depends(
-        set_custom_pagination,
-    ),
 ) -> Page[FetchPartner]:
     data = await view.fetch()
 
     return paginate(
         data,
-        params=params,
+        params=DEFAULT_LIST_PARAMS,
     )
 
 
@@ -65,13 +61,10 @@ async def fetch_partner(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-    params: Params = Depends(
-        set_custom_pagination,
-    ),
 ) -> FetchPartners:
     return await view.fetch_by_id(
         id=id,
-        params=params,
+        params=DEFAULT_LIST_PARAMS,
     )
 
 

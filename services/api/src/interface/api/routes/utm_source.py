@@ -7,7 +7,6 @@ from fastapi import (
 
 from fastapi_pagination import (
     Page,
-    Params,
     paginate,
 )
 
@@ -22,7 +21,7 @@ from ..dto import (
 
 from ..views import UTMSourceRepositoryView
 
-from ....infrastructure.utils.functions import set_custom_pagination
+from libs.core.constants import DEFAULT_LIST_PARAMS
 
 from ....infrastructure.utils.decorators import disable_extension_check
 
@@ -44,15 +43,12 @@ async def fetch_utm_sources(
     view: UTMSourceRepositoryView = Depends(
         UTMSourceRepositoryViewFactory.create,
     ),
-    pagination_params: Params = Depends(
-        set_custom_pagination,
-    ),
 ) -> Page[FetchUTMSources]:
     data = await view.fetch()
 
     return paginate(
         data,
-        params=pagination_params,
+        params=params,
     )
 
 

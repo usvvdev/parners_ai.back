@@ -12,3 +12,10 @@ class PartnerRelationMixin:
             secondary="partner_links",
             back_populates="partners",
         )
+
+    @declared_attr
+    def utm_source(cls):
+        return relationship(
+            "UtmSource",
+            lazy="selectin",
+        )
