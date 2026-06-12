@@ -28,6 +28,11 @@ class Offers(
         nullable=False,
     )
 
+    symbol: Mapped[str] = mapped_column(
+        String(8),
+        nullable=False,
+    )
+
     __table_args__ = (
         # fast search
         Index("ix_offers_title", "title"),
