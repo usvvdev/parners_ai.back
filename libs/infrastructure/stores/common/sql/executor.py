@@ -22,7 +22,7 @@ from contextlib import (
     asynccontextmanager,
 )
 
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.err import SQLAlchemyError
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -41,9 +41,7 @@ from libs.domain.errors.stores import (
     QueryExecutionException,
 )
 
-from libs.domain.utils import orm_model_dump
-
-from libs.domain.errors.stores import RepositoryException
+from libs.domain.utils.orm_dump import orm_model_dump
 
 
 T = TypeVar("T")
@@ -72,8 +70,10 @@ class BaseSQLExecutor:
             async with cm as session:
                 yield session
 
-        except SQLAlchemyError as exc:
-            raise RepositoryException from exc
+        except SQLAlchemyError as err:
+            raise QueryExecutionException(
+                table=self._table.__name__,
+            ) from err
 
     async def _query(
         self,

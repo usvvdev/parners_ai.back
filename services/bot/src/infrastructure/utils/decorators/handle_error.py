@@ -13,11 +13,8 @@ def handle_http_error(message: str):
         async def wrapper(callback, *args, **kwargs):
             try:
                 return await func(callback, *args, **kwargs)
-            except HTTPStatusError:
-                await callback.answer(
-                    message,
-                    show_alert=True,
-                )
+            except HTTPStatusError as err:
+                raise err
 
         return wrapper
 
