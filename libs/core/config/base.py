@@ -29,7 +29,7 @@ from pydantic_settings import (
 
 from .mixins import ApplicationOptionsMixin
 
-from libs.domain.utils import get_service_files
+from libs.domain.utils.service_files import get_service_files
 
 from libs.domain.types.enums.config import AppMode
 
