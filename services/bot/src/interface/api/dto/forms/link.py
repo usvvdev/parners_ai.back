@@ -9,4 +9,3 @@ from aiogram.fsm.state import (
 class LinkForm(StatesGroup):
     create_url = State()
     select_offers = State()
-    edit_url = State()

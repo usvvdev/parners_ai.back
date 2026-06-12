@@ -12,8 +12,6 @@ class LinkAction(StrEnum):
 
     TOGGLE = "toggle"
 
-    EDIT_URL = "edit_url"
-
     EDIT_OFFERS = "edit_offers"
 
     DELETE = "delete"

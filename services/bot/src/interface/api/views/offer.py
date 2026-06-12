@@ -91,15 +91,6 @@ class OfferView:
         builder = InlineKeyboardBuilder()
 
         builder.button(
-            text="✏️ Изменить название",
-            callback_data=OfferCD(
-                action=OfferAction.EDIT_TITLE,
-                p_id=p_id,
-                l_id=l_id,
-                o_id=offer.id,
-            ),
-        )
-        builder.button(
             text="🗑 Удалить оффер",
             callback_data=OfferCD(
                 action=OfferAction.DELETE,

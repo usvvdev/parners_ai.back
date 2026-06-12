@@ -286,51 +286,6 @@ async def pick_offer_confirm(
     await render_callback(callback, text, builder, answer="Сохранено")
 
 
-@link_router.callback_query(LinkCD.filter(F.action == LinkAction.EDIT_URL))
-async def edit_link_url_start(
-    callback: CallbackQuery,
-    callback_data: LinkCD,
-    state: FSMContext,
-) -> None:
-    await init_form_context(
-        state,
-        callback,
-        l_id=callback_data.l_id,
-        p_id=callback_data.p_id,
-    )
-
-    text, markup = build_form_prompt(
-        "🔗 <b>Введите новый URL ссылки:</b>",
-        LinkCD(
-            action=LinkAction.VIEW,
-            p_id=callback_data.p_id,
-            l_id=callback_data.l_id,
-        ),
-    )
-    await edit_menu_message(callback.bot, state, text, markup)
-    await state.set_state(LinkForm.edit_url)
-    await callback.answer()
-
-
-@link_router.message(LinkForm.edit_url)
-@handle_form_submit("❌ Не удалось обновить ссылку")
-async def edit_link_url_finish(
-    message: Message,
-    state: FSMContext,
-    link_service: LinkService,
-) -> tuple[str, ...]:
-    data = await state.get_data()
-
-    link = await link_service.update_url(
-        data["l_id"],
-        message.text.strip(),
-    )
-
-    text, builder = LinkView.detail(link, p_id=data.get("p_id", 0))
-
-    return text, builder.as_markup()
-
-
 @link_router.callback_query(LinkCD.filter(F.action == LinkAction.EDIT_OFFERS))
 @handle_http_error("Ссылка не найдена")
 async def edit_link_offers_start(

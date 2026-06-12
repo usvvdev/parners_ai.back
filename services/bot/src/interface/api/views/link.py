@@ -95,10 +95,6 @@ class LinkView:
             callback_data=LinkCD(action=LinkAction.TOGGLE, p_id=p_id, l_id=link.id),
         )
         builder.button(
-            text="✏️ Изменить URL",
-            callback_data=LinkCD(action=LinkAction.EDIT_URL, p_id=p_id, l_id=link.id),
-        )
-        builder.button(
             text="✏️ Изменить офферы",
             callback_data=LinkCD(
                 action=LinkAction.EDIT_OFFERS,

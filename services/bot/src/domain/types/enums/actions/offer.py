@@ -8,8 +8,6 @@ class OfferAction(StrEnum):
 
     CREATE_FOR_LINK = "create_for_link"
 
-    EDIT_TITLE = "edit_title"
-
     DELETE = "delete"
 
     PICK_TOGGLE = "pick_toggle"

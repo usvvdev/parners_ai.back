@@ -154,57 +154,6 @@ async def create_offer_finish(
     return text, builder.as_markup()
 
 
-@offer_router.callback_query(OfferCD.filter(F.action == OfferAction.EDIT_TITLE))
-async def edit_offer_title_start(
-    callback: CallbackQuery,
-    callback_data: OfferCD,
-    state: FSMContext,
-) -> None:
-    await init_form_context(
-        state,
-        callback,
-        o_id=callback_data.o_id,
-        p_id=callback_data.p_id,
-        l_id=callback_data.l_id,
-    )
-
-    text, markup = build_form_prompt(
-        "🎁 <b>Введите новое название оффера:</b>",
-        OfferCD(
-            action=OfferAction.VIEW,
-            p_id=callback_data.p_id,
-            l_id=callback_data.l_id,
-            o_id=callback_data.o_id,
-        ),
-    )
-    await edit_menu_message(callback.bot, state, text, markup)
-    await state.set_state(OfferForm.edit_title)
-    await callback.answer()
-
-
-@offer_router.message(OfferForm.edit_title)
-@handle_form_submit("❌ Не удалось обновить оффер")
-async def edit_offer_title_finish(
-    message: Message,
-    state: FSMContext,
-    offer_service: OfferService,
-) -> tuple[str, ...]:
-    data = await state.get_data()
-
-    offer = await offer_service.update_title(
-        data["o_id"],
-        message.text.strip(),
-    )
-
-    text, builder = OfferView.detail(
-        offer,
-        p_id=data.get("p_id", 0),
-        l_id=data.get("l_id", 0),
-    )
-
-    return text, builder.as_markup()
-
-
 @offer_router.callback_query(OfferCD.filter(F.action == OfferAction.DELETE))
 @handle_http_error("Не удалось удалить оффер")
 async def delete_offer(
