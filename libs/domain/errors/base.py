@@ -8,5 +8,6 @@ class BaseApplicationException(Exception):
         self.detail = detail
 
         super().__init__(
+            self.status_code,
             detail,
         )
