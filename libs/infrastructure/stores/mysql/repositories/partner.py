@@ -10,7 +10,7 @@ from sqlalchemy import (
     desc,
 )
 
-from sqlalchemy.orm import joinedload
+from fastapi_pagination import Params
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..models import (
     Partners,
     Links,
+    PartnerLinks,
 )
 
 from ..repository import MySQLRepository
@@ -79,17 +80,26 @@ class PartnerRepository(MySQLRepository[Partners]):
     async def fetch_one(
         self,
         id: int,
+        params: Params,
         session: AsyncSession | None = None,
     ) -> Optional[Partners]:
         return await self._fetch_one(
-            query=(
-                select(self._table)
-                .options(
-                    joinedload(self._table.links),
+            query=select(self._table).where(
+                self._table.id == id,
+            ),
+            pagination_query=(
+                select(Links)
+                .join(
+                    PartnerLinks,
+                    PartnerLinks.link_id == Links.id,
                 )
-                .where(self._table.id == id)
+                .where(
+                    PartnerLinks.partner_id == id,
+                )
             ),
             id=id,
+            with_pagination=True,
+            params=params,
             session=session,
         )
 

@@ -1,3 +1,7 @@
+# packages
+
+from fastapi_pagination import Params
+
 # application dependencies
 
 from ..dto import (
@@ -25,9 +29,15 @@ class LinkRepositoryView:
     async def fetch_by_id(
         self,
         id: int,
+        params: Params,
     ) -> FetchLink:
-        return await self._repository.fetch_one(
+        link, offers = await self._repository.fetch_one(
             id=id,
+            params=params,
+        )
+        return FetchLink(
+            **link.__dict__,
+            offers=offers,
         )
 
     async def insert(

@@ -7,7 +7,7 @@ from typing import (
 
 from sqlalchemy import select
 
-from sqlalchemy.orm import joinedload
+from fastapi_pagination import Params
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..models import (
     Links,
     Offers,
+    LinkOffers,
 )
 
 from ..repository import MySQLRepository
@@ -76,15 +77,24 @@ class LinkRepository(MySQLRepository[Links]):
     async def fetch_one(
         self,
         id: int,
+        params: Params,
         session: AsyncSession | None = None,
     ) -> Optional[Links]:
         return await self._fetch_one(
-            query=select(self._table)
-            .options(
-                joinedload(self._table.offers),
-            )
-            .where(self._table.id == id),
+            query=select(self._table).where(self._table.id == id),
+            pagination_query=(
+                select(Offers)
+                .join(
+                    LinkOffers,
+                    LinkOffers.offer_id == Offers.id,
+                )
+                .where(
+                    LinkOffers.link_id == id,
+                )
+            ),
             id=id,
+            with_pagination=True,
+            params=params,
             session=session,
         )
 

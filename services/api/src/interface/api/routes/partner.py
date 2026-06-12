@@ -65,9 +65,13 @@ async def fetch_partner(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
 ) -> FetchPartners:
     return await view.fetch_by_id(
         id=id,
+        params=params,
     )
 
 

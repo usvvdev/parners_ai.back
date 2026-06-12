@@ -56,18 +56,6 @@ async def fetch_links(
     )
 
 
-@link_router.post("")
-async def create_link(
-    data: InsertLink,
-    view: LinkRepositoryView = Depends(
-        LinkRepositoryViewFactory.create,
-    ),
-) -> FetchLink:
-    return await view.insert(
-        data=data,
-    )
-
-
 @link_router.get(
     "/{id}",
     response_model=FetchLink,
@@ -77,9 +65,25 @@ async def fetch_link_by_id(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
 ) -> FetchLink:
     return await view.fetch_by_id(
         id=id,
+        params=params,
+    )
+
+
+@link_router.post("")
+async def create_link(
+    data: InsertLink,
+    view: LinkRepositoryView = Depends(
+        LinkRepositoryViewFactory.create,
+    ),
+) -> FetchLink:
+    return await view.insert(
+        data=data,
     )
 
 

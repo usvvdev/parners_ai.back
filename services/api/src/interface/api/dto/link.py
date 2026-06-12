@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import Field
 
+from fastapi_pagination import Page
+
 # application dependencies
 
 from .base import BaseFetch
@@ -39,7 +41,7 @@ class FetchLink(
     BaseLinkFields,
     BaseFetch,
 ):
-    offers: list[FetchOffers] | None = Field(
+    offers: Optional[Page[FetchOffers]] = Field(
         default=None,
         description="Список офферов, связанных с данной ссылкой",
     )

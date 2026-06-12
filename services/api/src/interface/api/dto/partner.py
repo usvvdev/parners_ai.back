@@ -4,6 +4,8 @@ from pydantic import Field
 
 from typing import Optional
 
+from fastapi_pagination import Page
+
 # application dependencies
 
 from .link import FetchLinks
@@ -42,8 +44,8 @@ class FetchPartners(
     BasePartnerFields,
     BaseFetch,
 ):
-    links: list[FetchLinks] = Field(
-        default_factory=list,
+    links: Optional[Page[FetchLinks]] = Field(
+        default=None,
         description="Офферы, относящиеся к партнеру",
     )
 

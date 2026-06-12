@@ -28,6 +28,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.engine import ScalarResult
 
+from fastapi_pagination import Params
+
+from fastapi_pagination.ext.sqlalchemy import paginate
+
 # application dependencies
 
 from .engine import BaseSQLEngine
@@ -130,12 +134,28 @@ class BaseSQLExecutor:
                     table=self._table.__name__,
                 )
 
+    async def _paginate(
+        self,
+        pagination_query: Executable,
+        params: Params,
+        *,
+        session: AsyncSession,
+    ) -> Any:
+        async with self._session(session) as session:
+            return await paginate(
+                conn=session,
+                query=pagination_query,
+                params=params,
+            )
+
     async def _fetch_one(
         self,
         query: Executable,
         *,
         id: int | None = None,
         session: AsyncSession | None = None,
+        with_pagination: bool = False,
+        **kawrgs,
     ) -> Any:
 
         result = (
@@ -150,6 +170,14 @@ class BaseSQLExecutor:
                 table=self._table.__name__,
                 id=id,
             )
+
+        if with_pagination:
+            paginated_items = await self._paginate(
+                **kawrgs,
+                session=session,
+            )
+
+            return result, paginated_items
 
         return result
 
