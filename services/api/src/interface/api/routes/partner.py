@@ -44,7 +44,7 @@ async def fetch_offers(
     view: PartnerRepositoryView = Depends(
         PartnerRepositoryViewFactory.create,
     ),
-    pagination_params: Params = Depends(
+    params: Params = Depends(
         set_custom_pagination,
     ),
 ) -> Page[FetchPartner]:
@@ -52,7 +52,7 @@ async def fetch_offers(
 
     return paginate(
         data,
-        params=pagination_params,
+        params=params,
     )
 
 

@@ -44,7 +44,7 @@ async def fetch_links(
     view: LinkRepositoryView = Depends(
         LinkRepositoryViewFactory.create,
     ),
-    pagination_params: Params = Depends(
+    params: Params = Depends(
         set_custom_pagination,
     ),
 ) -> Page[FetchLinks]:
@@ -52,7 +52,7 @@ async def fetch_links(
 
     return paginate(
         data,
-        params=pagination_params,
+        params=params,
     )
 
 
