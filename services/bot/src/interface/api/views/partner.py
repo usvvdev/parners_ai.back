@@ -100,8 +100,9 @@ class PartnerView:
         )
 
         for link in partner.links.items:
+            status = "🟢" if link.is_active else "🔴"
             builder.button(
-                text=format_link_list_label(link.link, link.offers),
+                text=f"{status}{format_link_list_label(link.link, link.offers)}",
                 callback_data=LinkCD(
                     action=LinkAction.VIEW,
                     p_id=partner.id,

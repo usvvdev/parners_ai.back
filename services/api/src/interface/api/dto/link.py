@@ -31,6 +31,7 @@ class BaseLinkFields(BaseModelType):
 
 class FetchLinks(
     LinkIdentity,
+    BaseLinkFields,
     BaseFetch,
 ):
     offers: Optional[list[FetchOffers | str]] = Field(

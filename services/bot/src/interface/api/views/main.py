@@ -23,7 +23,7 @@ class MainView:
             callback_data=NavigationCD(level=NavLevel.LINKS),
         )
         builder.button(
-            text="🎁 Список офферов",
+            text="📋 Список офферов",
             callback_data=NavigationCD(level=NavLevel.OFFERS),
         )
         builder.adjust(1)

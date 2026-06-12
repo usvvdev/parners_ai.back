@@ -36,6 +36,7 @@ class BaseLinkFields(BaseModelType):
 
 class FetchLinks(
     LinkIdentity,
+    BaseLinkFields,
     BaseFetch,
 ):
     offers: list[str] = Field(

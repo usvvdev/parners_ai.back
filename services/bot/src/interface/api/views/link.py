@@ -34,6 +34,7 @@ from ....infrastructure.utils import (
     safe,
     short_url,
     format_offer_symbols,
+    format_offer_button_label,
     format_link_list_label,
 )
 
@@ -58,8 +59,9 @@ class LinkView:
         )
 
         for link in data.items:
+            status = "🟢" if link.is_active else "🔴"
             builder.button(
-                text=format_link_list_label(link.link, link.offers),
+                text=f"{status}{format_link_list_label(link.link, link.offers)}",
                 callback_data=LinkCD(action=LinkAction.VIEW, p_id=0, l_id=link.id),
             )
 
@@ -107,11 +109,11 @@ class LinkView:
         )
 
         for offer in link.offers.items:
-            label = offer.symbol or offer.title
             builder.button(
-                text=f"{label} · {offer.title}"
-                if offer.symbol
-                else f"🎁 {offer.title}",
+                text=format_offer_button_label(
+                    symbol=offer.symbol,
+                    title=offer.title,
+                ),
                 callback_data=OfferCD(
                     action=OfferAction.VIEW,
                     p_id=p_id,
@@ -152,9 +154,9 @@ class LinkView:
 
         text = (
             f"🔗 <b>Витрина:</b> {safe(short_url(link.link, limit=80))}\n"
-            f"⚡ <b>Статус:</b> {'Активна' if link.is_active else 'Отключена'}\n"
-            f"🎁 <b>Офферы:</b> {format_offer_symbols([o.symbol for o in link.offers.items if o.symbol])}\n\n"
-            f"🎁 <b>Список ({link.offers.total}):</b>"
+            f"⚡ <b>Статус:</b> {'🟢 Активна' if link.is_active else '🔴 Отключена'}\n"
+            f"🏷 <b>Офферы:</b> {format_offer_symbols([o.symbol for o in link.offers.items if o.symbol])}\n\n"
+            f"📋 <b>Список ({link.offers.total}):</b>"
         )
 
         return text, builder
@@ -173,7 +175,7 @@ class LinkView:
         for offer in offers:
             status = "🟢" if offer.id in selected_ids else "🔴"
             builder.button(
-                text=f"{status} {offer.title}",
+                text=f"{status} {format_offer_button_label(symbol=offer.symbol, title=offer.title)}",
                 callback_data=OfferCD(
                     action=OfferAction.PICK_TOGGLE,
                     p_id=p_id,
@@ -204,13 +206,13 @@ class LinkView:
 
         action_text = "создания" if mode == PickMode.CREATE else "редактирования"
         text = (
-            f"🎁 <b>Выберите офферы для {action_text} ссылки</b>\n"
+            f"📋 <b>Выберите офферы для {action_text} ссылки</b>\n"
             f"🟢 — выбран, 🔴 — не выбран"
         )
 
         if not offers:
             text = (
-                "🎁 <b>Офферов пока нет.</b>\n"
+                "📋 <b>Офферов пока нет.</b>\n"
                 "Создайте оффер в разделе «Список офферов» или нажмите «Готово» без выбора."
             )
 

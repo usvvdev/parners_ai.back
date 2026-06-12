@@ -18,6 +18,17 @@ def format_offer_symbols(symbols: list[str]) -> str:
     return "·".join(symbols)
 
 
+def format_offer_button_label(
+    *,
+    symbol: str,
+    title: str,
+) -> str:
+    if symbol:
+        return f"{symbol} · {title}"
+
+    return title
+
+
 def format_link_list_label(
     link: str,
     symbols: list[str],

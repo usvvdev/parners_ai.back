@@ -24,7 +24,10 @@ from ....domain.types.enums.actions import (
 
 from ....domain.types.enums.common import NavLevel
 
-from ....infrastructure.utils import safe
+from ....infrastructure.utils import (
+    safe,
+    format_offer_button_label,
+)
 
 from ....domain.types._types import (
     FetchOffer,
@@ -51,7 +54,10 @@ class OfferView:
 
         for offer in data.items:
             builder.button(
-                text=f"🎁 {offer.title}",
+                text=format_offer_button_label(
+                    symbol=offer.symbol,
+                    title=offer.title,
+                ),
                 callback_data=OfferCD(
                     action=OfferAction.VIEW,
                     p_id=0,
@@ -75,8 +81,8 @@ class OfferView:
 
         text = build_list_text(
             data,
-            title="🎁 <b>Список офферов</b>",
-            empty="🎁 <b>Офферов пока нет.</b>",
+            title="📋 <b>Список офферов</b>",
+            empty="📋 <b>Офферов пока нет.</b>",
         )
 
         return text, builder
@@ -109,6 +115,15 @@ class OfferView:
         )
         builder.adjust(1)
 
-        text = f"🎁 <b>Оффер:</b> {safe(offer.title)}\n🆔 <b>ID:</b> {offer.id}"
+        symbol_line = (
+            f"🏷 <b>Символ:</b> {safe(offer.symbol)}\n"
+            if offer.symbol
+            else ""
+        )
+        text = (
+            f"📋 <b>Оффер:</b> {safe(offer.title)}\n"
+            f"{symbol_line}"
+            f"🆔 <b>ID:</b> {offer.id}"
+        )
 
         return text, builder

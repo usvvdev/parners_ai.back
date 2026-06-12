@@ -43,14 +43,14 @@ from ....domain.types._types import (
     FetchLink,
 )
 
-from ....infrastructure.utils.decorators import (
-    handle_http_error,
-    handle_form_submit,
-)
+from httpx import HTTPStatusError
+
+from ....infrastructure.utils.decorators import handle_http_error
 
 from ....infrastructure.utils.functions import (
     init_form_context,
     edit_menu_message,
+    delete_user_message,
     render_callback,
 )
 
@@ -100,7 +100,7 @@ async def _start_offer_create(
         else NavigationCD(level=NavLevel.OFFERS)
     )
     text, markup = build_form_prompt(
-        "🎁 <b>Введите название нового оффера:</b>",
+        "📋 <b>Введите название нового оффера:</b>",
         cancel_data,
     )
     await edit_menu_message(callback.bot, state, text, markup)
@@ -132,18 +132,66 @@ async def create_offer_for_link_start(
 
 
 @offer_router.message(OfferForm.create_title)
-@handle_form_submit("❌ Не удалось создать оффер")
+async def create_offer_title(
+    message: Message,
+    state: FSMContext,
+) -> None:
+    title = message.text.strip()
+
+    if not title:
+        await message.answer("❌ Название не может быть пустым.")
+        return
+
+    await delete_user_message(message)
+
+    data = await state.get_data()
+    await state.update_data(title=title)
+
+    cancel_data = (
+        LinkCD(action=LinkAction.VIEW, p_id=data.get("p_id", 0), l_id=data.get("l_id", 0))
+        if data.get("l_id")
+        else NavigationCD(level=NavLevel.OFFERS)
+    )
+    text, markup = build_form_prompt(
+        "🏷 <b>Введите символ оффера</b> (до 8 символов, например: З, Б, К):",
+        cancel_data,
+    )
+    await edit_menu_message(message.bot, state, text, markup)
+    await state.set_state(OfferForm.create_symbol)
+
+
+@offer_router.message(OfferForm.create_symbol)
 async def create_offer_finish(
     message: Message,
     state: FSMContext,
     offer_service: OfferService,
-) -> tuple[str, ...]:
+) -> None:
+    symbol = message.text.strip()
+
+    if not symbol or len(symbol) > 8:
+        await message.answer("❌ Символ должен быть от 1 до 8 символов.")
+        return
+
+    await delete_user_message(message)
+
     data = await state.get_data()
 
-    result = await offer_service.create(
-        InsertOffer(title=message.text.strip()),
-        l_id=data.get("l_id", 0),
-    )
+    try:
+        result = await offer_service.create(
+            InsertOffer(
+                title=data["title"],
+                symbol=symbol,
+            ),
+            l_id=data.get("l_id", 0),
+        )
+    except HTTPStatusError:
+        await edit_menu_message(
+            message.bot,
+            state,
+            "❌ Не удалось создать оффер",
+        )
+        await state.clear()
+        return
 
     if isinstance(result, FetchLink):
         text, builder = LinkView.detail(result, p_id=data.get("p_id", 0))
@@ -151,7 +199,13 @@ async def create_offer_finish(
         page_data = await offer_service.fetch(page=1)
         text, builder = OfferView.list(page_data)
 
-    return text, builder.as_markup()
+    await edit_menu_message(
+        message.bot,
+        state,
+        text,
+        builder.as_markup(),
+    )
+    await state.clear()
 
 
 @offer_router.callback_query(OfferCD.filter(F.action == OfferAction.DELETE))

@@ -12,6 +12,7 @@ from .text import (
     safe,
     short_url,
     format_offer_symbols,
+    format_offer_button_label,
     format_link_list_label,
 )
 
@@ -25,5 +26,6 @@ __all__: list[str] = [
     "safe",
     "short_url",
     "format_offer_symbols",
+    "format_offer_button_label",
     "format_link_list_label",
 ]

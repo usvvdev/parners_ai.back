@@ -8,3 +8,4 @@ from aiogram.fsm.state import (
 
 class OfferForm(StatesGroup):
     create_title = State()
+    create_symbol = State()
