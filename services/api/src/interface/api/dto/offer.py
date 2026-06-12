@@ -15,6 +15,11 @@ class OfferIdentity(BaseModelType):
         description="Название оффера",
     )
 
+    symbol: str = Field(
+        ...,
+        description="Символ оффера",
+    )
+
 
 class FetchOffers(
     OfferIdentity,

@@ -30,6 +30,7 @@ class Offers(
 
     symbol: Mapped[str] = mapped_column(
         String(8),
+        server_default="",
         nullable=False,
     )
 
