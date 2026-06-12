@@ -95,7 +95,7 @@ class PartnerView:
             ),
         )
         builder.button(
-            text="✏️ Изменить ссылки",
+            text="✏️ Изменить витрины",
             callback_data=PartnerCD(action=PartnerAction.EDIT_LINKS, p_id=partner.id),
         )
 
@@ -135,7 +135,7 @@ class PartnerView:
             f"🏷 <b>UTM:</b> {safe(partner.utm_source)}\n"
             f"⭐ <b>Избранное:</b> {'Да' if partner.is_selected else 'Нет'}\n"
             f"📊 <b>Трекинг:</b> {'Активен' if partner.is_tracking else 'Выключен'}\n\n"
-            f"🔗 <b>Ссылки ({partner.links.total}):</b>"
+            f"🔗 <b>Витрины ({partner.links.total}):</b>"
         )
 
         return text, builder
@@ -226,12 +226,12 @@ class PartnerView:
         )
         builder.adjust(1)
 
-        text = "🔗 <b>Выберите ссылки партнера</b>\n🟢 — привязана, 🔴 — не привязана"
+        text = "🔗 <b>Выберите витрину партнера</b>\n🟢 — привязана, 🔴 — не привязана"
 
         if not links:
             text = (
                 "🔗 <b>Ссылок пока нет.</b>\n"
-                "Создайте ссылку в разделе «Список ссылок» или нажмите «Готово» без выбора."
+                "Создайте витрину в разделе «Список ссылок» или нажмите «Готово» без выбора."
             )
 
         return text, builder

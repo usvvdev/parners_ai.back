@@ -53,7 +53,7 @@ class LinkView:
         builder = InlineKeyboardBuilder()
 
         builder.button(
-            text="➕ Добавить ссылку",
+            text="➕ Добавить Витрину",
             callback_data=LinkCD(action=LinkAction.CREATE, p_id=0, l_id=0),
         )
 
@@ -109,7 +109,9 @@ class LinkView:
         for offer in link.offers.items:
             label = offer.symbol or offer.title
             builder.button(
-                text=f"{label} · {offer.title}" if offer.symbol else f"🎁 {offer.title}",
+                text=f"{label} · {offer.title}"
+                if offer.symbol
+                else f"🎁 {offer.title}",
                 callback_data=OfferCD(
                     action=OfferAction.VIEW,
                     p_id=p_id,
@@ -131,7 +133,7 @@ class LinkView:
         )
 
         builder.button(
-            text="🗑 Удалить ссылку",
+            text="🗑 Удалить витрину",
             callback_data=LinkCD(action=LinkAction.DELETE, p_id=p_id, l_id=link.id),
         )
 
@@ -142,14 +144,14 @@ class LinkView:
             )
         else:
             builder.button(
-                text="🔙 Назад к ссылкам",
+                text="🔙 Назад к витринам",
                 callback_data=NavigationCD(level=NavLevel.LINKS),
             )
 
         builder.adjust(1)
 
         text = (
-            f"🔗 <b>Ссылка:</b> {safe(short_url(link.link, limit=80))}\n"
+            f"🔗 <b>Витрина:</b> {safe(short_url(link.link, limit=80))}\n"
             f"⚡ <b>Статус:</b> {'Активна' if link.is_active else 'Отключена'}\n"
             f"🎁 <b>Офферы:</b> {format_offer_symbols([o.symbol for o in link.offers.items if o.symbol])}\n\n"
             f"🎁 <b>Список ({link.offers.total}):</b>"

@@ -277,7 +277,7 @@ async def link_pick_cancel(
 
 
 @partner_router.callback_query(LinkCD.filter(F.action == LinkAction.PICK_CONFIRM))
-@handle_http_error("Не удалось обновить ссылки")
+@handle_http_error("Не удалось обновить витрины")
 async def link_pick_confirm(
     callback: CallbackQuery,
     callback_data: LinkCD,
@@ -292,4 +292,4 @@ async def link_pick_confirm(
 
     await state.clear()
     text, builder = PartnerView.detail(partner)
-    await render_callback(callback, text, builder, answer="Ссылки обновлены")
+    await render_callback(callback, text, builder, answer="Витрины обновлены")

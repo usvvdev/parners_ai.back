@@ -61,7 +61,7 @@ class FetchPartners(FetchPartner):
             size=0,
             pages=0,
         ),
-        description="Ссылки партнера",
+        description="Витрина партнера",
     )
 
     @field_validator("links", mode="before")

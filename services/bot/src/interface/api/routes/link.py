@@ -97,7 +97,7 @@ async def link_list(
 
 
 @link_router.callback_query(LinkCD.filter(F.action == LinkAction.VIEW))
-@handle_http_error("Ссылка не найдена")
+@handle_http_error("Витрина не найдена")
 async def link_detail(
     callback: CallbackQuery,
     callback_data: LinkCD,
@@ -125,7 +125,7 @@ async def link_toggle(
     text, builder = LinkView.detail(link, p_id=callback_data.p_id)
 
     answer = "активирована" if new_status else "деактивирована"
-    await render_callback(callback, text, builder, answer=f"Ссылка {answer}")
+    await render_callback(callback, text, builder, answer=f"Витрина {answer}")
 
 
 async def _start_link_create(
@@ -143,7 +143,7 @@ async def _start_link_create(
     )
 
     text, markup = build_form_prompt(
-        "🔗 <b>Введите URL новой ссылки:</b>",
+        "🔗 <b>Введите URL новой витрины:</b>",
         LinkCD(action=LinkAction.CREATE_CANCEL, p_id=p_id, l_id=0),
     )
     await edit_menu_message(callback.bot, state, text, markup)
@@ -249,9 +249,9 @@ async def pick_offer_cancel(
 
     if mode == PickMode.EDIT and callback_data.l_id:
         link = await link_service.fetch_by_id(
-        callback_data.l_id,
-        page=callback_data.page,
-    )
+            callback_data.l_id,
+            page=callback_data.page,
+        )
         text, builder = LinkView.detail(link, p_id=callback_data.p_id)
     elif callback_data.p_id:
         partner = await partner_service.fetch_by_id(callback_data.p_id)
@@ -297,7 +297,7 @@ async def pick_offer_confirm(
 
 
 @link_router.callback_query(LinkCD.filter(F.action == LinkAction.EDIT_OFFERS))
-@handle_http_error("Ссылка не найдена")
+@handle_http_error("Витрина не найдена")
 async def edit_link_offers_start(
     callback: CallbackQuery,
     callback_data: LinkCD,
@@ -336,4 +336,4 @@ async def delete_link(
         data = await link_service.fetch(page=1)
         text, builder = LinkView.list(data)
 
-    await render_callback(callback, text, builder, answer="Ссылка удалена")
+    await render_callback(callback, text, builder, answer="Витрина удалена")
