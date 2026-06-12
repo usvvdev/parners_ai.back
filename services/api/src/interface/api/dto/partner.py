@@ -1,6 +1,9 @@
 # packages
 
-from pydantic import Field
+from pydantic import (
+    Field,
+    field_validator,
+)
 
 from typing import Optional
 
@@ -11,6 +14,8 @@ from fastapi_pagination import Page
 # application dependencies
 
 from .link import FetchLinks
+
+from .utm_source import FetchUTMSource
 
 from .base import BaseFetch
 
@@ -35,21 +40,30 @@ class PartnerIdentity(BaseModelType):
         description="Название оффера",
     )
 
-    utm_source_id: int = Field(
-        ...,
-        description="Название оффера",
-    )
-
 
 class FetchPartners(
     PartnerIdentity,
     BasePartnerFields,
     BaseFetch,
 ):
+    utm_source: Optional[FetchUTMSource | str] = Field(
+        default=None,
+        description="UTM метка",
+    )
+
     links: Optional[Page[FetchLinks]] = Field(
         default=None,
         description="Офферы, относящиеся к партнеру",
     )
+
+    @field_validator("utm_source", mode="after")
+    def validate_utm_source(
+        cls,
+        value: Optional[FetchUTMSource],
+    ) -> str:
+        if value is not None:
+            return value.title
+        return value
 
 
 class FetchPartner(
@@ -57,13 +71,30 @@ class FetchPartner(
     BasePartnerFields,
     BaseFetch,
 ):
-    pass
+    utm_source: Optional[FetchUTMSource | str] = Field(
+        default=None,
+        description="UTM метка",
+    )
+
+    @field_validator("utm_source", mode="after")
+    def validate_utm_source(
+        cls,
+        value: Optional[FetchUTMSource],
+    ) -> str:
+        if value is not None:
+            return value.title
+        return value
 
 
 class InsertPartner(
     PartnerIdentity,
     BasePartnerFields,
 ):
+    utm_source_id: int = Field(
+        ...,
+        description="Название оффера",
+    )
+
     link_ids: list[int] = Field(
         default_factory=list,
         description="ID офферов, относящихся к партнеру",

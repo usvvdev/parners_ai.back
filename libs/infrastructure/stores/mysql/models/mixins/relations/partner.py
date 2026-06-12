@@ -16,6 +16,6 @@ class PartnerRelationMixin:
     @declared_attr
     def utm_source(cls):
         return relationship(
-            "UtmSource",
+            "UtmSources",
             lazy="selectin",
         )

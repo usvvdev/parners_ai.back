@@ -14,12 +14,12 @@ from sqlalchemy.orm import (
 
 from ...common.sql.models import BaseModel
 
-from .mixins.relations import PartnerRelationMixin
+from .mixins.relations import UTMSouceRelationMixin
 
 
 class UtmSources(
     BaseModel,
-    PartnerRelationMixin,
+    UTMSouceRelationMixin,
 ):
     title: Mapped[str] = mapped_column(
         String(128),

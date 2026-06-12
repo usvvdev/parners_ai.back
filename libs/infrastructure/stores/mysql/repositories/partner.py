@@ -21,6 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..models import (
     Partners,
     Links,
+    UtmSources,
     PartnerLinks,
 )
 
@@ -145,9 +146,12 @@ class PartnerRepository(MySQLRepository[Partners]):
         session: AsyncSession | None = None,
     ) -> type[Partners] | None:
         return await self._fetch_many(
-            query=select(
-                self._table,
-            ).order_by(desc(self._table.is_selected)),
+            query=select(self._table)
+            .options(
+                selectinload(self._table.utm_source),
+            )
+            .order_by(desc(self._table.is_selected))
+            .join(UtmSources),
             session=session,
         )
 
