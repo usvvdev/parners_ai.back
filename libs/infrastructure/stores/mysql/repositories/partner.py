@@ -86,7 +86,7 @@ class PartnerRepository(MySQLRepository[Partners]):
     async def fetch_one(
         self,
         id: int,
-        params: Params,
+        params: Params | None = None,
         session: AsyncSession | None = None,
     ) -> Optional[Partners]:
         return await self._fetch_one(
@@ -107,7 +107,7 @@ class PartnerRepository(MySQLRepository[Partners]):
                 )
             ),
             id=id,
-            with_pagination=True,
+            with_pagination=params is not None,
             params=params,
             session=session,
         )

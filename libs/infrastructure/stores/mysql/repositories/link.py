@@ -95,7 +95,7 @@ class LinkRepository(MySQLRepository[Links]):
                 )
             ),
             id=id,
-            with_pagination=True,
+            with_pagination=params is not None,
             params=params,
             session=session,
         )
