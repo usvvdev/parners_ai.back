@@ -13,7 +13,7 @@ def short_url(value: str, limit: int = 35) -> str:
 
 def format_offer_symbols(symbols: list[str]) -> str:
     if not symbols:
-        return "—"
+        return ""
 
     return "·".join(symbols)
 
@@ -27,4 +27,4 @@ def format_link_list_label(
     badges = format_offer_symbols(symbols)
     url = short_url(link, limit=url_limit)
 
-    return f"「{badges}」 {url}"
+    return f" [{badges}] {url}"
