@@ -22,7 +22,7 @@ from contextlib import (
     asynccontextmanager,
 )
 
-from sqlalchemy.err import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
