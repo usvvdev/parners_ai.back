@@ -1,4 +1,4 @@
 services:
   bot:
     environment:
-      BOT_TOKEN: ${BOT_TOKEN}
+      TELEGRAM_OPTIONS__BOT_TOKEN: ${TELEGRAM_OPTIONS__BOT_TOKEN}
