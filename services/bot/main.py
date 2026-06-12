@@ -1,6 +1,6 @@
 # packages
 
-import asyncio
+from asyncio import run
 
 from pathlib import Path
 
@@ -33,7 +33,7 @@ from libs.infrastructure.factories.common import ApplicationConfigFactory
 SERVICE_DIR = Path(__file__).parent
 
 
-async def run_app() -> None:
+async def create_app() -> None:
     config = ApplicationConfigFactory.create(
         service_dir=SERVICE_DIR,
     )
@@ -82,7 +82,9 @@ async def run_app() -> None:
 
 
 def main():
-    asyncio.run(run_app())
+    run(
+        create_app(),
+    )
 
 
 if __name__ == "__main__":
