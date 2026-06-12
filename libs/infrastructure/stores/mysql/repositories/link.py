@@ -5,7 +5,10 @@ from typing import (
     Optional,
 )
 
-from sqlalchemy import select
+from sqlalchemy import (
+    delete,
+    select,
+)
 
 from sqlalchemy.orm import selectinload
 
@@ -50,6 +53,27 @@ class LinkRepository(MySQLRepository[Links]):
             session=session,
         )
 
+    async def __sync_offers(
+        self,
+        session: AsyncSession,
+        link_id: int,
+        offer_ids: list[int],
+    ) -> None:
+        await session.execute(
+            delete(LinkOffers).where(LinkOffers.link_id == link_id),
+        )
+
+        if offer_ids:
+            session.add_all(
+                [
+                    LinkOffers(
+                        link_id=link_id,
+                        offer_id=offer_id,
+                    )
+                    for offer_id in offer_ids
+                ],
+            )
+
     async def __commit_offers(
         self,
         entity: Links,
@@ -57,6 +81,14 @@ class LinkRepository(MySQLRepository[Links]):
         offer_ids: list[int] | None,
     ) -> None:
         if offer_ids is None:
+            return
+
+        if entity.id:
+            await self.__sync_offers(
+                session,
+                entity.id,
+                offer_ids,
+            )
             return
 
         entity.offers = await self.__fetch_offers(

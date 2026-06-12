@@ -6,6 +6,7 @@ from typing import (
 )
 
 from sqlalchemy import (
+    delete,
     select,
     desc,
 )
@@ -57,6 +58,27 @@ class PartnerRepository(MySQLRepository[Partners]):
             session=session,
         )
 
+    async def __sync_links(
+        self,
+        session: AsyncSession,
+        partner_id: int,
+        link_ids: list[int],
+    ) -> None:
+        await session.execute(
+            delete(PartnerLinks).where(PartnerLinks.partner_id == partner_id),
+        )
+
+        if link_ids:
+            session.add_all(
+                [
+                    PartnerLinks(
+                        partner_id=partner_id,
+                        link_id=link_id,
+                    )
+                    for link_id in link_ids
+                ],
+            )
+
     async def __commit_links(
         self,
         entity: Partners,
@@ -66,6 +88,14 @@ class PartnerRepository(MySQLRepository[Partners]):
         if link_ids is None:
             return
 
+        if entity.id:
+            await self.__sync_links(
+                session,
+                entity.id,
+                link_ids,
+            )
+            return
+
         entity.links = await self.__fetch_links(
             session=session,
             link_ids=link_ids,
@@ -73,7 +103,7 @@ class PartnerRepository(MySQLRepository[Partners]):
 
     async def _before_commit(
         self,
-        entity: Links,
+        entity: Partners,
         data: Any,
         session: AsyncSession,
     ) -> None:
