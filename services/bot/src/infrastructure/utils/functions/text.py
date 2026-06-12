@@ -27,4 +27,6 @@ def format_link_list_label(
     badges = format_offer_symbols(symbols)
     url = short_url(link, limit=url_limit)
 
-    return f" [{badges}] {url}"
+    badge_part = f" [{badges}]" if badges else ""
+
+    return f" {badge_part} {url}"
