@@ -10,6 +10,8 @@ from ..clients.api import (
     OfferAPIClient,
 )
 
+from libs.core.config import TApplicationConfig
+
 from libs.domain.types._types.common import BaseModelType
 
 
@@ -26,12 +28,15 @@ class APIClients(BaseModelType):
 class APIClientsFactory:
     @staticmethod
     def create(
-        base_url: str,
+        config: type[TApplicationConfig],
         timeout: float = 30.0,
     ) -> APIClients:
         http = AsyncClient(
-            base_url=base_url,
+            base_url=config.telegram_options.api_base_url,
             timeout=timeout,
+            headers={
+                "Authorization": f"Bearer {config.access_token}",
+            },
         )
 
         return APIClients(

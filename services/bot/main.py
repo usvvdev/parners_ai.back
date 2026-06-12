@@ -39,7 +39,7 @@ async def create_app() -> None:
     )
 
     clients = APIClientsFactory.create(
-        base_url=config.telegram_options.api_base_url,
+        config=config,
     )
 
     services = BotServicesFactory.create(
