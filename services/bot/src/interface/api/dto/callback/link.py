@@ -10,3 +10,4 @@ class LinkCD(
     action: str
     p_id: int
     l_id: int
+    page: int = 1

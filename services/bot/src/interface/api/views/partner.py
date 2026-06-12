@@ -15,6 +15,7 @@ from ..dto.callback import (
 from .base import (
     build_list_text,
     append_list_pagination,
+    append_detail_pagination,
 )
 
 from ....domain.types.enums.actions import (
@@ -26,7 +27,7 @@ from ....domain.types.enums.common import NavLevel
 
 from ....infrastructure.utils import (
     safe,
-    short_url,
+    format_link_list_label,
 )
 
 from ....domain.types._types import (
@@ -98,15 +99,26 @@ class PartnerView:
             callback_data=PartnerCD(action=PartnerAction.EDIT_LINKS, p_id=partner.id),
         )
 
-        for link in partner.links:
+        for link in partner.links.items:
             builder.button(
-                text=f"🔗 {short_url(link.link)}",
+                text=format_link_list_label(link.link, link.offers),
                 callback_data=LinkCD(
                     action=LinkAction.VIEW,
                     p_id=partner.id,
                     l_id=link.id,
                 ),
             )
+
+        append_detail_pagination(
+            builder,
+            page=partner.links.page,
+            pages=partner.links.pages,
+            build_callback=lambda page: PartnerCD(
+                action=PartnerAction.VIEW,
+                p_id=partner.id,
+                page=page,
+            ).pack(),
+        )
 
         builder.button(
             text="🗑 Удалить партнера",
@@ -123,7 +135,7 @@ class PartnerView:
             f"🏷 <b>UTM:</b> {safe(partner.utm_source)}\n"
             f"⭐ <b>Избранное:</b> {'Да' if partner.is_selected else 'Нет'}\n"
             f"📊 <b>Трекинг:</b> {'Активен' if partner.is_tracking else 'Выключен'}\n\n"
-            f"🔗 <b>Ссылки ({len(partner.links)}):</b>"
+            f"🔗 <b>Ссылки ({partner.links.total}):</b>"
         )
 
         return text, builder
@@ -188,7 +200,7 @@ class PartnerView:
         for link in links:
             status = "🟢" if link.id in selected_ids else "🔴"
             builder.button(
-                text=f"{status} {short_url(link.link)}",
+                text=f"{status} {format_link_list_label(link.link, link.offers, url_limit=24)}",
                 callback_data=LinkCD(
                     action=LinkAction.PICK_TOGGLE,
                     p_id=p_id,

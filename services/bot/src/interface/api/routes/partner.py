@@ -90,7 +90,10 @@ async def partner_detail(
     callback_data: PartnerCD,
     partner_service: PartnerService,
 ) -> None:
-    partner = await partner_service.fetch_by_id(callback_data.p_id)
+    partner = await partner_service.fetch_by_id(
+        callback_data.p_id,
+        page=callback_data.page,
+    )
     text, builder = PartnerView.detail(partner)
     await render_callback(callback, text, builder)
 
@@ -155,7 +158,10 @@ async def partner_settings(
     callback_data: PartnerCD,
     partner_service: PartnerService,
 ) -> None:
-    partner = await partner_service.fetch_by_id(callback_data.p_id)
+    partner = await partner_service.fetch_by_id(
+        callback_data.p_id,
+        page=callback_data.page,
+    )
     text, builder = PartnerView.settings(partner)
     await render_callback(callback, text, builder)
 
@@ -262,7 +268,10 @@ async def link_pick_cancel(
     partner_service: PartnerService,
 ) -> None:
     await state.clear()
-    partner = await partner_service.fetch_by_id(callback_data.p_id)
+    partner = await partner_service.fetch_by_id(
+        callback_data.p_id,
+        page=callback_data.page,
+    )
     text, builder = PartnerView.detail(partner)
     await render_callback(callback, text, builder)
 

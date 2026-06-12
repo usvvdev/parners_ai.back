@@ -11,6 +11,8 @@ from .chat import (
 from .text import (
     safe,
     short_url,
+    format_offer_symbols,
+    format_link_list_label,
 )
 
 __all__: list[str] = [
@@ -22,4 +24,6 @@ __all__: list[str] = [
     "render_callback",
     "safe",
     "short_url",
+    "format_offer_symbols",
+    "format_link_list_label",
 ]

@@ -51,10 +51,7 @@ from ....domain.types._types import (
     FetchPartners,
 )
 
-from ....infrastructure.utils.decorators import (
-    handle_http_error,
-    handle_form_submit,
-)
+from ....infrastructure.utils.decorators import handle_http_error
 
 from ....infrastructure.utils.functions import (
     init_form_context,
@@ -106,7 +103,10 @@ async def link_detail(
     callback_data: LinkCD,
     link_service: LinkService,
 ) -> None:
-    link = await link_service.fetch_by_id(callback_data.l_id)
+    link = await link_service.fetch_by_id(
+        callback_data.l_id,
+        page=callback_data.page,
+    )
     text, builder = LinkView.detail(link, p_id=callback_data.p_id)
     await render_callback(callback, text, builder)
 
@@ -118,7 +118,10 @@ async def link_toggle(
     callback_data: LinkCD,
     link_service: LinkService,
 ) -> None:
-    link, new_status = await link_service.toggle(callback_data.l_id)
+    link, new_status = await link_service.toggle(
+        callback_data.l_id,
+        page=callback_data.page,
+    )
     text, builder = LinkView.detail(link, p_id=callback_data.p_id)
 
     answer = "активирована" if new_status else "деактивирована"
@@ -245,7 +248,10 @@ async def pick_offer_cancel(
     await state.clear()
 
     if mode == PickMode.EDIT and callback_data.l_id:
-        link = await link_service.fetch_by_id(callback_data.l_id)
+        link = await link_service.fetch_by_id(
+        callback_data.l_id,
+        page=callback_data.page,
+    )
         text, builder = LinkView.detail(link, p_id=callback_data.p_id)
     elif callback_data.p_id:
         partner = await partner_service.fetch_by_id(callback_data.p_id)
@@ -274,7 +280,11 @@ async def pick_offer_confirm(
             p_id=data.get("p_id", 0),
         )
     else:
-        result = await link_service.update_offers(data["l_id"], offer_ids)
+        result = await link_service.update_offers(
+            data["l_id"],
+            offer_ids,
+            page=data.get("page", 1),
+        )
 
     await state.clear()
 

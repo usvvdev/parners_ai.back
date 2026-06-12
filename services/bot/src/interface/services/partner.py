@@ -34,8 +34,13 @@ class PartnerService:
     async def fetch_by_id(
         self,
         id: int,
+        *,
+        page: int = 1,
     ) -> FetchPartners:
-        return await self._partner_client.fetch_by_id(id)
+        return await self._partner_client.fetch_by_id(
+            id,
+            page=page,
+        )
 
     async def create(
         self,
@@ -87,9 +92,22 @@ class PartnerService:
         self,
         id: int,
     ) -> list[int]:
-        partner = await self._partner_client.fetch_by_id(id)
+        link_ids: list[int] = []
+        page = 1
 
-        return [link.id for link in partner.links]
+        while True:
+            partner = await self._partner_client.fetch_by_id(
+                id,
+                page=page,
+            )
+            link_ids.extend(link.id for link in partner.links.items)
+
+            if page >= partner.links.pages:
+                break
+
+            page += 1
+
+        return link_ids
 
     async def fetch_all_links(self) -> list[FetchLinks]:
         return await self._link_client.fetch_all()

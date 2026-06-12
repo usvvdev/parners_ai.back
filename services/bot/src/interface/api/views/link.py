@@ -16,6 +16,7 @@ from ..dto.callback import (
 from .base import (
     build_list_text,
     append_list_pagination,
+    append_detail_pagination,
 )
 
 from ....domain.types.enums.actions import (
@@ -32,6 +33,8 @@ from ....domain.types.enums.common import (
 from ....infrastructure.utils import (
     safe,
     short_url,
+    format_offer_symbols,
+    format_link_list_label,
 )
 
 from ....domain.types._types import (
@@ -56,7 +59,7 @@ class LinkView:
 
         for link in data.items:
             builder.button(
-                text=f"🔗 {short_url(link.link)}",
+                text=format_link_list_label(link.link, link.offers),
                 callback_data=LinkCD(action=LinkAction.VIEW, p_id=0, l_id=link.id),
             )
 
@@ -103,9 +106,10 @@ class LinkView:
             ),
         )
 
-        for offer in link.offers:
+        for offer in link.offers.items:
+            label = offer.symbol or offer.title
             builder.button(
-                text=f"🎁 {offer.title}",
+                text=f"{label} · {offer.title}" if offer.symbol else f"🎁 {offer.title}",
                 callback_data=OfferCD(
                     action=OfferAction.VIEW,
                     p_id=p_id,
@@ -113,6 +117,18 @@ class LinkView:
                     o_id=offer.id,
                 ),
             )
+
+        append_detail_pagination(
+            builder,
+            page=link.offers.page,
+            pages=link.offers.pages,
+            build_callback=lambda page: LinkCD(
+                action=LinkAction.VIEW,
+                p_id=p_id,
+                l_id=link.id,
+                page=page,
+            ).pack(),
+        )
 
         builder.button(
             text="🗑 Удалить ссылку",
@@ -134,8 +150,9 @@ class LinkView:
 
         text = (
             f"🔗 <b>Ссылка:</b> {safe(short_url(link.link, limit=80))}\n"
-            f"⚡ <b>Статус:</b> {'Активна' if link.is_active else 'Отключена'}\n\n"
-            f"🎁 <b>Офферы ({len(link.offers)}):</b>"
+            f"⚡ <b>Статус:</b> {'Активна' if link.is_active else 'Отключена'}\n"
+            f"🎁 <b>Офферы:</b> {format_offer_symbols([o.symbol for o in link.offers.items if o.symbol])}\n\n"
+            f"🎁 <b>Список ({link.offers.total}):</b>"
         )
 
         return text, builder

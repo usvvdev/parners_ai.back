@@ -11,3 +11,4 @@ class PartnerCD(
     p_id: int
     is_tracking: int = 0
     is_selected: int = 0
+    page: int = 1

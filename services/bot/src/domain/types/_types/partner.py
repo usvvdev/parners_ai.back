@@ -2,11 +2,18 @@
 
 from typing import Optional
 
-from pydantic import Field
+from pydantic import (
+    Field,
+    field_validator,
+)
 
 # application depencies
 
-from .base import BaseFetch
+from .base import (
+    BaseFetch,
+    PaginatedResponse,
+    parse_nested_page,
+)
 
 from .link import FetchLinks
 
@@ -46,10 +53,21 @@ class FetchPartner(
 
 
 class FetchPartners(FetchPartner):
-    links: list[FetchLinks] = Field(
-        default_factory=list,
+    links: PaginatedResponse[FetchLinks] = Field(
+        default_factory=lambda: PaginatedResponse(
+            items=[],
+            total=0,
+            page=1,
+            size=0,
+            pages=0,
+        ),
         description="Ссылки партнера",
     )
+
+    @field_validator("links", mode="before")
+    @classmethod
+    def _parse_links(cls, v: PaginatedResponse[FetchLinks] | dict | None):
+        return parse_nested_page(v, FetchLinks)
 
 
 class InsertPartner(

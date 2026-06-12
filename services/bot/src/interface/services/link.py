@@ -39,14 +39,24 @@ class LinkService:
     async def fetch_by_id(
         self,
         id: int,
+        *,
+        page: int = 1,
     ) -> FetchLink:
-        return await self._link_client.fetch_by_id(id)
+        return await self._link_client.fetch_by_id(
+            id,
+            page=page,
+        )
 
     async def toggle(
         self,
         id: int,
+        *,
+        page: int = 1,
     ) -> tuple[FetchLink, bool]:
-        link = await self._link_client.fetch_by_id(id)
+        link = await self._link_client.fetch_by_id(
+            id,
+            page=page,
+        )
         new_status = not link.is_active
 
         await self._link_client.update(
@@ -54,19 +64,27 @@ class LinkService:
             UpdateLink(is_active=new_status),
         )
 
-        return await self._link_client.fetch_by_id(id), new_status
+        return await self._link_client.fetch_by_id(
+            id,
+            page=page,
+        ), new_status
 
     async def update_url(
         self,
         id: int,
         url: str,
+        *,
+        page: int = 1,
     ) -> FetchLink:
         await self._link_client.update(
             id,
             UpdateLink(link=url),
         )
 
-        return await self._link_client.fetch_by_id(id)
+        return await self._link_client.fetch_by_id(
+            id,
+            page=page,
+        )
 
     async def create_with_offers(
         self,
@@ -77,8 +95,7 @@ class LinkService:
         created = await self._link_client.create(data)
 
         if p_id:
-            partner = await self._partner_client.fetch_by_id(p_id)
-            link_ids = [item.id for item in partner.links]
+            link_ids = await self._fetch_all_partner_link_ids(p_id)
 
             return await self._partner_client.update(
                 p_id,
@@ -91,13 +108,18 @@ class LinkService:
         self,
         id: int,
         offer_ids: list[int],
+        *,
+        page: int = 1,
     ) -> FetchLink:
         await self._link_client.update(
             id,
             UpdateLink(offer_ids=offer_ids),
         )
 
-        return await self._link_client.fetch_by_id(id)
+        return await self._link_client.fetch_by_id(
+            id,
+            page=page,
+        )
 
     async def delete(
         self,
@@ -109,9 +131,43 @@ class LinkService:
         self,
         id: int,
     ) -> list[int]:
-        link = await self._link_client.fetch_by_id(id)
+        offer_ids: list[int] = []
+        page = 1
 
-        return [offer.id for offer in link.offers]
+        while True:
+            link = await self._link_client.fetch_by_id(
+                id,
+                page=page,
+            )
+            offer_ids.extend(offer.id for offer in link.offers.items)
+
+            if page >= link.offers.pages:
+                break
+
+            page += 1
+
+        return offer_ids
 
     async def fetch_all_offers(self) -> list[FetchOffer]:
         return await self._offer_client.fetch_all()
+
+    async def _fetch_all_partner_link_ids(
+        self,
+        p_id: int,
+    ) -> list[int]:
+        link_ids: list[int] = []
+        page = 1
+
+        while True:
+            partner = await self._partner_client.fetch_by_id(
+                p_id,
+                page=page,
+            )
+            link_ids.extend(link.id for link in partner.links.items)
+
+            if page >= partner.links.pages:
+                break
+
+            page += 1
+
+        return link_ids

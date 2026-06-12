@@ -11,3 +11,4 @@ class OfferAPIClient(
     path = "/offers"
     list_schema = FetchOffer
     detail_schema = FetchOffer
+    detail_paginated = False

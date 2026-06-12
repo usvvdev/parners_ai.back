@@ -9,3 +9,22 @@ def short_url(value: str, limit: int = 35) -> str:
     url = value.replace("https://", "").replace("http://", "")
 
     return f"{url[:limit]}..." if len(url) > limit else url
+
+
+def format_offer_symbols(symbols: list[str]) -> str:
+    if not symbols:
+        return "—"
+
+    return "·".join(symbols)
+
+
+def format_link_list_label(
+    link: str,
+    symbols: list[str],
+    *,
+    url_limit: int = 28,
+) -> str:
+    badges = format_offer_symbols(symbols)
+    url = short_url(link, limit=url_limit)
+
+    return f"「{badges}」 {url}"

@@ -87,6 +87,7 @@ class BaseResourceAPIClient(
     path: str
     list_schema: type[TList]
     detail_schema: type[TDetail]
+    detail_paginated: bool = True
 
     async def fetch_page(
         self,
@@ -129,8 +130,25 @@ class BaseResourceAPIClient(
     async def fetch_by_id(
         self,
         id: int,
+        *,
+        page: int = 1,
+        size: int = DEFAULT_PAGE_SIZE,
+        paginated: bool | None = None,
     ) -> TDetail:
-        data = await self._get(f"{self.path}/{id}")
+        use_pagination = (
+            self.detail_paginated
+            if paginated is None
+            else paginated
+        )
+        params = (
+            {"page": page, "size": size}
+            if use_pagination
+            else None
+        )
+        data = await self._get(
+            f"{self.path}/{id}",
+            params=params,
+        )
 
         return self.detail_schema.model_validate(data)
 

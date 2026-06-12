@@ -9,7 +9,11 @@ from pydantic import (
 
 # application depencies
 
-from .base import BaseFetch
+from .base import (
+    BaseFetch,
+    PaginatedResponse,
+    parse_nested_page,
+)
 
 from .offer import FetchOffer
 
@@ -34,7 +38,15 @@ class FetchLinks(
     LinkIdentity,
     BaseFetch,
 ):
-    pass
+    offers: list[str] = Field(
+        default_factory=list,
+        description="Символы офферов ссылки",
+    )
+
+    @field_validator("offers", mode="before")
+    @classmethod
+    def _normalize_offers(cls, v: list | None) -> list:
+        return v if v is not None else []
 
 
 class FetchLink(
@@ -42,15 +54,21 @@ class FetchLink(
     BaseLinkFields,
     BaseFetch,
 ):
-    offers: list[FetchOffer] = Field(
-        default_factory=list,
+    offers: PaginatedResponse[FetchOffer] = Field(
+        default_factory=lambda: PaginatedResponse(
+            items=[],
+            total=0,
+            page=1,
+            size=0,
+            pages=0,
+        ),
         description="Офферы, привязанные к ссылке",
     )
 
     @field_validator("offers", mode="before")
     @classmethod
-    def _normalize_offers(cls, v: list | None) -> list:
-        return v if v is not None else []
+    def _parse_offers(cls, v: PaginatedResponse[FetchOffer] | dict | None):
+        return parse_nested_page(v, FetchOffer)
 
 
 class InsertLink(

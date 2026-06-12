@@ -71,6 +71,44 @@ def append_list_pagination(
     builder.row(*buttons)
 
 
+def append_detail_pagination(
+    builder: InlineKeyboardBuilder,
+    *,
+    page: int,
+    pages: int,
+    build_callback,
+) -> None:
+    if pages <= 1:
+        return
+
+    buttons: list[InlineKeyboardButton] = []
+
+    if page > 1:
+        buttons.append(
+            InlineKeyboardButton(
+                text="◀️ Назад",
+                callback_data=build_callback(page - 1),
+            )
+        )
+
+    buttons.append(
+        InlineKeyboardButton(
+            text=f"· {page}/{pages} ·",
+            callback_data=build_callback(page),
+        )
+    )
+
+    if page < pages:
+        buttons.append(
+            InlineKeyboardButton(
+                text="Вперёд ▶️",
+                callback_data=build_callback(page + 1),
+            )
+        )
+
+    builder.row(*buttons)
+
+
 def build_form_prompt(
     text: str,
     cancel_data,
