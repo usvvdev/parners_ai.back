@@ -12,51 +12,64 @@ from aiogram.client.session.aiohttp import AiohttpSession
 
 # application dependencies
 
-from .src.config import BotSettings
+from .src.interface.routing import BotApplicationRouter
 
-from .src.interface.handlers import (
+from .src.interface.api.routes import (
     start_router,
+    main_router,
     partner_router,
     link_router,
     offer_router,
-    main_router,
 )
 
-from .src.infrastructure.factories import APIClientsFactory
+from .src.infrastructure.factories import (
+    APIClientsFactory,
+    BotServicesFactory,
+)
+
+from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 
 SERVICE_DIR = Path(__file__).parent
 
 
 async def run_app() -> None:
-    settings = BotSettings(
-        _env_file=SERVICE_DIR / ".env",
+    config = ApplicationConfigFactory.create(
+        service_dir=SERVICE_DIR,
     )
 
     clients = APIClientsFactory.create(
-        base_url=settings.api_base_url,
+        base_url=config.telegram_options.api_base_url,
     )
 
-    session = AiohttpSession(
-        settings.proxy_url,
+    services = BotServicesFactory.create(
+        clients=clients,
     )
 
     bot = Bot(
-        token=settings.bot_token,
-        session=session,
+        token=config.telegram_options.bot_token,
+        session=AiohttpSession(
+            config.proxy_url,
+        ),
     )
 
     dp = Dispatcher()
 
-    dp["partner_client"] = clients.partner
-    dp["link_client"] = clients.link
-    dp["offer_client"] = clients.offer
+    dp["partner_service"] = services.partner
+    dp["link_service"] = services.link
+    dp["offer_service"] = services.offer
 
-    dp.include_router(start_router)
-    dp.include_router(main_router)
-    dp.include_router(partner_router)
-    dp.include_router(link_router)
-    dp.include_router(offer_router)
+    BotApplicationRouter(
+        dispatcher=dp,
+    ).register_routes(
+        routes=[
+            start_router,
+            main_router,
+            partner_router,
+            link_router,
+            offer_router,
+        ],
+    )
 
     try:
         logger.info("Bot starting...")

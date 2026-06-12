@@ -1,7 +1,5 @@
 # packages
 
-from dataclasses import dataclass
-
 from httpx import AsyncClient
 
 # application dependencies
@@ -12,9 +10,10 @@ from ..clients.api import (
     OfferAPIClient,
 )
 
+from libs.domain.types._types.common import BaseModelType
 
-@dataclass(frozen=True)
-class APIClients:
+
+class APIClients(BaseModelType):
     http: AsyncClient
     partner: PartnerAPIClient
     link: LinkAPIClient

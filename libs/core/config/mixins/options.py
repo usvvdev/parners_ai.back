@@ -6,7 +6,11 @@ from typing import Optional
 
 # application dependencies
 
-from libs.domain.types._types.options import EngineOptions, OpenAPIOptions
+from libs.domain.types._types.options import (
+    EngineOptions,
+    OpenAPIOptions,
+    TelegramOptions,
+)
 
 
 class ApplicationOptionsMixin:
@@ -18,4 +22,9 @@ class ApplicationOptionsMixin:
     openai_options: Optional[OpenAPIOptions] = Field(
         default_factory=OpenAPIOptions,
         description="Openai application options",
+    )
+
+    telegram_options: Optional[TelegramOptions] = Field(
+        default=None,
+        description="Telegram options",
     )

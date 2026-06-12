@@ -2,7 +2,11 @@
 
 from os import getenv
 
-from typing import Any, TypeVar
+from typing import (
+    Any,
+    Optional,
+    TypeVar,
+)
 
 from pydantic import Field
 
@@ -66,6 +70,12 @@ class ApplicationBaseConfig(
             "uvicorn.access",
         ),
         description="Tuple of logger names to configure",
+    )
+
+    # proxy pass
+    proxy_url: Optional[str] = Field(
+        default=None,
+        description="Proxy url",
     )
 
     @classmethod
