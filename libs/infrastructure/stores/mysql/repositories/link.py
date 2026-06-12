@@ -2,7 +2,6 @@
 
 from typing import (
     Any,
-    Optional,
 )
 
 from sqlalchemy import (
@@ -113,9 +112,10 @@ class LinkRepository(MySQLRepository[Links]):
         id: int,
         params: Params | None = None,
         session: AsyncSession | None = None,
-    ) -> Optional[Links]:
+    ) -> tuple[Links, Any] | Links:
+        pagination = self._list_params(params)
+
         return await self._fetch_one(
-            query=select(self._table).where(self._table.id == id),
             pagination_query=(
                 select(Offers)
                 .join(
@@ -127,8 +127,8 @@ class LinkRepository(MySQLRepository[Links]):
                 )
             ),
             id=id,
-            with_pagination=params is not None,
-            params=params,
+            with_pagination=self._paginate_on_read(session),
+            params=pagination,
             session=session,
         )
 
@@ -150,10 +150,14 @@ class LinkRepository(MySQLRepository[Links]):
         data: Any,
         *,
         session: AsyncSession | None = None,
-    ) -> Links:
-        return await self._insert(
+    ) -> tuple[Links, Any]:
+        entity = await self._insert(
             data,
             session=session,
+        )
+
+        return await self.fetch_one(
+            id=entity.id,
         )
 
     async def update(
@@ -162,11 +166,15 @@ class LinkRepository(MySQLRepository[Links]):
         data: Any,
         *,
         session: AsyncSession | None = None,
-    ) -> Links:
-        return await self._update(
+    ) -> tuple[Links, Any]:
+        await self._update(
             id=id,
             data=data,
             session=session,
+        )
+
+        return await self.fetch_one(
+            id=id,
         )
 
     async def delete(

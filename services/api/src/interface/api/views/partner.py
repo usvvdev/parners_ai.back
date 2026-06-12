@@ -11,8 +11,6 @@ from ..dto import (
     UpdatePartner,
 )
 
-from ....infrastructure.utils.functions import set_custom_pagination
-
 from libs.infrastructure.stores.mysql.repositories import PartnerRepository
 
 
@@ -28,39 +26,30 @@ class PartnerRepositoryView:
     ) -> list[FetchPartner]:
         return await self._repository.fetch_many()
 
-    async def __fetch_one(
+    async def fetch_by_id(
         self,
         id: int,
-        params: Params | None = None,
+        params: Params,
     ) -> FetchPartners:
         partner, links = await self._repository.fetch_one(
             id=id,
-            params=params or set_custom_pagination(),
+            params=params,
         )
         return FetchPartners(
             **partner.__dict__,
             links=links,
         )
 
-    async def fetch_by_id(
-        self,
-        id: int,
-        params: Params,
-    ) -> FetchPartners:
-        return await self.__fetch_one(
-            id=id,
-            params=params,
-        )
-
     async def insert(
         self,
         data: InsertPartner,
     ) -> FetchPartners:
-        partner = await self._repository.insert(
+        partner, links = await self._repository.insert(
             data=data,
         )
-        return await self.__fetch_one(
-            id=partner.id,
+        return FetchPartners(
+            **partner.__dict__,
+            links=links,
         )
 
     async def update(
@@ -68,12 +57,13 @@ class PartnerRepositoryView:
         id: int,
         data: UpdatePartner,
     ) -> FetchPartners:
-        await self._repository.update(
+        partner, links = await self._repository.update(
             id=id,
             data=data,
         )
-        return await self.__fetch_one(
-            id=id,
+        return FetchPartners(
+            **partner.__dict__,
+            links=links,
         )
 
     async def delete(

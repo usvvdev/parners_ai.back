@@ -11,8 +11,6 @@ from ..dto import (
     UpdateLink,
 )
 
-from ....infrastructure.utils.functions import set_custom_pagination
-
 from libs.infrastructure.stores.mysql.repositories import LinkRepository
 
 
@@ -28,39 +26,30 @@ class LinkRepositoryView:
     ) -> list[FetchLinks]:
         return await self._repository.fetch_many()
 
-    async def __fetch_one(
+    async def fetch_by_id(
         self,
         id: int,
-        params: Params | None = None,
+        params: Params,
     ) -> FetchLink:
         link, offers = await self._repository.fetch_one(
             id=id,
-            params=params or set_custom_pagination(),
+            params=params,
         )
         return FetchLink(
             **link.__dict__,
             offers=offers,
         )
 
-    async def fetch_by_id(
-        self,
-        id: int,
-        params: Params,
-    ) -> FetchLink:
-        return await self.__fetch_one(
-            id=id,
-            params=params,
-        )
-
     async def insert(
         self,
         data: InsertLink,
     ) -> FetchLink:
-        link = await self._repository.insert(
+        link, offers = await self._repository.insert(
             data=data,
         )
-        return await self.__fetch_one(
-            id=link.id,
+        return FetchLink(
+            **link.__dict__,
+            offers=offers,
         )
 
     async def update(
@@ -68,12 +57,13 @@ class LinkRepositoryView:
         id: int,
         data: UpdateLink,
     ) -> FetchLink:
-        await self._repository.update(
+        link, offers = await self._repository.update(
             id=id,
             data=data,
         )
-        return await self.__fetch_one(
-            id=id,
+        return FetchLink(
+            **link.__dict__,
+            offers=offers,
         )
 
     async def delete(

@@ -74,9 +74,9 @@ def create_app() -> FastAPI:
         app=app,
     ).register_routes(
         routes=[
-            offer_router,
             partner_router,
             link_router,
+            offer_router,
             offer_position_router,
         ]
     )

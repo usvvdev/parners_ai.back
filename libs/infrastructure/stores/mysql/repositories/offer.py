@@ -33,9 +33,6 @@ class OfferRepository(MySQLRepository[Offers]):
         session: AsyncSession | None = None,
     ) -> type[Offers] | None:
         return await self._fetch_one(
-            query=select(self._table).where(
-                self._table.id == id,
-            ),
             id=id,
             session=session,
         )

@@ -13,6 +13,8 @@ from sqlalchemy import (
     # types
     Executable,
     Result,
+    # functions
+    select,
 )
 
 from loguru import logger
@@ -45,6 +47,8 @@ from libs.domain.utils.orm_dump import orm_model_dump
 
 
 T = TypeVar("T")
+
+DEFAULT_LIST_PARAMS = Params(page=1, size=5)
 
 
 class BaseSQLExecutor:
@@ -150,17 +154,24 @@ class BaseSQLExecutor:
 
     async def _fetch_one(
         self,
-        query: Executable,
+        query: Executable | None = None,
         *,
         id: int | None = None,
         session: AsyncSession | None = None,
         with_pagination: bool = False,
         **kawrgs,
     ) -> Any:
+        query = (
+            select(self._table).where(
+                self._table.id == id,
+            )
+            if query is None
+            else query
+        )
 
         result = (
             await self._query(
-                query,
+                query=query,
                 session=session,
             )
         ).first()
@@ -193,6 +204,18 @@ class BaseSQLExecutor:
                 session=session,
             )
         ).all()
+
+    def _list_params(
+        self,
+        params: Params | None,
+    ) -> Params:
+        return params or DEFAULT_LIST_PARAMS
+
+    def _paginate_on_read(
+        self,
+        session: AsyncSession | None,
+    ) -> bool:
+        return session is None
 
     async def _before_commit(
         self,
@@ -248,12 +271,14 @@ class BaseSQLExecutor:
         id: int,
         data: Any,
         *,
+        query: Executable | None = None,
         session: AsyncSession | None = None,
     ) -> Any:
         async def action(
             opened_session: AsyncSession,
         ) -> Any:
-            entity = await self.fetch_one(
+            entity = await self._fetch_one(
+                query=query,
                 id=id,
                 session=opened_session,
             )
