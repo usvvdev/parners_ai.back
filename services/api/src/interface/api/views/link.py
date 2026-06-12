@@ -28,7 +28,7 @@ class LinkRepositoryView:
     ) -> list[FetchLinks]:
         return await self._repository.fetch_many()
 
-    async def _to_fetch_link(
+    async def __fetch_one(
         self,
         id: int,
         params: Params | None = None,
@@ -47,7 +47,7 @@ class LinkRepositoryView:
         id: int,
         params: Params,
     ) -> FetchLink:
-        return await self._to_fetch_link(
+        return await self.__fetch_one(
             id=id,
             params=params,
         )
@@ -59,7 +59,7 @@ class LinkRepositoryView:
         link = await self._repository.insert(
             data=data,
         )
-        return await self._to_fetch_link(
+        return await self.__fetch_one(
             id=link.id,
         )
 
@@ -72,7 +72,7 @@ class LinkRepositoryView:
             id=id,
             data=data,
         )
-        return await self._to_fetch_link(
+        return await self.__fetch_one(
             id=id,
         )
 
