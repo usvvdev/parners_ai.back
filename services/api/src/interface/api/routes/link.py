@@ -7,6 +7,7 @@ from fastapi import (
 
 from fastapi_pagination import (
     Page,
+    Params,
     paginate,
 )
 
@@ -21,13 +22,14 @@ from ..dto import (
 
 from ..views import LinkRepositoryView
 
-from ....infrastructure.utils.functions import verify_token
+from ....infrastructure.utils.functions import (
+    verify_token,
+    set_custom_pagination,
+)
 
 from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import LinkRepositoryViewFactory
-
-from libs.infrastructure.stores.common.sql.executor import DEFAULT_LIST_PARAMS
 
 
 link_router = APIRouter(
@@ -48,12 +50,15 @@ async def fetch_links(
     _: str = Depends(
         verify_token,
     ),
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
 ) -> Page[FetchLinks]:
     data = await view.fetch()
 
     return paginate(
         data,
-        params=DEFAULT_LIST_PARAMS,
+        params=params,
     )
 
 
@@ -69,10 +74,13 @@ async def fetch_link_by_id(
     _: str = Depends(
         verify_token,
     ),
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
 ) -> FetchLink:
     return await view.fetch_by_id(
         id=id,
-        params=DEFAULT_LIST_PARAMS,
+        params=params,
     )
 
 

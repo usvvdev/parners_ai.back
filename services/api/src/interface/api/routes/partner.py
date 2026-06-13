@@ -7,6 +7,7 @@ from fastapi import (
 
 from fastapi_pagination import (
     Page,
+    Params,
     paginate,
 )
 
@@ -21,10 +22,10 @@ from ..dto import (
 
 from ..views import PartnerRepositoryView
 
-from libs.infrastructure.stores.common.sql.executor import DEFAULT_LIST_PARAMS
-
-
-from ....infrastructure.utils.functions import verify_token
+from ....infrastructure.utils.functions import (
+    verify_token,
+    set_custom_pagination,
+)
 
 from ....infrastructure.utils.decorators import disable_extension_check
 
@@ -49,12 +50,15 @@ async def fetch_offers(
     _: str = Depends(
         verify_token,
     ),
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
 ) -> Page[FetchPartner]:
     data = await view.fetch()
 
     return paginate(
         data,
-        params=DEFAULT_LIST_PARAMS,
+        params=params,
     )
 
 
@@ -70,10 +74,13 @@ async def fetch_partner(
     _: str = Depends(
         verify_token,
     ),
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
 ) -> FetchPartners:
     return await view.fetch_by_id(
         id=id,
-        params=DEFAULT_LIST_PARAMS,
+        params=params,
     )
 
 
