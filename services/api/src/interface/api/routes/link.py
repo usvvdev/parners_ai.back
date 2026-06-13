@@ -21,13 +21,13 @@ from ..dto import (
 
 from ..views import LinkRepositoryView
 
-from libs.core.constants import DEFAULT_LIST_PARAMS
-
 from ....infrastructure.utils.functions import verify_token
 
 from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import LinkRepositoryViewFactory
+
+from libs.infrastructure.stores.common.sql.executor import DEFAULT_LIST_PARAMS
 
 
 link_router = APIRouter(

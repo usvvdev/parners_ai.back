@@ -1,5 +1,3 @@
-from fastapi_pagination import Params
-
 # Configuration variables
 
 BASE_ENCODING = "utf-8"
@@ -33,6 +31,8 @@ SYSTEM_PROMPT = """
     {markdown}
 """
 
-# Pagination params
+# Pagination defaults (used by API and bot independently)
 
-DEFAULT_LIST_PARAMS = Params(page=1, size=5)
+DEFAULT_PAGE = 1
+
+DEFAULT_PAGE_SIZE = 5

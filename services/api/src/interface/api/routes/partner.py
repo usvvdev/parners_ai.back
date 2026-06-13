@@ -21,7 +21,8 @@ from ..dto import (
 
 from ..views import PartnerRepositoryView
 
-from libs.core.constants import DEFAULT_LIST_PARAMS
+from libs.infrastructure.stores.common.sql.executor import DEFAULT_LIST_PARAMS
+
 
 from ....infrastructure.utils.functions import verify_token
 
