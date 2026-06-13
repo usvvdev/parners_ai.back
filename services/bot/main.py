@@ -27,6 +27,8 @@ from .src.infrastructure.factories import (
     BotServicesFactory,
 )
 
+from .src.interface.middleware import AuthMiddleware
+
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 
@@ -54,6 +56,12 @@ async def create_app() -> None:
     )
 
     dp = Dispatcher()
+
+    dp.update.middleware(
+        AuthMiddleware(
+            telegram_options=config.telegram_options,
+        )
+    )
 
     dp["partner_service"] = services.partner
     dp["link_service"] = services.link
