@@ -90,7 +90,7 @@ class PartnerView:
                 ).pack(),
             )
 
-        append_item_grid(builder)
+        append_item_grid(builder, count=len(data.items))
 
         append_list_pagination(
             builder,
@@ -200,7 +200,7 @@ class PartnerView:
                 ).pack(),
             )
 
-        append_item_grid(builder)
+        append_item_grid(builder, count=len(partner.links.items))
 
         append_detail_pagination(
             builder,
@@ -306,7 +306,7 @@ class PartnerView:
                 ).pack(),
             )
 
-        append_item_grid(builder)
+        append_item_grid(builder, count=len(data.items))
 
         append_detail_pagination(
             builder,

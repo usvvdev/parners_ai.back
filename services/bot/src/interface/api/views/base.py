@@ -13,14 +13,15 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ..dto.callback import NavigationCD
 
-from ....core.constants import FILTER_ALL
+from ....core.constants import (
+    FILTER_ALL,
+    LIST_GRID_COLUMNS,
+    LIST_GRID_MIN_ITEMS,
+)
 
 from ....domain.types._types.base import PaginatedResponse
 
 from ....domain.types.enums.common import NavLevel
-
-
-from ....core.constants import LIST_GRID_COLUMNS
 
 
 def build_list_text(
@@ -45,10 +46,14 @@ def build_list_text(
 def append_item_grid(
     builder: InlineKeyboardBuilder,
     *,
+    count: int,
     columns: int = LIST_GRID_COLUMNS,
 ) -> None:
-    if columns > 1:
-        builder.adjust(columns)
+    if count <= 0:
+        return
+
+    layout_columns = 1 if count < LIST_GRID_MIN_ITEMS else columns
+    builder.adjust(layout_columns)
 
 
 def append_list_pagination(

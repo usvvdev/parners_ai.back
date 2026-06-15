@@ -95,7 +95,7 @@ class LinkView:
                 ).pack(),
             )
 
-        append_item_grid(builder)
+        append_item_grid(builder, count=len(data.items))
 
         append_list_pagination(
             builder,
@@ -204,7 +204,7 @@ class LinkView:
                 ).pack(),
             )
 
-        append_item_grid(builder)
+        append_item_grid(builder, count=len(link.offers.items))
 
         append_detail_pagination(
             builder,
@@ -280,7 +280,7 @@ class LinkView:
                 ).pack(),
             )
 
-        append_item_grid(builder)
+        append_item_grid(builder, count=len(data.items))
 
         append_detail_pagination(
             builder,
