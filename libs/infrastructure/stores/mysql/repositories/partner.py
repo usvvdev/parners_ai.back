@@ -150,11 +150,11 @@ class PartnerRepository(MySQLRepository[Partners]):
     ) -> type[Partners] | None:
         query = (
             select(self._table)
-            # .options(
-            #     selectinload(self._table.utm_source),
-            # )
+            .options(
+                selectinload(self._table.utm_source),
+            )
             .order_by(desc(self._table.is_selected))
-            # .join(UtmSources)
+            .join(UtmSources)
         )
         return await self._fetch_many(
             query=apply_filters(

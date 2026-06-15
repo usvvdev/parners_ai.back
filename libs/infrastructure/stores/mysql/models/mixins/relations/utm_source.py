@@ -5,10 +5,9 @@ from sqlalchemy.orm import (
 
 
 class UTMSouceRelationMixin:
-    # @declared_attr
-    # def partners(cls):
-    #     return relationship(
-    #         "Partners",
-    #         back_populates="utm_source",
-    #     )
-    pass
+    @declared_attr
+    def partners(cls):
+        return relationship(
+            "Partners",
+            back_populates="utm_source",
+        )

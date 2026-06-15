@@ -9,12 +9,12 @@ from typing import Optional
 
 from datetime import datetime
 
+from fastapi_pagination import Page
+
 from fastapi_filters import (
     FilterField,
     FilterSet,
 )
-
-from fastapi_pagination import Page
 
 # application dependencies
 
@@ -95,12 +95,7 @@ class InsertPartner(
     PartnerIdentity,
     BasePartnerFields,
 ):
-    # utm_source_id: int = Field(
-    #     ...,
-    #     description="Название оффера",
-    # )
-
-    utm_source: str = Field(
+    utm_source_id: int = Field(
         ...,
         description="Название оффера",
     )

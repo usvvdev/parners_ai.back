@@ -78,7 +78,7 @@ def create_app() -> FastAPI:
             partner_router,
             link_router,
             offer_router,
-            # utm_source_router,
+            utm_source_router,
             offer_position_router,
         ]
     )
