@@ -13,9 +13,9 @@ class PartnerRelationMixin:
             back_populates="partners",
         )
 
-    @declared_attr
-    def utm_source(cls):
-        return relationship(
-            "UtmSources",
-            lazy="selectin",
-        )
+    # @declared_attr
+    # def utm_source(cls):
+    #     return relationship(
+    #         "UtmSources",
+    #         lazy="selectin",
+    #     )

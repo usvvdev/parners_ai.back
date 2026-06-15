@@ -95,7 +95,12 @@ class InsertPartner(
     PartnerIdentity,
     BasePartnerFields,
 ):
-    utm_source_id: int = Field(
+    # utm_source_id: int = Field(
+    #     ...,
+    #     description="Название оффера",
+    # )
+
+    utm_source: str = Field(
         ...,
         description="Название оффера",
     )
