@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import Field
 
+from datetime import datetime
+
 from fastapi_filters import (
     FilterField,
     FilterSet,
@@ -54,7 +56,10 @@ class InsertOfferPosition(
     BaseOfferPositionFields,
     OfferPositionIdentity,
 ):
-    pass
+    created_at: datetime = Field(
+        default=datetime.now(),
+        description="Вермя создания записи",
+    )
 
 
 class FiltersOfferPosition(FilterSet):

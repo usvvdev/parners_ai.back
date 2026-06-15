@@ -127,7 +127,7 @@ class BaseSQLExecutor:
             try:
                 result = await action(opened_session)
 
-                if owns_session:
+                if owns_session and self._engine._supports_transactions:
                     await opened_session.commit()
 
                 return result

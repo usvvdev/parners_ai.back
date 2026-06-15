@@ -1,8 +1,5 @@
 # packages
 
-
-from sqlalchemy import func
-
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -52,5 +49,4 @@ class OfferPositions(BaseClickhouseModel):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         primary_key=True,
-        server_default=func.now(),
     )

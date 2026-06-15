@@ -55,6 +55,8 @@ TTable = TypeVar(
 
 
 class BaseEngine:
+    _supports_transactions: bool = True
+
     def __init__(
         self,
         *,
