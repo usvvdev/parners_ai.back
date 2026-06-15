@@ -13,6 +13,7 @@ from datetime import datetime
 from clickhouse_sqlalchemy.types import (
     String,
     DateTime,
+    Int16,
 )
 
 
@@ -42,9 +43,10 @@ class OfferPositions(BaseClickhouseModel):
         nullable=False,
     )
 
-    position: Mapped[str] = mapped_column(
-        String,
+    position: Mapped[int] = mapped_column(
+        Int16,
         server_default="null",
+        nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
