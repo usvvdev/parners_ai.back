@@ -52,6 +52,7 @@ from ....infrastructure.utils.functions import (
     edit_menu_message,
     delete_user_message,
     render_callback,
+    clear_state_keep_filters,
 )
 
 
@@ -190,7 +191,7 @@ async def create_offer_finish(
             state,
             "❌ Не удалось создать оффер",
         )
-        await state.clear()
+        await clear_state_keep_filters(state)
         return
 
     if isinstance(result, FetchLink):
@@ -205,7 +206,7 @@ async def create_offer_finish(
         text,
         builder.as_markup(),
     )
-    await state.clear()
+    await clear_state_keep_filters(state)
 
 
 @offer_router.callback_query(OfferCD.filter(F.action == OfferAction.DELETE))

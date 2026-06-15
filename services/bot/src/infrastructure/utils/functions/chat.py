@@ -10,6 +10,8 @@ from aiogram.types import (
     Message,
 )
 
+from .filter_state import clear_state_keep_filters
+
 
 async def delete_message_safe(
     bot: Bot,
@@ -30,7 +32,7 @@ async def init_form_context(
     callback: CallbackQuery,
     **extra,
 ) -> None:
-    await state.clear()
+    await clear_state_keep_filters(state)
     await state.update_data(
         chat_id=callback.message.chat.id,
         menu_message_id=callback.message.message_id,

@@ -141,6 +141,7 @@ class LinkView:
                     level=NavLevel.LINKS,
                     page=1,
                     fa=is_active,
+                    pr=0,
                 ).pack(),
             ),
             InlineKeyboardButton(
@@ -149,6 +150,7 @@ class LinkView:
                     level=NavLevel.LINKS,
                     page=1,
                     fa=backup_active,
+                    pr=0,
                 ).pack(),
             ),
         )

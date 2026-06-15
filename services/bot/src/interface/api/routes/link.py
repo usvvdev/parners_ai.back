@@ -58,6 +58,9 @@ from ....infrastructure.utils.functions import (
     edit_menu_message,
     delete_user_message,
     render_callback,
+    resolve_link_filter,
+    get_link_filter,
+    clear_state_keep_filters,
 )
 
 
@@ -95,14 +98,17 @@ async def link_list(
     callback: CallbackQuery,
     callback_data: NavigationCD,
     link_service: LinkService,
+    state: FSMContext,
 ) -> None:
+    is_active = await resolve_link_filter(state, callback_data)
+
     data = await link_service.fetch(
         page=callback_data.page,
-        is_active=callback_data.fa,
+        is_active=is_active,
     )
     text, builder = LinkView.list(
         data,
-        is_active=callback_data.fa,
+        is_active=is_active,
     )
     await render_callback(callback, text, builder)
 
@@ -201,14 +207,15 @@ async def create_link_cancel(
     link_service: LinkService,
     partner_service: PartnerService,
 ) -> None:
-    await state.clear()
+    await clear_state_keep_filters(state)
 
     if callback_data.p_id:
         partner = await partner_service.fetch_by_id(callback_data.p_id)
         text, builder = PartnerView.detail(partner)
     else:
-        data = await link_service.fetch(page=1)
-        text, builder = LinkView.list(data)
+        is_active = await get_link_filter(state)
+        data = await link_service.fetch(page=1, is_active=is_active)
+        text, builder = LinkView.list(data, is_active=is_active)
 
     await render_callback(callback, text, builder)
 
@@ -235,7 +242,7 @@ async def create_link_url(
             state,
             "❌ Ошибка загрузки офферов",
         )
-        await state.clear()
+        await clear_state_keep_filters(state)
 
 
 @link_router.callback_query(OfferCD.filter(F.action == OfferAction.PICK_TOGGLE))
@@ -290,7 +297,7 @@ async def pick_offer_cancel(
 ) -> None:
     data = await state.get_data()
     mode = data.get("offer_pick_mode", PickMode.CREATE)
-    await state.clear()
+    await clear_state_keep_filters(state)
 
     detail_page = data.get("detail_page", 1)
 
@@ -304,8 +311,9 @@ async def pick_offer_cancel(
         partner = await partner_service.fetch_by_id(callback_data.p_id)
         text, builder = PartnerView.detail(partner)
     else:
-        data = await link_service.fetch(page=1)
-        text, builder = LinkView.list(data)
+        is_active = await get_link_filter(state)
+        data = await link_service.fetch(page=1, is_active=is_active)
+        text, builder = LinkView.list(data, is_active=is_active)
 
     await render_callback(callback, text, builder)
 
@@ -333,7 +341,7 @@ async def pick_offer_confirm(
             page=data.get("detail_page", 1),
         )
 
-    await state.clear()
+    await clear_state_keep_filters(state)
 
     if isinstance(result, FetchPartners):
         text, builder = PartnerView.detail(result)
@@ -375,6 +383,7 @@ async def delete_link(
     callback_data: LinkCD,
     link_service: LinkService,
     partner_service: PartnerService,
+    state: FSMContext,
 ) -> None:
     await link_service.delete(callback_data.l_id)
 
@@ -382,7 +391,8 @@ async def delete_link(
         partner = await partner_service.fetch_by_id(callback_data.p_id)
         text, builder = PartnerView.detail(partner)
     else:
-        data = await link_service.fetch(page=1)
-        text, builder = LinkView.list(data)
+        is_active = await get_link_filter(state)
+        data = await link_service.fetch(page=1, is_active=is_active)
+        text, builder = LinkView.list(data, is_active=is_active)
 
     await render_callback(callback, text, builder, answer="Витрина удалена")

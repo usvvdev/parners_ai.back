@@ -142,6 +142,7 @@ class PartnerView:
                     page=1,
                     ft=is_tracking,
                     fs=is_selected,
+                    pr=0,
                 ).pack(),
             ),
             InlineKeyboardButton(
@@ -151,6 +152,7 @@ class PartnerView:
                     page=1,
                     ft=backup_tracking,
                     fs=backup_selected,
+                    pr=0,
                 ).pack(),
             ),
         )

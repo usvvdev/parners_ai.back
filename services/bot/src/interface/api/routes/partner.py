@@ -47,6 +47,9 @@ from ....infrastructure.utils.functions import (
     edit_menu_message,
     delete_user_message,
     render_callback,
+    resolve_partner_filters,
+    get_partner_filters,
+    clear_state_keep_filters,
 )
 
 
@@ -82,16 +85,22 @@ async def partner_list(
     callback: CallbackQuery,
     callback_data: NavigationCD,
     partner_service: PartnerService,
+    state: FSMContext,
 ) -> None:
+    is_tracking, is_selected = await resolve_partner_filters(
+        state,
+        callback_data,
+    )
+
     data = await partner_service.fetch(
         page=callback_data.page,
-        is_tracking=callback_data.ft,
-        is_selected=callback_data.fs,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
     )
     text, builder = PartnerView.list(
         data,
-        is_tracking=callback_data.ft,
-        is_selected=callback_data.fs,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
     )
     await render_callback(callback, text, builder)
 
@@ -166,14 +175,24 @@ async def create_partner_finish(
 ) -> tuple[str, ...]:
     data = await state.get_data()
 
-    result = await partner_service.create(
+    await partner_service.create(
         InsertPartner(
             wmid=data["wmid"],
             utm_source=message.text.strip(),
         ),
     )
 
-    text, builder = PartnerView.list(result)
+    is_tracking, is_selected = await get_partner_filters(state)
+    result = await partner_service.fetch(
+        page=1,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
+    )
+    text, builder = PartnerView.list(
+        result,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
+    )
 
     return text, builder.as_markup()
 
@@ -238,10 +257,20 @@ async def delete_partner(
     callback: CallbackQuery,
     callback_data: PartnerCD,
     partner_service: PartnerService,
+    state: FSMContext,
 ) -> None:
     await partner_service.delete(callback_data.p_id)
-    data = await partner_service.fetch(page=1)
-    text, builder = PartnerView.list(data)
+    is_tracking, is_selected = await get_partner_filters(state)
+    data = await partner_service.fetch(
+        page=1,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
+    )
+    text, builder = PartnerView.list(
+        data,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
+    )
     await render_callback(callback, text, builder, answer="Партнер удален")
 
 
@@ -319,7 +348,7 @@ async def link_pick_cancel(
 ) -> None:
     data = await state.get_data()
     detail_page = data.get("detail_page", callback_data.page)
-    await state.clear()
+    await clear_state_keep_filters(state)
 
     partner = await partner_service.fetch_by_id(
         callback_data.p_id,
@@ -345,7 +374,7 @@ async def link_pick_confirm(
         data.get("selected_link_ids", []),
     )
 
-    await state.clear()
+    await clear_state_keep_filters(state)
 
     partner = await partner_service.fetch_by_id(
         callback_data.p_id,
