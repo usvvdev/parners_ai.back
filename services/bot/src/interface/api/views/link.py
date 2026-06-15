@@ -20,10 +20,14 @@ from .base import (
     append_list_pagination,
     append_detail_pagination,
     append_link_filter_options,
+    append_item_grid,
     link_filters_button_text,
 )
 
-from ....core.constants import FILTER_ALL
+from ....core.constants import (
+    FILTER_ALL,
+    LIST_GRID_URL_LIMIT,
+)
 
 from ....domain.types.enums.actions import (
     PartnerAction,
@@ -82,16 +86,16 @@ class LinkView:
 
         for link in data.items:
             status = "🟢" if link.is_active else "🔴"
-            builder.row(
-                InlineKeyboardButton(
-                    text=f"{status}{format_link_list_label(link.link, link.offers)}",
-                    callback_data=LinkCD(
-                        action=LinkAction.VIEW,
-                        p_id=0,
-                        l_id=link.id,
-                    ).pack(),
-                )
+            builder.button(
+                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
+                callback_data=LinkCD(
+                    action=LinkAction.VIEW,
+                    p_id=0,
+                    l_id=link.id,
+                ).pack(),
             )
+
+        append_item_grid(builder)
 
         append_list_pagination(
             builder,
@@ -165,16 +169,22 @@ class LinkView:
         builder = InlineKeyboardBuilder()
 
         toggle_text = "❌ Деактивировать" if link.is_active else "✅ Активировать"
-        builder.button(
-            text=toggle_text,
-            callback_data=LinkCD(action=LinkAction.TOGGLE, p_id=p_id, l_id=link.id),
-        )
-        builder.button(
-            text="✏️ Изменить офферы",
-            callback_data=LinkCD(
-                action=LinkAction.EDIT_OFFERS,
-                p_id=p_id,
-                l_id=link.id,
+        builder.row(
+            InlineKeyboardButton(
+                text=toggle_text,
+                callback_data=LinkCD(
+                    action=LinkAction.TOGGLE,
+                    p_id=p_id,
+                    l_id=link.id,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="✏️ Изменить офферы",
+                callback_data=LinkCD(
+                    action=LinkAction.EDIT_OFFERS,
+                    p_id=p_id,
+                    l_id=link.id,
+                ).pack(),
             ),
         )
 
@@ -189,8 +199,10 @@ class LinkView:
                     p_id=p_id,
                     l_id=link.id,
                     o_id=offer.id,
-                ),
+                ).pack(),
             )
+
+        append_item_grid(builder)
 
         append_detail_pagination(
             builder,
@@ -204,23 +216,34 @@ class LinkView:
             ).pack(),
         )
 
-        builder.button(
-            text="🗑 Удалить витрину",
-            callback_data=LinkCD(action=LinkAction.DELETE, p_id=p_id, l_id=link.id),
+        builder.row(
+            InlineKeyboardButton(
+                text="🗑 Удалить витрину",
+                callback_data=LinkCD(
+                    action=LinkAction.DELETE,
+                    p_id=p_id,
+                    l_id=link.id,
+                ).pack(),
+            )
         )
 
         if p_id:
-            builder.button(
-                text="🔙 Назад к партнеру",
-                callback_data=PartnerCD(action=PartnerAction.VIEW, p_id=p_id),
+            builder.row(
+                InlineKeyboardButton(
+                    text="🔙 Назад к партнеру",
+                    callback_data=PartnerCD(
+                        action=PartnerAction.VIEW,
+                        p_id=p_id,
+                    ).pack(),
+                )
             )
         else:
-            builder.button(
-                text="🔙 Назад к витринам",
-                callback_data=NavigationCD(level=NavLevel.LINKS),
+            builder.row(
+                InlineKeyboardButton(
+                    text="🔙 Назад к витринам",
+                    callback_data=NavigationCD(level=NavLevel.LINKS).pack(),
+                )
             )
-
-        builder.adjust(1)
 
         text = (
             f"🔗 <b>Витрина:</b> {safe(short_url(link.link, limit=80))}\n"
@@ -245,15 +268,17 @@ class LinkView:
         for offer in data.items:
             status = "🟢" if offer.id in selected_ids else "🔴"
             builder.button(
-                text=f"{status} {format_offer_button_label(symbol=offer.symbol, title=offer.title)}",
+                text=f"{status}{format_offer_button_label(symbol=offer.symbol, title=offer.title)}",
                 callback_data=OfferCD(
                     action=OfferAction.PICK_TOGGLE,
                     p_id=p_id,
                     l_id=l_id,
                     o_id=offer.id,
                     page=data.page,
-                ),
+                ).pack(),
             )
+
+        append_item_grid(builder)
 
         append_detail_pagination(
             builder,
@@ -268,27 +293,28 @@ class LinkView:
             ).pack(),
         )
 
-        builder.button(
-            text="✅ Готово",
-            callback_data=OfferCD(
-                action=OfferAction.PICK_CONFIRM,
-                p_id=p_id,
-                l_id=l_id,
-                o_id=0,
-                page=data.page,
+        builder.row(
+            InlineKeyboardButton(
+                text="✅ Готово",
+                callback_data=OfferCD(
+                    action=OfferAction.PICK_CONFIRM,
+                    p_id=p_id,
+                    l_id=l_id,
+                    o_id=0,
+                    page=data.page,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="❌ Отмена",
+                callback_data=OfferCD(
+                    action=OfferAction.PICK_CANCEL,
+                    p_id=p_id,
+                    l_id=l_id,
+                    o_id=0,
+                    page=data.page,
+                ).pack(),
             ),
         )
-        builder.button(
-            text="❌ Отмена",
-            callback_data=OfferCD(
-                action=OfferAction.PICK_CANCEL,
-                p_id=p_id,
-                l_id=l_id,
-                o_id=0,
-                page=data.page,
-            ),
-        )
-        builder.adjust(1)
 
         action_text = "создания" if mode == PickMode.CREATE else "редактирования"
 

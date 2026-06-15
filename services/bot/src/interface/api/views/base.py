@@ -20,6 +20,9 @@ from ....domain.types._types.base import PaginatedResponse
 from ....domain.types.enums.common import NavLevel
 
 
+from ....core.constants import LIST_GRID_COLUMNS
+
+
 def build_list_text(
     result: PaginatedResponse,
     *,
@@ -37,6 +40,15 @@ def build_list_text(
         text += f"\nСтраница {result.page} из {result.pages}"
 
     return text
+
+
+def append_item_grid(
+    builder: InlineKeyboardBuilder,
+    *,
+    columns: int = LIST_GRID_COLUMNS,
+) -> None:
+    if columns > 1:
+        builder.adjust(columns)
 
 
 def append_list_pagination(

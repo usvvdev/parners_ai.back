@@ -19,10 +19,14 @@ from .base import (
     append_list_pagination,
     append_detail_pagination,
     append_partner_filter_options,
+    append_item_grid,
     partner_filters_button_text,
 )
 
-from ....core.constants import FILTER_ALL
+from ....core.constants import (
+    FILTER_ALL,
+    LIST_GRID_URL_LIMIT,
+)
 
 from ....domain.types.enums.actions import (
     PartnerAction,
@@ -76,16 +80,17 @@ class PartnerView:
 
         for partner in data.items:
             status = "🟢" if partner.is_tracking else "🔴"
-            favorite = "⭐ " if partner.is_selected else ""
-            builder.row(
-                InlineKeyboardButton(
-                    text=f"{favorite}{status} {partner.wmid}",
-                    callback_data=PartnerCD(
-                        action=PartnerAction.VIEW,
-                        p_id=partner.id,
-                    ).pack(),
-                )
+            favorite = "⭐" if partner.is_selected else ""
+            prefix = f"{favorite} " if favorite else ""
+            builder.button(
+                text=f"{prefix}{status} {partner.wmid}",
+                callback_data=PartnerCD(
+                    action=PartnerAction.VIEW,
+                    p_id=partner.id,
+                ).pack(),
             )
+
+        append_item_grid(builder)
 
         append_list_pagination(
             builder,
@@ -163,30 +168,37 @@ class PartnerView:
     ) -> tuple[str, InlineKeyboardBuilder]:
         builder = InlineKeyboardBuilder()
 
-        builder.button(
-            text="⚙️ Статус и избранное",
-            callback_data=PartnerCD(
-                action=PartnerAction.SETTINGS,
-                p_id=partner.id,
-                is_tracking=int(partner.is_tracking),
-                is_selected=int(partner.is_selected),
+        builder.row(
+            InlineKeyboardButton(
+                text="⚙️ Статус и избранное",
+                callback_data=PartnerCD(
+                    action=PartnerAction.SETTINGS,
+                    p_id=partner.id,
+                    is_tracking=int(partner.is_tracking),
+                    is_selected=int(partner.is_selected),
+                ).pack(),
             ),
-        )
-        builder.button(
-            text="✏️ Изменить витрины",
-            callback_data=PartnerCD(action=PartnerAction.EDIT_LINKS, p_id=partner.id),
+            InlineKeyboardButton(
+                text="✏️ Изменить витрины",
+                callback_data=PartnerCD(
+                    action=PartnerAction.EDIT_LINKS,
+                    p_id=partner.id,
+                ).pack(),
+            ),
         )
 
         for link in partner.links.items:
             status = "🟢" if link.is_active else "🔴"
             builder.button(
-                text=f"{status}{format_link_list_label(link.link, link.offers)}",
+                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
                 callback_data=LinkCD(
                     action=LinkAction.VIEW,
                     p_id=partner.id,
                     l_id=link.id,
-                ),
+                ).pack(),
             )
+
+        append_item_grid(builder)
 
         append_detail_pagination(
             builder,
@@ -199,15 +211,19 @@ class PartnerView:
             ).pack(),
         )
 
-        builder.button(
-            text="🗑 Удалить партнера",
-            callback_data=PartnerCD(action=PartnerAction.DELETE, p_id=partner.id),
+        builder.row(
+            InlineKeyboardButton(
+                text="🗑 Удалить партнера",
+                callback_data=PartnerCD(
+                    action=PartnerAction.DELETE,
+                    p_id=partner.id,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="🔙 Назад к партнерам",
+                callback_data=NavigationCD(level=NavLevel.PARTNERS).pack(),
+            ),
         )
-        builder.button(
-            text="🔙 Назад к партнерам",
-            callback_data=NavigationCD(level=NavLevel.PARTNERS),
-        )
-        builder.adjust(1)
 
         text = (
             f"🏢 <b>Партнер:</b> {safe(partner.wmid)}\n"
@@ -279,14 +295,16 @@ class PartnerView:
         for link in data.items:
             status = "🟢" if link.id in selected_ids else "🔴"
             builder.button(
-                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=24)}",
+                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
                 callback_data=LinkCD(
                     action=LinkAction.PICK_TOGGLE,
                     p_id=p_id,
                     l_id=link.id,
                     page=data.page,
-                ),
+                ).pack(),
             )
+
+        append_item_grid(builder)
 
         append_detail_pagination(
             builder,
@@ -300,25 +318,26 @@ class PartnerView:
             ).pack(),
         )
 
-        builder.button(
-            text="✅ Готово",
-            callback_data=LinkCD(
-                action=LinkAction.PICK_CONFIRM,
-                p_id=p_id,
-                l_id=0,
-                page=data.page,
+        builder.row(
+            InlineKeyboardButton(
+                text="✅ Готово",
+                callback_data=LinkCD(
+                    action=LinkAction.PICK_CONFIRM,
+                    p_id=p_id,
+                    l_id=0,
+                    page=data.page,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="❌ Отмена",
+                callback_data=LinkCD(
+                    action=LinkAction.PICK_CANCEL,
+                    p_id=p_id,
+                    l_id=0,
+                    page=data.page,
+                ).pack(),
             ),
         )
-        builder.button(
-            text="❌ Отмена",
-            callback_data=LinkCD(
-                action=LinkAction.PICK_CANCEL,
-                p_id=p_id,
-                l_id=0,
-                page=data.page,
-            ),
-        )
-        builder.adjust(1)
 
         if data.total:
             text = (
