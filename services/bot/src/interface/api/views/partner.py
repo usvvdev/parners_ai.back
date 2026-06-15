@@ -19,7 +19,7 @@ from .base import (
     append_list_pagination,
     append_detail_pagination,
     append_partner_filter_options,
-    append_item_grid,
+    append_button_grid,
     partner_filters_button_text,
 )
 
@@ -78,19 +78,23 @@ class PartnerView:
             ),
         )
 
+        item_buttons: list[InlineKeyboardButton] = []
+
         for partner in data.items:
             status = "🟢" if partner.is_tracking else "🔴"
             favorite = "⭐" if partner.is_selected else ""
             prefix = f"{favorite} " if favorite else ""
-            builder.button(
-                text=f"{prefix}{status} {partner.wmid}",
-                callback_data=PartnerCD(
-                    action=PartnerAction.VIEW,
-                    p_id=partner.id,
-                ).pack(),
+            item_buttons.append(
+                InlineKeyboardButton(
+                    text=f"{prefix}{status} {partner.wmid}",
+                    callback_data=PartnerCD(
+                        action=PartnerAction.VIEW,
+                        p_id=partner.id,
+                    ).pack(),
+                )
             )
 
-        append_item_grid(builder, count=len(data.items))
+        append_button_grid(builder, item_buttons)
 
         append_list_pagination(
             builder,
@@ -189,18 +193,22 @@ class PartnerView:
             ),
         )
 
+        item_buttons: list[InlineKeyboardButton] = []
+
         for link in partner.links.items:
             status = "🟢" if link.is_active else "🔴"
-            builder.button(
-                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
-                callback_data=LinkCD(
-                    action=LinkAction.VIEW,
-                    p_id=partner.id,
-                    l_id=link.id,
-                ).pack(),
+            item_buttons.append(
+                InlineKeyboardButton(
+                    text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
+                    callback_data=LinkCD(
+                        action=LinkAction.VIEW,
+                        p_id=partner.id,
+                        l_id=link.id,
+                    ).pack(),
+                )
             )
 
-        append_item_grid(builder, count=len(partner.links.items))
+        append_button_grid(builder, item_buttons)
 
         append_detail_pagination(
             builder,
@@ -294,19 +302,23 @@ class PartnerView:
     ) -> tuple[str, InlineKeyboardBuilder]:
         builder = InlineKeyboardBuilder()
 
+        item_buttons: list[InlineKeyboardButton] = []
+
         for link in data.items:
             status = "🟢" if link.id in selected_ids else "🔴"
-            builder.button(
-                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
-                callback_data=LinkCD(
-                    action=LinkAction.PICK_TOGGLE,
-                    p_id=p_id,
-                    l_id=link.id,
-                    page=data.page,
-                ).pack(),
+            item_buttons.append(
+                InlineKeyboardButton(
+                    text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
+                    callback_data=LinkCD(
+                        action=LinkAction.PICK_TOGGLE,
+                        p_id=p_id,
+                        l_id=link.id,
+                        page=data.page,
+                    ).pack(),
+                )
             )
 
-        append_item_grid(builder, count=len(data.items))
+        append_button_grid(builder, item_buttons)
 
         append_detail_pagination(
             builder,

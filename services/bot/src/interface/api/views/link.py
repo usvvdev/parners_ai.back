@@ -20,7 +20,7 @@ from .base import (
     append_list_pagination,
     append_detail_pagination,
     append_link_filter_options,
-    append_item_grid,
+    append_button_grid,
     link_filters_button_text,
 )
 
@@ -84,18 +84,22 @@ class LinkView:
             ),
         )
 
+        item_buttons: list[InlineKeyboardButton] = []
+
         for link in data.items:
             status = "🟢" if link.is_active else "🔴"
-            builder.button(
-                text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
-                callback_data=LinkCD(
-                    action=LinkAction.VIEW,
-                    p_id=0,
-                    l_id=link.id,
-                ).pack(),
+            item_buttons.append(
+                InlineKeyboardButton(
+                    text=f"{status}{format_link_list_label(link.link, link.offers, url_limit=LIST_GRID_URL_LIMIT)}",
+                    callback_data=LinkCD(
+                        action=LinkAction.VIEW,
+                        p_id=0,
+                        l_id=link.id,
+                    ).pack(),
+                )
             )
 
-        append_item_grid(builder, count=len(data.items))
+        append_button_grid(builder, item_buttons)
 
         append_list_pagination(
             builder,
@@ -190,8 +194,8 @@ class LinkView:
             ),
         )
 
-        for offer in link.offers.items:
-            builder.button(
+        item_buttons = [
+            InlineKeyboardButton(
                 text=format_offer_button_label(
                     symbol=offer.symbol,
                     title=offer.title,
@@ -203,8 +207,10 @@ class LinkView:
                     o_id=offer.id,
                 ).pack(),
             )
+            for offer in link.offers.items
+        ]
 
-        append_item_grid(builder, count=len(link.offers.items))
+        append_button_grid(builder, item_buttons)
 
         append_detail_pagination(
             builder,
@@ -267,20 +273,24 @@ class LinkView:
     ) -> tuple[str, InlineKeyboardBuilder]:
         builder = InlineKeyboardBuilder()
 
+        item_buttons: list[InlineKeyboardButton] = []
+
         for offer in data.items:
             status = "🟢" if offer.id in selected_ids else "🔴"
-            builder.button(
-                text=f"{status}{format_offer_button_label(symbol=offer.symbol, title=offer.title)}",
-                callback_data=OfferCD(
-                    action=OfferAction.PICK_TOGGLE,
-                    p_id=p_id,
-                    l_id=l_id,
-                    o_id=offer.id,
-                    page=data.page,
-                ).pack(),
+            item_buttons.append(
+                InlineKeyboardButton(
+                    text=f"{status}{format_offer_button_label(symbol=offer.symbol, title=offer.title)}",
+                    callback_data=OfferCD(
+                        action=OfferAction.PICK_TOGGLE,
+                        p_id=p_id,
+                        l_id=l_id,
+                        o_id=offer.id,
+                        page=data.page,
+                    ).pack(),
+                )
             )
 
-        append_item_grid(builder, count=len(data.items))
+        append_button_grid(builder, item_buttons)
 
         append_detail_pagination(
             builder,

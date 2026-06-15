@@ -17,7 +17,7 @@ from ..dto.callback import (
 from .base import (
     build_list_text,
     append_list_pagination,
-    append_item_grid,
+    append_button_grid,
 )
 
 from ....domain.types.enums.actions import (
@@ -57,8 +57,8 @@ class OfferView:
             )
         )
 
-        for offer in data.items:
-            builder.button(
+        item_buttons = [
+            InlineKeyboardButton(
                 text=format_offer_button_label(
                     symbol=offer.symbol,
                     title=offer.title,
@@ -70,8 +70,10 @@ class OfferView:
                     o_id=offer.id,
                 ).pack(),
             )
+            for offer in data.items
+        ]
 
-        append_item_grid(builder, count=len(data.items))
+        append_button_grid(builder, item_buttons)
 
         append_list_pagination(
             builder,

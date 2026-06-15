@@ -43,17 +43,17 @@ def build_list_text(
     return text
 
 
-def append_item_grid(
+def append_button_grid(
     builder: InlineKeyboardBuilder,
-    *,
-    count: int,
-    columns: int = LIST_GRID_COLUMNS,
+    buttons: list[InlineKeyboardButton],
 ) -> None:
-    if count <= 0:
+    if not buttons:
         return
 
-    layout_columns = 1 if count < LIST_GRID_MIN_ITEMS else columns
-    builder.adjust(layout_columns)
+    columns = 1 if len(buttons) < LIST_GRID_MIN_ITEMS else LIST_GRID_COLUMNS
+
+    for index in range(0, len(buttons), columns):
+        builder.row(*buttons[index : index + columns])
 
 
 def append_list_pagination(
