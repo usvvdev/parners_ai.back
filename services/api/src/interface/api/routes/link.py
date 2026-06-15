@@ -18,6 +18,7 @@ from ..dto import (
     FetchLinks,
     InsertLink,
     UpdateLink,
+    FiltersLink,
 )
 
 from ..views import LinkRepositoryView
@@ -53,8 +54,11 @@ async def fetch_links(
     params: Params = Depends(
         set_custom_pagination,
     ),
+    filters: FiltersLink = Depends(),
 ) -> Page[FetchLinks]:
-    data = await view.fetch()
+    data = await view.fetch(
+        filters=filters,
+    )
 
     return paginate(
         data,

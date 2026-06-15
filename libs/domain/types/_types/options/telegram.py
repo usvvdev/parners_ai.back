@@ -12,32 +12,9 @@ from pydantic import (
 
 from ..common import BaseModelType
 
+from .api import APIOptions
+
 from ...enums.config import UserRole
-
-
-class APIOptions(BaseModelType):
-    host: Optional[str] = Field(
-        default="api",
-        description="API хост(имя сервиса)",
-        exclude=True,
-    )
-
-    port: Optional[int] = Field(
-        default=8000,
-        description="API порт",
-        exclude=True,
-    )
-
-    prefix: Optional[str] = Field(
-        default="/api",
-        description="API префикс(базовый uri)",
-        exclude=True,
-    )
-
-    @computed_field
-    @property
-    def base_url(self) -> str:
-        return f"http://{self.host}:{self.port}{self.prefix}"
 
 
 class UserOptions(BaseModelType):

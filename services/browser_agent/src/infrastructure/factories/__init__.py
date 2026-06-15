@@ -1,8 +1,11 @@
-from .services.browser_agent import BrowserAgentServiceFactory
+from .base import (
+    APIClients,
+    APIClientsFactory,
+)
+from .agent import AgentServicesFactory
 
-from .services.offer_repository_agent import PartnerParserServiceFactory
-
-__all__: list[str] = [
-    "BrowserAgentServiceFactory",
-    "PartnerParserServiceFactory",
+__all__ = [
+    "APIClients",
+    "APIClientsFactory",
+    "AgentServicesFactory",
 ]

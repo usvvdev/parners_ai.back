@@ -9,6 +9,7 @@ from ..dto import (
     FetchLink,
     FetchLinks,
     UpdateLink,
+    FiltersLink,
 )
 
 from libs.infrastructure.stores.mysql.repositories import LinkRepository
@@ -23,8 +24,11 @@ class LinkRepositoryView:
 
     async def fetch(
         self,
+        filters: FiltersLink,
     ) -> list[FetchLinks]:
-        return await self._repository.fetch_many()
+        return await self._repository.fetch_many(
+            filters=filters,
+        )
 
     async def fetch_by_id(
         self,

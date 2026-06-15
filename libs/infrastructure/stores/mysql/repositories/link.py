@@ -15,6 +15,8 @@ from fastapi_pagination import Params
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fastapi_filters.ext.sqlalchemy import apply_filters
+
 # application dependencies
 
 from ..models import (
@@ -134,14 +136,19 @@ class LinkRepository(MySQLRepository[Links]):
 
     async def fetch_many(
         self,
+        filters: Any,
         session: AsyncSession | None = None,
     ) -> type[Links] | None:
-        return await self._fetch_many(
-            query=select(
+        query = apply_filters(
+            select(
                 self._table,
             ).options(
                 selectinload(self._table.offers),
             ),
+            filters=filters,
+        )
+        return await self._fetch_many(
+            query=query,
             session=session,
         )
 

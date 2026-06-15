@@ -10,6 +10,7 @@ from libs.domain.types._types.options import (
     EngineOptions,
     OpenAPIOptions,
     TelegramOptions,
+    APIOptions,
 )
 
 
@@ -27,4 +28,9 @@ class ApplicationOptionsMixin:
     telegram_options: Optional[TelegramOptions] = Field(
         default=None,
         description="Telegram options",
+    )
+
+    api_options: Optional[APIOptions] = Field(
+        default_factory=APIOptions,
+        description="Internal API options",
     )

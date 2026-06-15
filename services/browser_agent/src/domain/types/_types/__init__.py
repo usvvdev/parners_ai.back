@@ -1,19 +1,24 @@
-from ._types import (
-    FetchLinks,
-    FetchOffer,
+from .base import PaginatedResponse
+from .link import FetchLinks
+from .offer import FetchOffer
+from .partner import (
     FetchPartner,
     FetchPartners,
     InsertPartner,
     UpdatePartner,
+)
+from .utm_source import (
     FetchUTMSource,
     InsertUTMSource,
-    InsertOfferPosition,
+)
+from .offer_position import InsertOfferPosition
+from .scan import (
     ScannedOffer,
     PartnerResult,
-    PaginatedResponse,
 )
 
 __all__ = [
+    "PaginatedResponse",
     "FetchLinks",
     "FetchOffer",
     "FetchPartner",
@@ -25,5 +30,4 @@ __all__ = [
     "InsertOfferPosition",
     "ScannedOffer",
     "PartnerResult",
-    "PaginatedResponse",
 ]

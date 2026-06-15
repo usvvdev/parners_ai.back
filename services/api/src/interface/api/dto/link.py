@@ -7,6 +7,11 @@ from pydantic import (
     field_validator,
 )
 
+from fastapi_filters import (
+    FilterField,
+    FilterSet,
+)
+
 from datetime import datetime
 
 from fastapi_pagination import Page
@@ -85,3 +90,7 @@ class UpdateLink(BaseLinkFields):
         default=datetime.now(),
         description="Текущее время обновления",
     )
+
+
+class FiltersLink(FilterSet):
+    is_active: FilterField[bool]

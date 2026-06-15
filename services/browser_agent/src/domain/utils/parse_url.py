@@ -1,17 +1,18 @@
-from typing import Optional
-
-import urllib.parse as urlparse
-
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlparse
 
 
-def parse_url(
+def extract_query_param(
     url: str,
-    get_params: list[str, ...],
-) -> list[dict[str, Optional[str]]]:
-    parsed_url = urlparse.urlparse(url)
+    param: str,
+) -> str | None:
+    if not url:
+        return None
 
-    params = parse_qs(
-        parsed_url.query,
-    )
-    return [{param: params.get(param)} for param in get_params]
+    values = parse_qs(
+        urlparse(url).query,
+    ).get(param)
+
+    if not values:
+        return None
+
+    return values[0] or None

@@ -1,8 +1,7 @@
+from .ai.crawler import Crawler
 from .ai.gemini import Gemini
 
-from .ai.crawler import Crawler
-
-__all__: list[str] = [
+__all__ = [
     "Crawler",
     "Gemini",
 ]

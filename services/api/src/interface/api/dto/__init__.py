@@ -17,6 +17,7 @@ from .link import (
     FetchLinks,
     InsertLink,
     UpdateLink,
+    FiltersLink,
 )
 
 from .utm_source import (
@@ -45,6 +46,7 @@ __all__: list[str] = [
     "FetchLinks",
     "InsertLink",
     "UpdateLink",
+    "FiltersLink",
     "FetchUTMSource",
     "FetchUTMSources",
     "InsertUTMSource",
