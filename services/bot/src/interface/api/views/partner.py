@@ -2,6 +2,8 @@ from __future__ import annotations
 
 # packages
 
+from aiogram.types import InlineKeyboardButton
+
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # application depencies
@@ -16,7 +18,10 @@ from .base import (
     build_list_text,
     append_list_pagination,
     append_detail_pagination,
+    append_partner_filters,
 )
+
+from ....core.constants import FILTER_ALL
 
 from ....domain.types.enums.actions import (
     PartnerAction,
@@ -42,20 +47,37 @@ class PartnerView:
     @staticmethod
     def list(
         data: PaginatedResponse[FetchPartner],
+        *,
+        is_tracking: int = FILTER_ALL,
+        is_selected: int = FILTER_ALL,
     ) -> tuple[str, InlineKeyboardBuilder]:
         builder = InlineKeyboardBuilder()
 
-        builder.button(
-            text="➕ Добавить партнера",
-            callback_data=PartnerCD(action=PartnerAction.CREATE, p_id=0),
+        builder.row(
+            InlineKeyboardButton(
+                text="➕ Добавить партнера",
+                callback_data=PartnerCD(action=PartnerAction.CREATE, p_id=0),
+            )
+        )
+
+        append_partner_filters(
+            builder,
+            is_tracking=is_tracking,
+            is_selected=is_selected,
+            page=data.page,
         )
 
         for partner in data.items:
             status = "🟢" if partner.is_tracking else "🔴"
             favorite = "⭐ " if partner.is_selected else ""
-            builder.button(
-                text=f"{favorite}{status} {partner.wmid}",
-                callback_data=PartnerCD(action=PartnerAction.VIEW, p_id=partner.id),
+            builder.row(
+                InlineKeyboardButton(
+                    text=f"{favorite}{status} {partner.wmid}",
+                    callback_data=PartnerCD(
+                        action=PartnerAction.VIEW,
+                        p_id=partner.id,
+                    ),
+                )
             )
 
         append_list_pagination(
@@ -63,13 +85,16 @@ class PartnerView:
             level=NavLevel.PARTNERS,
             page=data.page,
             pages=data.pages,
+            ft=is_tracking,
+            fs=is_selected,
         )
 
-        builder.button(
-            text="🏠 Главное меню",
-            callback_data=NavigationCD(level=NavLevel.MAIN),
+        builder.row(
+            InlineKeyboardButton(
+                text="🏠 Главное меню",
+                callback_data=NavigationCD(level=NavLevel.MAIN),
+            )
         )
-        builder.adjust(1)
 
         text = build_list_text(
             data,

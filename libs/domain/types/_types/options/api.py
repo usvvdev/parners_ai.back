@@ -13,6 +13,11 @@ from ..common import BaseModelType
 
 
 class APIOptions(BaseModelType):
+    protocol: str = Field(
+        default="http",
+        description="Протокол для веб запроса",
+    )
+
     host: Optional[str] = Field(
         default="api",
         description="API host",
@@ -35,4 +40,4 @@ class APIOptions(BaseModelType):
     @property
     def base_url(self) -> str:
         port = f":{self.port} " if self.port else ""
-        return f"https://{self.host}{port}{self.prefix}"
+        return f"{self.protocol}://{self.host}{port}{self.prefix}"

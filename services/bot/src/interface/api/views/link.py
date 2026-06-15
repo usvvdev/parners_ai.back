@@ -2,6 +2,8 @@ from __future__ import annotations
 
 # packages
 
+from aiogram.types import InlineKeyboardButton
+
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # application depencies
@@ -17,7 +19,10 @@ from .base import (
     build_list_text,
     append_list_pagination,
     append_detail_pagination,
+    append_link_filters,
 )
+
+from ....core.constants import FILTER_ALL
 
 from ....domain.types.enums.actions import (
     PartnerAction,
@@ -50,19 +55,35 @@ class LinkView:
     @staticmethod
     def list(
         data: PaginatedResponse[FetchLinks],
+        *,
+        is_active: int = FILTER_ALL,
     ) -> tuple[str, InlineKeyboardBuilder]:
         builder = InlineKeyboardBuilder()
 
-        builder.button(
-            text="➕ Добавить Витрину",
-            callback_data=LinkCD(action=LinkAction.CREATE, p_id=0, l_id=0),
+        builder.row(
+            InlineKeyboardButton(
+                text="➕ Добавить Витрину",
+                callback_data=LinkCD(action=LinkAction.CREATE, p_id=0, l_id=0),
+            )
+        )
+
+        append_link_filters(
+            builder,
+            is_active=is_active,
+            page=data.page,
         )
 
         for link in data.items:
             status = "🟢" if link.is_active else "🔴"
-            builder.button(
-                text=f"{status}{format_link_list_label(link.link, link.offers)}",
-                callback_data=LinkCD(action=LinkAction.VIEW, p_id=0, l_id=link.id),
+            builder.row(
+                InlineKeyboardButton(
+                    text=f"{status}{format_link_list_label(link.link, link.offers)}",
+                    callback_data=LinkCD(
+                        action=LinkAction.VIEW,
+                        p_id=0,
+                        l_id=link.id,
+                    ),
+                )
             )
 
         append_list_pagination(
@@ -70,13 +91,15 @@ class LinkView:
             level=NavLevel.LINKS,
             page=data.page,
             pages=data.pages,
+            fa=is_active,
         )
 
-        builder.button(
-            text="🏠 Главное меню",
-            callback_data=NavigationCD(level=NavLevel.MAIN),
+        builder.row(
+            InlineKeyboardButton(
+                text="🏠 Главное меню",
+                callback_data=NavigationCD(level=NavLevel.MAIN),
+            )
         )
-        builder.adjust(1)
 
         text = build_list_text(
             data,

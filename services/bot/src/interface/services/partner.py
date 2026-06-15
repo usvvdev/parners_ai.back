@@ -1,5 +1,7 @@
 # application depencies
 
+from ...core.constants import FILTER_ALL
+
 from ...infrastructure.clients.api import (
     PartnerAPIClient,
     LinkAPIClient,
@@ -28,8 +30,21 @@ class PartnerService:
         self,
         *,
         page: int = 1,
+        is_tracking: int = FILTER_ALL,
+        is_selected: int = FILTER_ALL,
     ) -> PaginatedResponse[FetchPartner]:
-        return await self._partner_client.fetch_page(page=page)
+        filters: dict[str, bool] = {}
+
+        if is_tracking != FILTER_ALL:
+            filters["is_tracking"] = bool(is_tracking)
+
+        if is_selected != FILTER_ALL:
+            filters["is_selected"] = bool(is_selected)
+
+        return await self._partner_client.fetch_page(
+            page=page,
+            filters=filters or None,
+        )
 
     async def fetch_by_id(
         self,

@@ -94,10 +94,16 @@ class BaseResourceAPIClient(
         *,
         page: int = 1,
         size: int = DEFAULT_PAGE_SIZE,
+        filters: dict[str, Any] | None = None,
     ) -> PaginatedResponse[TList]:
+        params: dict[str, Any] = {"page": page, "size": size}
+
+        if filters:
+            params.update(filters)
+
         data = await self._get(
             self.path,
-            params={"page": page, "size": size},
+            params=params,
         )
 
         return parse_paginated_response(

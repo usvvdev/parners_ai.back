@@ -83,8 +83,16 @@ async def partner_list(
     callback_data: NavigationCD,
     partner_service: PartnerService,
 ) -> None:
-    data = await partner_service.fetch(page=callback_data.page)
-    text, builder = PartnerView.list(data)
+    data = await partner_service.fetch(
+        page=callback_data.page,
+        is_tracking=callback_data.ft,
+        is_selected=callback_data.fs,
+    )
+    text, builder = PartnerView.list(
+        data,
+        is_tracking=callback_data.ft,
+        is_selected=callback_data.fs,
+    )
     await render_callback(callback, text, builder)
 
 

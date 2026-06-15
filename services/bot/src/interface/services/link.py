@@ -1,5 +1,7 @@
 # application depencies
 
+from ...core.constants import FILTER_ALL
+
 from ...infrastructure.clients.api import (
     LinkAPIClient,
     PartnerAPIClient,
@@ -33,8 +35,17 @@ class LinkService:
         self,
         *,
         page: int = 1,
+        is_active: int = FILTER_ALL,
     ) -> PaginatedResponse[FetchLinks]:
-        return await self._link_client.fetch_page(page=page)
+        filters: dict[str, bool] = {}
+
+        if is_active != FILTER_ALL:
+            filters["is_active"] = bool(is_active)
+
+        return await self._link_client.fetch_page(
+            page=page,
+            filters=filters or None,
+        )
 
     async def fetch_by_id(
         self,

@@ -96,8 +96,14 @@ async def link_list(
     callback_data: NavigationCD,
     link_service: LinkService,
 ) -> None:
-    data = await link_service.fetch(page=callback_data.page)
-    text, builder = LinkView.list(data)
+    data = await link_service.fetch(
+        page=callback_data.page,
+        is_active=callback_data.fa,
+    )
+    text, builder = LinkView.list(
+        data,
+        is_active=callback_data.fa,
+    )
     await render_callback(callback, text, builder)
 
 
