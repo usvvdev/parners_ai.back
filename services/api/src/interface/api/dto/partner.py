@@ -9,6 +9,11 @@ from typing import Optional
 
 from datetime import datetime
 
+from fastapi_filters import (
+    FilterField,
+    FilterSet,
+)
+
 from fastapi_pagination import Page
 
 # application dependencies
@@ -111,3 +116,9 @@ class UpdatePartner(BasePartnerFields):
         default=datetime.now(),
         description="Текущее время обновления",
     )
+
+
+class FiltersPartner(FilterSet):
+    is_tracking: FilterField[bool]
+
+    is_selected: FilterField[bool]

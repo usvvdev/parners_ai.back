@@ -10,6 +10,7 @@ from .partner import (
     FetchPartners,
     InsertPartner,
     UpdatePartner,
+    FiltersPartner,
 )
 
 from .link import (
@@ -42,6 +43,7 @@ __all__: list[str] = [
     "FetchPartners",
     "InsertPartner",
     "UpdatePartner",
+    "FiltersPartner",
     "FetchLink",
     "FetchLinks",
     "InsertLink",

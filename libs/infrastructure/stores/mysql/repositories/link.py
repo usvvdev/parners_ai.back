@@ -139,16 +139,16 @@ class LinkRepository(MySQLRepository[Links]):
         filters: Any,
         session: AsyncSession | None = None,
     ) -> type[Links] | None:
-        query = apply_filters(
-            select(
-                self._table,
-            ).options(
-                selectinload(self._table.offers),
-            ),
-            filters=filters,
+        query = select(
+            self._table,
+        ).options(
+            selectinload(self._table.offers),
         )
         return await self._fetch_many(
-            query=query,
+            query=apply_filters(
+                query,
+                filters=filters,
+            ),
             session=session,
         )
 

@@ -9,6 +9,7 @@ from ..dto import (
     FetchPartners,
     InsertPartner,
     UpdatePartner,
+    FiltersPartner,
 )
 
 from libs.infrastructure.stores.mysql.repositories import PartnerRepository
@@ -23,8 +24,11 @@ class PartnerRepositoryView:
 
     async def fetch(
         self,
+        filters: FiltersPartner,
     ) -> list[FetchPartner]:
-        return await self._repository.fetch_many()
+        return await self._repository.fetch_many(
+            filters=filters,
+        )
 
     async def fetch_by_id(
         self,

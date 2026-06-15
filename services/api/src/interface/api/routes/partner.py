@@ -18,6 +18,7 @@ from ..dto import (
     FetchPartners,
     InsertPartner,
     UpdatePartner,
+    FiltersPartner,
 )
 
 from ..views import PartnerRepositoryView
@@ -53,8 +54,11 @@ async def fetch_offers(
     params: Params = Depends(
         set_custom_pagination,
     ),
+    filters: FiltersPartner = Depends(),
 ) -> Page[FetchPartner]:
-    data = await view.fetch()
+    data = await view.fetch(
+        filters=filters,
+    )
 
     return paginate(
         data,
