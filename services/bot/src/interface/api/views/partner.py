@@ -18,7 +18,8 @@ from .base import (
     build_list_text,
     append_list_pagination,
     append_detail_pagination,
-    append_partner_filters,
+    append_partner_filter_options,
+    partner_filters_button_text,
 )
 
 from ....core.constants import FILTER_ALL
@@ -56,15 +57,21 @@ class PartnerView:
         builder.row(
             InlineKeyboardButton(
                 text="➕ Добавить партнера",
-                callback_data=PartnerCD(action=PartnerAction.CREATE, p_id=0),
-            )
-        )
-
-        append_partner_filters(
-            builder,
-            is_tracking=is_tracking,
-            is_selected=is_selected,
-            page=data.page,
+                callback_data=PartnerCD(
+                    action=PartnerAction.CREATE,
+                    p_id=0,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text=partner_filters_button_text(is_tracking, is_selected),
+                callback_data=NavigationCD(
+                    level=NavLevel.PARTNERS_FILTERS,
+                    ft=is_tracking,
+                    fs=is_selected,
+                    bft=is_tracking,
+                    bfs=is_selected,
+                ).pack(),
+            ),
         )
 
         for partner in data.items:
@@ -76,7 +83,7 @@ class PartnerView:
                     callback_data=PartnerCD(
                         action=PartnerAction.VIEW,
                         p_id=partner.id,
-                    ),
+                    ).pack(),
                 )
             )
 
@@ -92,7 +99,7 @@ class PartnerView:
         builder.row(
             InlineKeyboardButton(
                 text="🏠 Главное меню",
-                callback_data=NavigationCD(level=NavLevel.MAIN),
+                callback_data=NavigationCD(level=NavLevel.MAIN).pack(),
             )
         )
 
@@ -100,6 +107,52 @@ class PartnerView:
             data,
             title="📂 <b>Список партнеров</b>",
             empty="📂 <b>Партнеров пока нет.</b>",
+        )
+
+        return text, builder
+
+    @staticmethod
+    def filters(
+        *,
+        is_tracking: int = FILTER_ALL,
+        is_selected: int = FILTER_ALL,
+        backup_tracking: int = FILTER_ALL,
+        backup_selected: int = FILTER_ALL,
+    ) -> tuple[str, InlineKeyboardBuilder]:
+        builder = InlineKeyboardBuilder()
+
+        append_partner_filter_options(
+            builder,
+            is_tracking=is_tracking,
+            is_selected=is_selected,
+            backup_tracking=backup_tracking,
+            backup_selected=backup_selected,
+        )
+
+        builder.row(
+            InlineKeyboardButton(
+                text="✅ Показать",
+                callback_data=NavigationCD(
+                    level=NavLevel.PARTNERS,
+                    page=1,
+                    ft=is_tracking,
+                    fs=is_selected,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="🔙 Назад",
+                callback_data=NavigationCD(
+                    level=NavLevel.PARTNERS,
+                    page=1,
+                    ft=backup_tracking,
+                    fs=backup_selected,
+                ).pack(),
+            ),
+        )
+
+        text = (
+            "🔍 <b>Фильтры партнёров</b>\n\n"
+            "🔔 <b>Трекинг</b> и ⭐ <b>избранное</b>"
         )
 
         return text, builder

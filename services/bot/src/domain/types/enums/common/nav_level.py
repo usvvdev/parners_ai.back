@@ -6,6 +6,10 @@ class NavLevel(StrEnum):
 
     PARTNERS = "partners"
 
+    PARTNERS_FILTERS = "partners_filters"
+
     LINKS = "links"
+
+    LINKS_FILTERS = "links_filters"
 
     OFFERS = "offers"

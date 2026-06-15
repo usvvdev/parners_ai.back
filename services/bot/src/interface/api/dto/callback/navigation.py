@@ -14,3 +14,6 @@ class NavigationCD(
     fa: int = FILTER_ALL
     ft: int = FILTER_ALL
     fs: int = FILTER_ALL
+    bft: int = FILTER_ALL
+    bfs: int = FILTER_ALL
+    bfa: int = FILTER_ALL

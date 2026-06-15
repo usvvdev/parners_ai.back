@@ -96,6 +96,20 @@ async def partner_list(
     await render_callback(callback, text, builder)
 
 
+@partner_router.callback_query(NavigationCD.filter(F.level == NavLevel.PARTNERS_FILTERS))
+async def partner_filters(
+    callback: CallbackQuery,
+    callback_data: NavigationCD,
+) -> None:
+    text, builder = PartnerView.filters(
+        is_tracking=callback_data.ft,
+        is_selected=callback_data.fs,
+        backup_tracking=callback_data.bft,
+        backup_selected=callback_data.bfs,
+    )
+    await render_callback(callback, text, builder)
+
+
 @partner_router.callback_query(PartnerCD.filter(F.action == PartnerAction.VIEW))
 @handle_http_error("Партнер не найден")
 async def partner_detail(

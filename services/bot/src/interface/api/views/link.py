@@ -19,7 +19,8 @@ from .base import (
     build_list_text,
     append_list_pagination,
     append_detail_pagination,
-    append_link_filters,
+    append_link_filter_options,
+    link_filters_button_text,
 )
 
 from ....core.constants import FILTER_ALL
@@ -63,14 +64,20 @@ class LinkView:
         builder.row(
             InlineKeyboardButton(
                 text="➕ Добавить Витрину",
-                callback_data=LinkCD(action=LinkAction.CREATE, p_id=0, l_id=0),
-            )
-        )
-
-        append_link_filters(
-            builder,
-            is_active=is_active,
-            page=data.page,
+                callback_data=LinkCD(
+                    action=LinkAction.CREATE,
+                    p_id=0,
+                    l_id=0,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text=link_filters_button_text(is_active),
+                callback_data=NavigationCD(
+                    level=NavLevel.LINKS_FILTERS,
+                    fa=is_active,
+                    bfa=is_active,
+                ).pack(),
+            ),
         )
 
         for link in data.items:
@@ -82,7 +89,7 @@ class LinkView:
                         action=LinkAction.VIEW,
                         p_id=0,
                         l_id=link.id,
-                    ),
+                    ).pack(),
                 )
             )
 
@@ -97,7 +104,7 @@ class LinkView:
         builder.row(
             InlineKeyboardButton(
                 text="🏠 Главное меню",
-                callback_data=NavigationCD(level=NavLevel.MAIN),
+                callback_data=NavigationCD(level=NavLevel.MAIN).pack(),
             )
         )
 
@@ -105,6 +112,46 @@ class LinkView:
             data,
             title="🔗 <b>Список витрин</b>",
             empty="🔗 <b>Витрин пока нет.</b>",
+        )
+
+        return text, builder
+
+    @staticmethod
+    def filters(
+        *,
+        is_active: int = FILTER_ALL,
+        backup_active: int = FILTER_ALL,
+    ) -> tuple[str, InlineKeyboardBuilder]:
+        builder = InlineKeyboardBuilder()
+
+        append_link_filter_options(
+            builder,
+            is_active=is_active,
+            backup_active=backup_active,
+        )
+
+        builder.row(
+            InlineKeyboardButton(
+                text="✅ Показать",
+                callback_data=NavigationCD(
+                    level=NavLevel.LINKS,
+                    page=1,
+                    fa=is_active,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="🔙 Назад",
+                callback_data=NavigationCD(
+                    level=NavLevel.LINKS,
+                    page=1,
+                    fa=backup_active,
+                ).pack(),
+            ),
+        )
+
+        text = (
+            "🔍 <b>Фильтры витрин</b>\n\n"
+            "🟢 <b>Активные</b> и 🔴 <b>неактивные</b>"
         )
 
         return text, builder

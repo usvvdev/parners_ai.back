@@ -107,6 +107,18 @@ async def link_list(
     await render_callback(callback, text, builder)
 
 
+@link_router.callback_query(NavigationCD.filter(F.level == NavLevel.LINKS_FILTERS))
+async def link_filters(
+    callback: CallbackQuery,
+    callback_data: NavigationCD,
+) -> None:
+    text, builder = LinkView.filters(
+        is_active=callback_data.fa,
+        backup_active=callback_data.bfa,
+    )
+    await render_callback(callback, text, builder)
+
+
 @link_router.callback_query(LinkCD.filter(F.action == LinkAction.VIEW))
 @handle_http_error("Витрина не найдена")
 async def link_detail(

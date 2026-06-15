@@ -1,5 +1,7 @@
 # packages
 
+from aiogram.filters.callback_data import CallbackData
+
 from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -11,10 +13,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ..dto.callback import NavigationCD
 
-from ....core.constants import (
-    FILTER_ALL,
-    PAGINATION_GRID_SIZE,
-)
+from ....core.constants import FILTER_ALL
 
 from ....domain.types._types.base import PaginatedResponse
 
@@ -40,64 +39,6 @@ def build_list_text(
     return text
 
 
-def _page_window(
-    page: int,
-    pages: int,
-    *,
-    width: int = 7,
-) -> list[int]:
-    if pages <= width:
-        return list(range(1, pages + 1))
-
-    half = width // 2
-    start = max(1, page - half)
-    end = min(pages, start + width - 1)
-    start = max(1, end - width + 1)
-
-    return list(range(start, end + 1))
-
-
-def _append_page_grid(
-    builder: InlineKeyboardBuilder,
-    *,
-    page: int,
-    pages: int,
-    build_callback,
-    row_size: int = PAGINATION_GRID_SIZE,
-) -> None:
-    if pages <= 1:
-        return
-
-    nav_row: list[InlineKeyboardButton] = []
-
-    if page > 1:
-        nav_row.append(
-            InlineKeyboardButton(
-                text="◀️",
-                callback_data=build_callback(page - 1),
-            )
-        )
-
-    for page_number in _page_window(page, pages):
-        nav_row.append(
-            InlineKeyboardButton(
-                text=f"· {page_number} ·" if page_number == page else str(page_number),
-                callback_data=build_callback(page_number),
-            )
-        )
-
-    if page < pages:
-        nav_row.append(
-            InlineKeyboardButton(
-                text="▶️",
-                callback_data=build_callback(page + 1),
-            )
-        )
-
-    for index in range(0, len(nav_row), row_size):
-        builder.row(*nav_row[index : index + row_size])
-
-
 def append_list_pagination(
     builder: InlineKeyboardBuilder,
     *,
@@ -108,18 +49,53 @@ def append_list_pagination(
     ft: int = FILTER_ALL,
     fs: int = FILTER_ALL,
 ) -> None:
-    _append_page_grid(
-        builder,
-        page=page,
-        pages=pages,
-        build_callback=lambda target_page: NavigationCD(
-            level=level,
-            page=target_page,
-            fa=fa,
-            ft=ft,
-            fs=fs,
-        ).pack(),
+    if pages <= 1:
+        return
+
+    buttons: list[InlineKeyboardButton] = []
+
+    if page > 1:
+        buttons.append(
+            InlineKeyboardButton(
+                text="◀",
+                callback_data=NavigationCD(
+                    level=level,
+                    page=page - 1,
+                    fa=fa,
+                    ft=ft,
+                    fs=fs,
+                ).pack(),
+            )
+        )
+
+    buttons.append(
+        InlineKeyboardButton(
+            text=f"{page}/{pages}",
+            callback_data=NavigationCD(
+                level=level,
+                page=page,
+                fa=fa,
+                ft=ft,
+                fs=fs,
+            ).pack(),
+        )
     )
+
+    if page < pages:
+        buttons.append(
+            InlineKeyboardButton(
+                text="▶",
+                callback_data=NavigationCD(
+                    level=level,
+                    page=page + 1,
+                    fa=fa,
+                    ft=ft,
+                    fs=fs,
+                ).pack(),
+            )
+        )
+
+    builder.row(*buttons)
 
 
 def append_detail_pagination(
@@ -129,88 +105,135 @@ def append_detail_pagination(
     pages: int,
     build_callback,
 ) -> None:
-    _append_page_grid(
-        builder,
-        page=page,
-        pages=pages,
-        build_callback=build_callback,
+    if pages <= 1:
+        return
+
+    buttons: list[InlineKeyboardButton] = []
+
+    if page > 1:
+        buttons.append(
+            InlineKeyboardButton(
+                text="◀",
+                callback_data=build_callback(page - 1),
+            )
+        )
+
+    buttons.append(
+        InlineKeyboardButton(
+            text=f"{page}/{pages}",
+            callback_data=build_callback(page),
+        )
     )
 
+    if page < pages:
+        buttons.append(
+            InlineKeyboardButton(
+                text="▶",
+                callback_data=build_callback(page + 1),
+            )
+        )
 
-def append_link_filters(
+    builder.row(*buttons)
+
+
+def _toggle_on_filter(
+    current: int,
+    *,
+    on_value: int = 1,
+) -> int:
+    return FILTER_ALL if current == on_value else on_value
+
+
+def append_link_filter_options(
     builder: InlineKeyboardBuilder,
     *,
     is_active: int,
-    page: int,
+    backup_active: int,
 ) -> None:
-    options = (
-        ("Все", FILTER_ALL),
-        ("🟢 Активные", 1),
-        ("🔴 Неактивные", 0),
-    )
+    active_on = is_active == 1
+    inactive_on = is_active == 0
 
     builder.row(
-        *[
-            InlineKeyboardButton(
-                text=f"• {label} •" if is_active == value else label,
-                callback_data=NavigationCD(
-                    level=NavLevel.LINKS,
-                    page=1 if value != is_active else page,
-                    fa=value,
-                ).pack(),
-            )
-            for label, value in options
-        ]
+        InlineKeyboardButton(
+            text=f"🟢 Активные {'✅' if active_on else '⬜'}",
+            callback_data=NavigationCD(
+                level=NavLevel.LINKS_FILTERS,
+                fa=_toggle_on_filter(is_active, on_value=1),
+                bfa=backup_active,
+            ).pack(),
+        ),
+        InlineKeyboardButton(
+            text=f"🔴 Неактивные {'✅' if inactive_on else '⬜'}",
+            callback_data=NavigationCD(
+                level=NavLevel.LINKS_FILTERS,
+                fa=_toggle_on_filter(is_active, on_value=0),
+                bfa=backup_active,
+            ).pack(),
+        ),
     )
 
 
-def append_partner_filters(
+def append_partner_filter_options(
     builder: InlineKeyboardBuilder,
     *,
     is_tracking: int,
     is_selected: int,
-    page: int,
+    backup_tracking: int,
+    backup_selected: int,
 ) -> None:
-    tracking_options = (
-        ("Все", FILTER_ALL),
-        ("🔔 Трекинг", 1),
-        ("🔕 Без трекинга", 0),
-    )
-    selected_options = (
-        ("Все", FILTER_ALL),
-        ("⭐ Избранные", 1),
-        ("☆ Остальные", 0),
-    )
+    tracking_on = is_tracking == 1
+    selected_on = is_selected == 1
 
     builder.row(
-        *[
-            InlineKeyboardButton(
-                text=f"• {label} •" if is_tracking == value else label,
-                callback_data=NavigationCD(
-                    level=NavLevel.PARTNERS,
-                    page=1 if value != is_tracking else page,
-                    ft=value,
-                    fs=is_selected,
-                ).pack(),
-            )
-            for label, value in tracking_options
-        ]
-    )
-    builder.row(
-        *[
-            InlineKeyboardButton(
-                text=f"• {label} •" if is_selected == value else label,
-                callback_data=NavigationCD(
-                    level=NavLevel.PARTNERS,
-                    page=1 if value != is_selected else page,
-                    ft=is_tracking,
-                    fs=value,
-                ).pack(),
-            )
-            for label, value in selected_options
-        ]
+        InlineKeyboardButton(
+            text=f"🔔 Трекинг {'✅' if tracking_on else '⬜'}",
+            callback_data=NavigationCD(
+                level=NavLevel.PARTNERS_FILTERS,
+                ft=_toggle_on_filter(is_tracking, on_value=1),
+                fs=is_selected,
+                bft=backup_tracking,
+                bfs=backup_selected,
+            ).pack(),
+        ),
+        InlineKeyboardButton(
+            text=f"⭐ Избранное {'✅' if selected_on else '⬜'}",
+            callback_data=NavigationCD(
+                level=NavLevel.PARTNERS_FILTERS,
+                ft=is_tracking,
+                fs=_toggle_on_filter(is_selected, on_value=1),
+                bft=backup_tracking,
+                bfs=backup_selected,
+            ).pack(),
+        ),
     )
 
+
+def link_filters_button_text(is_active: int) -> str:
+    if is_active == FILTER_ALL:
+        return "🔍 Фильтры"
+
+    if is_active == 1:
+        return "🔍 Фильтры • 🟢"
+
+    return "🔍 Фильтры • 🔴"
+
+
+def partner_filters_button_text(
+    is_tracking: int,
+    is_selected: int,
+) -> str:
+    if is_tracking != 1 and is_selected != 1:
+        return "🔍 Фильтры"
+
+    parts: list[str] = []
+
+    if is_tracking == 1:
+        parts.append("🔔")
+
+    if is_selected == 1:
+        parts.append("⭐")
+
+    return f"🔍 Фильтры • {' '.join(parts)}"
 
 def build_form_prompt(
     text: str,
@@ -220,7 +243,11 @@ def build_form_prompt(
     builder.row(
         InlineKeyboardButton(
             text="❌ Отмена",
-            callback_data=cancel_data,
+            callback_data=(
+                cancel_data.pack()
+                if isinstance(cancel_data, CallbackData)
+                else cancel_data
+            ),
         )
     )
 
