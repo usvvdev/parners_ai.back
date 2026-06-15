@@ -32,7 +32,7 @@ class APIClientsFactory:
         timeout: float = 30.0,
     ) -> APIClients:
         http = AsyncClient(
-            base_url=config.telegram_options.api_base_url,
+            base_url=config.api_options.base_url,
             timeout=timeout,
             headers={
                 "Authorization": f"Bearer {config.access_token}",
