@@ -23,7 +23,10 @@ class ScannedOffer(BaseModelType):
 
     url: str = Field(
         default="",
-        description="URL перехода с карточки оффера",
+        description=(
+            "Промежуточный href с карточки оффера на витрине "
+            "(до редиректа; wmid/utm_source могут отсутствовать)"
+        ),
     )
 
 

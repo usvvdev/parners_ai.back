@@ -3,6 +3,12 @@ from fastapi import (
     Depends,
 )
 
+from fastapi_pagination import (
+    Page,
+    Params,
+    paginate,
+)
+
 from ..dto import (
     FetchOfferPosition,
     InsertOfferPosition,
@@ -11,7 +17,12 @@ from ..dto import (
 
 from ..views import OfferPositionRepositoryView
 
-from ....infrastructure.utils.functions import verify_token
+from ....infrastructure.utils.functions import (
+    verify_token,
+    set_custom_pagination,
+)
+
+from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import OfferPositionRepositoryViewFactory
 
@@ -24,19 +35,28 @@ offer_position_router = APIRouter(
 
 @offer_position_router.get(
     "",
-    response_model=list[FetchOfferPosition],
+    response_model=Page[FetchOfferPosition],
 )
+@disable_extension_check
 async def fetch(
-    filters: FiltersOfferPosition = Depends(),
     view: OfferPositionRepositoryView = Depends(
         OfferPositionRepositoryViewFactory.create,
     ),
     _: str = Depends(
         verify_token,
     ),
-) -> list[FetchOfferPosition]:
-    return await view.fetch(
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
+    filters: FiltersOfferPosition = Depends(),
+) -> Page[FetchOfferPosition]:
+    data = await view.fetch(
         filters=filters,
+    )
+
+    return paginate(
+        data,
+        params=params,
     )
 
 

@@ -12,6 +12,7 @@ class IGeminiProtocol(Protocol):
         *,
         screenshot: str,
         markdown: str,
+        showcase_url: str,
         target_offers: list[str],
     ) -> Any:
         raise NotImplementedError

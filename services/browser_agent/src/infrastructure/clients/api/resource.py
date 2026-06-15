@@ -5,6 +5,8 @@ from typing import (
     TypeVar,
 )
 
+from typing import Any
+
 from ....core.constants import DEFAULT_PAGE_SIZE
 from ....domain.types._types.base import PaginatedResponse
 from ...utils.functions.paginate_response import parse_paginated_response
@@ -31,10 +33,16 @@ class BaseResourceAPIClient(
         *,
         page: int = 1,
         size: int = DEFAULT_PAGE_SIZE,
+        filters: dict[str, Any] | None = None,
     ) -> PaginatedResponse[TList]:
+        params: dict[str, Any] = {"page": page, "size": size}
+
+        if filters:
+            params.update(filters)
+
         data = await self._get(
             self.path,
-            params={"page": page, "size": size},
+            params=params,
         )
         return parse_paginated_response(
             data,
@@ -45,6 +53,7 @@ class BaseResourceAPIClient(
         self,
         *,
         size: int = DEFAULT_PAGE_SIZE,
+        filters: dict[str, Any] | None = None,
     ) -> list[TList]:
         items: list[TList] = []
         page = 1
@@ -53,6 +62,7 @@ class BaseResourceAPIClient(
             result = await self.fetch_page(
                 page=page,
                 size=size,
+                filters=filters,
             )
             items.extend(result.items)
 

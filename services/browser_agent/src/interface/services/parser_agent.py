@@ -41,6 +41,17 @@ class ParserAgentService:
         self._partner_client = partner_client
         self._utm_source_client = utm_source_client
         self._offer_position_client = offer_position_client
+        self._default_offers: list[FetchOffer] | None = None
+
+    async def _get_default_offers(self) -> list[FetchOffer]:
+        if self._default_offers is None:
+            self._default_offers = await self._offer_client.fetch_all()
+            logger.info(
+                "Cached {} default offers",
+                len(self._default_offers),
+            )
+
+        return self._default_offers
 
     @staticmethod
     def _resolve_target_titles(
@@ -116,18 +127,33 @@ class ParserAgentService:
         result: PartnerResult,
     ) -> None:
         for offer in result.target_offers_found:
-            if not offer.is_found:
+            if not offer.is_found or not offer.url:
                 continue
 
-            wmid = extract_query_param(offer.url, "wmid")
-            utm_source = extract_query_param(offer.url, "utm_source")
-
-            if not wmid or not utm_source:
+            try:
+                final_url = await self._browser_agent.capture_offer_redirect_url(
+                    offer.url,
+                )
+            except RuntimeError as err:
                 logger.warning(
-                    "Skip offer without wmid/utm_source: link={} offer={} url={}",
+                    "Skip offer redirect capture: link={} offer={} url={} err={}",
                     link.link,
                     offer.title,
                     offer.url,
+                    err,
+                )
+                continue
+
+            wmid = extract_query_param(final_url, "wmid")
+            utm_source = extract_query_param(final_url, "utm_source")
+
+            if not wmid or not utm_source:
+                logger.warning(
+                    "Skip offer without wmid/utm_source: link={} offer={} url={} final_url={}",
+                    link.link,
+                    offer.title,
+                    offer.url,
+                    final_url,
                 )
                 continue
 
@@ -148,8 +174,8 @@ class ParserAgentService:
             )
 
     async def execute(self) -> list[PartnerResult]:
-        links = [link for link in await self._link_client.fetch_all() if link.is_active]
-        all_offers = await self._offer_client.fetch_all()
+        links = await self._link_client.fetch_all_active()
+        all_offers = await self._get_default_offers()
 
         results: list[PartnerResult] = []
 

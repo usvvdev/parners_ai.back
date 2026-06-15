@@ -31,6 +31,7 @@ class Gemini(IGeminiProtocol):
         *,
         screenshot: str,
         markdown: str,
+        showcase_url: str,
         target_offers: list[str],
     ) -> PartnerResult:
         image_payload = ImagePayload(
@@ -38,6 +39,7 @@ class Gemini(IGeminiProtocol):
         )
 
         prompt = SYSTEM_PROMPT.format(
+            showcase_url=showcase_url,
             target_offers=", ".join(target_offers),
             markdown=markdown[:50000],
         )

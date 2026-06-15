@@ -18,10 +18,10 @@ from clickhouse_sqlalchemy.types import (
 
 # application dependencies
 
-from ...common.base import ETableModel
+from ...common.base import BaseClickhouseModel
 
 
-class OfferPositions(ETableModel):
+class OfferPositions(BaseClickhouseModel):
     wmid: Mapped[str] = mapped_column(
         String(length=128),
         nullable=False,

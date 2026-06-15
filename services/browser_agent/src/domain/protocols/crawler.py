@@ -12,3 +12,10 @@ class ICrawlerProtocol(Protocol):
         link: str,
     ) -> CrawlResult:
         raise NotImplementedError
+
+    async def navigate_and_capture_url(
+        self,
+        *,
+        link: str,
+    ) -> str:
+        raise NotImplementedError

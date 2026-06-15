@@ -20,8 +20,6 @@ async def run_app() -> None:
         service_dir=SERVICE_DIR,
     )
 
-    print(config)
-
     clients = APIClientsFactory.create(
         config=config,
     )

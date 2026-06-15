@@ -29,9 +29,21 @@ class BrowserAgentService:
         result = await self._gemini.analyze(
             screenshot=page.screenshot,
             markdown=page.markdown,
+            showcase_url=link,
             target_offers=target_offers,
         )
 
         result.link = link
 
         return result
+
+    async def capture_offer_redirect_url(
+        self,
+        url: str,
+    ) -> str:
+        if not url:
+            return url
+
+        return await self._crawler.navigate_and_capture_url(
+            link=url,
+        )
