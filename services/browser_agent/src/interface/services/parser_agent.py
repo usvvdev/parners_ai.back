@@ -2,6 +2,8 @@
 
 from loguru import logger
 
+from datetime import datetime
+
 # application dependencies
 
 from ...domain.types._types import (
@@ -170,6 +172,7 @@ class ParserAgentService:
                     offer=offer.title,
                     vitrina=link.link,
                     position=offer.position,
+                    created_at=datetime.now(),
                 ),
             )
 
