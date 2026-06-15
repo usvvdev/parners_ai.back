@@ -38,18 +38,16 @@ class PartnerIdentity(BaseModelType):
         description="WMID вебмастера",
     )
 
-    utm_source: str = Field(
-        ...,
-        description="UTM-источник партнера",
-    )
-
 
 class FetchPartner(
     PartnerIdentity,
     BasePartnerFields,
     BaseFetch,
 ):
-    pass
+    utm_source: str = Field(
+        default="",
+        description="UTM-источник партнера",
+    )
 
 
 class FetchPartners(FetchPartner):
@@ -71,9 +69,18 @@ class FetchPartners(FetchPartner):
 
 
 class InsertPartner(
-    PartnerIdentity,
     BasePartnerFields,
 ):
+    wmid: str = Field(
+        ...,
+        description="WMID вебмастера",
+    )
+
+    utm_source_id: int = Field(
+        ...,
+        description="ID UTM-источника",
+    )
+
     link_ids: list[int] = Field(
         default_factory=list,
         description="ID ссылок партнера",

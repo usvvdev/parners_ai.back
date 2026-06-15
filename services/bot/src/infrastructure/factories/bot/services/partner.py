@@ -13,4 +13,5 @@ class PartnerServiceFactory:
         return PartnerService(
             partner_client=clients.partner,
             link_client=clients.link,
+            utm_source_client=clients.utm_source,
         )

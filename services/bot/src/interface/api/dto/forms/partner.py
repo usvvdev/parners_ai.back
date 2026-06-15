@@ -8,7 +8,7 @@ from aiogram.fsm.state import (
 
 class PartnerForm(StatesGroup):
     create_wmid = State()
-    create_utm_source = State()
+    select_utm_source = State()
     select_links = State()
     edit_wmid = State()
     edit_utm_source = State()

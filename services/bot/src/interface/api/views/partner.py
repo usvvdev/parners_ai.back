@@ -12,6 +12,7 @@ from ..dto.callback import (
     NavigationCD,
     PartnerCD,
     LinkCD,
+    UTMSourceCD,
 )
 
 from .base import (
@@ -31,6 +32,7 @@ from ....core.constants import (
 from ....domain.types.enums.actions import (
     PartnerAction,
     LinkAction,
+    UTMSourceAction,
 )
 
 from ....domain.types.enums.common import NavLevel
@@ -44,6 +46,7 @@ from ....domain.types._types import (
     FetchPartner,
     FetchPartners,
     FetchLinks,
+    FetchUTMSource,
     PaginatedResponse,
 )
 
@@ -363,6 +366,140 @@ class PartnerView:
                 "🔗 <b>Витрин пока нет.</b>\n"
                 "Создайте витрину в разделе «Список витрин» или нажмите «Готово» без выбора."
             )
+
+        if data.pages > 1:
+            text += f"\nСтраница {data.page} из {data.pages}"
+
+        return text, builder
+
+    @staticmethod
+    def utm_source_picker(
+        data: PaginatedResponse[FetchUTMSource],
+        selected_id: int | None,
+    ) -> tuple[str, InlineKeyboardBuilder]:
+        builder = InlineKeyboardBuilder()
+
+        item_buttons: list[InlineKeyboardButton] = []
+
+        for source in data.items:
+            status = "🟢" if source.id == selected_id else "🔴"
+            item_buttons.append(
+                InlineKeyboardButton(
+                    text=f"{status} {safe(source.title)}",
+                    callback_data=UTMSourceCD(
+                        action=UTMSourceAction.PICK_SELECT,
+                        u_id=source.id,
+                        page=data.page,
+                    ).pack(),
+                )
+            )
+
+        append_button_grid(builder, item_buttons)
+
+        append_detail_pagination(
+            builder,
+            page=data.page,
+            pages=data.pages,
+            build_callback=lambda page: UTMSourceCD(
+                action=UTMSourceAction.PICK_PAGE,
+                u_id=0,
+                page=page,
+            ).pack(),
+        )
+
+        builder.row(
+            InlineKeyboardButton(
+                text="✅ Готово",
+                callback_data=UTMSourceCD(
+                    action=UTMSourceAction.PICK_CONFIRM,
+                    u_id=0,
+                    page=data.page,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="❌ Отмена",
+                callback_data=UTMSourceCD(
+                    action=UTMSourceAction.PICK_CANCEL,
+                    u_id=0,
+                    page=data.page,
+                ).pack(),
+            ),
+        )
+
+        if data.total:
+            text = (
+                f"🏷 <b>Выберите UTM source</b> ({data.total})\n"
+                f"🟢 — выбран, 🔴 — не выбран"
+            )
+        else:
+            text = "🏷 <b>UTM sources пока нет.</b>"
+
+        if data.pages > 1:
+            text += f"\nСтраница {data.page} из {data.pages}"
+
+        return text, builder
+
+    @staticmethod
+    def utm_source_picker(
+        data: PaginatedResponse[FetchUTMSource],
+        selected_id: int | None,
+    ) -> tuple[str, InlineKeyboardBuilder]:
+        builder = InlineKeyboardBuilder()
+
+        item_buttons: list[InlineKeyboardButton] = []
+
+        for source in data.items:
+            status = "🟢" if source.id == selected_id else "🔴"
+            item_buttons.append(
+                InlineKeyboardButton(
+                    text=f"{status} {safe(source.title)}",
+                    callback_data=UTMSourceCD(
+                        action=UTMSourceAction.PICK_SELECT,
+                        u_id=source.id,
+                        page=data.page,
+                    ).pack(),
+                )
+            )
+
+        append_button_grid(builder, item_buttons)
+
+        append_detail_pagination(
+            builder,
+            page=data.page,
+            pages=data.pages,
+            build_callback=lambda page: UTMSourceCD(
+                action=UTMSourceAction.PICK_PAGE,
+                u_id=0,
+                page=page,
+            ).pack(),
+        )
+
+        builder.row(
+            InlineKeyboardButton(
+                text="✅ Готово",
+                callback_data=UTMSourceCD(
+                    action=UTMSourceAction.PICK_CONFIRM,
+                    u_id=0,
+                    page=data.page,
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text="❌ Отмена",
+                callback_data=UTMSourceCD(
+                    action=UTMSourceAction.PICK_CANCEL,
+                    u_id=0,
+                    page=data.page,
+                ).pack(),
+            ),
+        )
+
+        if data.total:
+            text = (
+                f"🏷 <b>Выберите UTM source</b> ({data.total})\n"
+                f"🟢 — выбран, 🔴 — не выбран"
+            )
+        else:
+            text = "🏷 <b>UTM sources пока нет.</b>"
 
         if data.pages > 1:
             text += f"\nСтраница {data.page} из {data.pages}"

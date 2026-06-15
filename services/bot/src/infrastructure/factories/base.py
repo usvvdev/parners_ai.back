@@ -8,6 +8,7 @@ from ..clients.api import (
     PartnerAPIClient,
     LinkAPIClient,
     OfferAPIClient,
+    UTMSourceAPIClient,
 )
 
 from libs.core.config import TApplicationConfig
@@ -20,6 +21,7 @@ class APIClients(BaseModelType):
     partner: PartnerAPIClient
     link: LinkAPIClient
     offer: OfferAPIClient
+    utm_source: UTMSourceAPIClient
 
     async def close(self) -> None:
         await self.http.aclose()
@@ -44,4 +46,5 @@ class APIClientsFactory:
             partner=PartnerAPIClient(client=http),
             link=LinkAPIClient(client=http),
             offer=OfferAPIClient(client=http),
+            utm_source=UTMSourceAPIClient(client=http),
         )

@@ -23,6 +23,11 @@ from .partner import (
     UpdatePartner,
 )
 
+from .utm_source import (
+    FetchUTMSource,
+    InsertUTMSource,
+)
+
 __all__: list[str] = [
     "BaseFetch",
     "PaginatedResponse",
@@ -37,4 +42,6 @@ __all__: list[str] = [
     "FetchPartners",
     "InsertPartner",
     "UpdatePartner",
+    "FetchUTMSource",
+    "InsertUTMSource",
 ]

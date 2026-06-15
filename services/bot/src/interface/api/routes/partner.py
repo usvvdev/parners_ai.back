@@ -12,12 +12,15 @@ from aiogram.types import (
     Message,
 )
 
+from httpx import HTTPStatusError
+
 # application depencies
 
 from ..dto.callback import (
     NavigationCD,
     PartnerCD,
     LinkCD,
+    UTMSourceCD,
 )
 
 from ..dto.forms import PartnerForm
@@ -31,6 +34,7 @@ from ...services import PartnerService
 from ....domain.types.enums.actions import (
     PartnerAction,
     LinkAction,
+    UTMSourceAction,
 )
 
 from ....domain.types.enums.common import NavLevel
@@ -39,7 +43,6 @@ from ....domain.types._types import InsertPartner
 
 from ....infrastructure.utils.decorators import (
     handle_http_error,
-    handle_form_submit,
 )
 
 from ....infrastructure.utils.functions import (
@@ -54,6 +57,28 @@ from ....infrastructure.utils.functions import (
 
 
 partner_router = Router()
+
+
+async def _render_utm_source_picker(
+    bot,
+    state: FSMContext,
+    partner_service: PartnerService,
+    *,
+    page: int | None = None,
+) -> None:
+    data = await state.get_data()
+    current_page = page if page is not None else data.get("picker_page", 1)
+    selected_id = data.get("selected_utm_source_id")
+
+    await state.update_data(picker_page=current_page)
+
+    sources = await partner_service.fetch_utm_sources(page=current_page)
+    text, builder = PartnerView.utm_source_picker(
+        sources,
+        selected_id,
+    )
+
+    await edit_menu_message(bot, state, text, builder.as_markup())
 
 
 async def _render_link_picker(
@@ -154,33 +179,112 @@ async def create_partner_start(
 async def create_partner_wmid(
     message: Message,
     state: FSMContext,
+    partner_service: PartnerService,
 ) -> None:
     await delete_user_message(message)
-    await state.update_data(wmid=message.text.strip())
-
-    text, markup = build_form_prompt(
-        "🏷 <b>Введите UTM source партнера:</b>",
-        NavigationCD(level=NavLevel.PARTNERS),
+    await state.update_data(
+        wmid=message.text.strip(),
+        selected_utm_source_id=None,
+        picker_page=1,
     )
-    await edit_menu_message(message.bot, state, text, markup)
-    await state.set_state(PartnerForm.create_utm_source)
+
+    await state.set_state(PartnerForm.select_utm_source)
+
+    try:
+        await _render_utm_source_picker(message.bot, state, partner_service)
+    except HTTPStatusError:
+        await edit_menu_message(
+            message.bot,
+            state,
+            "❌ Ошибка загрузки UTM sources",
+        )
+        await clear_state_keep_filters(state)
 
 
-@partner_router.message(PartnerForm.create_utm_source)
-@handle_form_submit("❌ Не удалось создать партнера")
-async def create_partner_finish(
-    message: Message,
+@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_SELECT))
+async def utm_source_pick_select(
+    callback: CallbackQuery,
+    callback_data: UTMSourceCD,
     state: FSMContext,
     partner_service: PartnerService,
-) -> tuple[str, ...]:
+) -> None:
     data = await state.get_data()
+    selected_id = data.get("selected_utm_source_id")
+
+    if selected_id == callback_data.u_id:
+        await state.update_data(selected_utm_source_id=None)
+    else:
+        await state.update_data(selected_utm_source_id=callback_data.u_id)
+
+    await _render_utm_source_picker(
+        callback.bot,
+        state,
+        partner_service,
+        page=callback_data.page,
+    )
+    await callback.answer()
+
+
+@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_PAGE))
+async def utm_source_pick_page(
+    callback: CallbackQuery,
+    callback_data: UTMSourceCD,
+    state: FSMContext,
+    partner_service: PartnerService,
+) -> None:
+    await _render_utm_source_picker(
+        callback.bot,
+        state,
+        partner_service,
+        page=callback_data.page,
+    )
+    await callback.answer()
+
+
+@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_CANCEL))
+@handle_http_error("Ошибка")
+async def utm_source_pick_cancel(
+    callback: CallbackQuery,
+    state: FSMContext,
+    partner_service: PartnerService,
+) -> None:
+    await clear_state_keep_filters(state)
+    is_tracking, is_selected = await get_partner_filters(state)
+    data = await partner_service.fetch(
+        page=1,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
+    )
+    text, builder = PartnerView.list(
+        data,
+        is_tracking=is_tracking,
+        is_selected=is_selected,
+    )
+    await render_callback(callback, text, builder)
+
+
+@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_CONFIRM))
+@handle_http_error("❌ Не удалось создать партнера")
+async def create_partner_finish(
+    callback: CallbackQuery,
+    state: FSMContext,
+    partner_service: PartnerService,
+) -> None:
+    data = await state.get_data()
+    utm_source_id = data.get("selected_utm_source_id")
+
+    if not utm_source_id:
+        await callback.answer("Выберите UTM source", show_alert=True)
+        return
 
     await partner_service.create(
         InsertPartner(
             wmid=data["wmid"],
-            utm_source=message.text.strip(),
+            utm_source_id=utm_source_id,
         ),
     )
+
+    await clear_state_keep_filters(state)
 
     is_tracking, is_selected = await get_partner_filters(state)
     result = await partner_service.fetch(
@@ -194,7 +298,7 @@ async def create_partner_finish(
         is_selected=is_selected,
     )
 
-    return text, builder.as_markup()
+    await render_callback(callback, text, builder, answer="Партнер создан")
 
 
 @partner_router.callback_query(PartnerCD.filter(F.action == PartnerAction.SETTINGS))

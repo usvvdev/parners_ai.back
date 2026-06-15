@@ -5,12 +5,14 @@ from ...core.constants import FILTER_ALL
 from ...infrastructure.clients.api import (
     PartnerAPIClient,
     LinkAPIClient,
+    UTMSourceAPIClient,
 )
 
 from ...domain.types._types import (
     FetchPartner,
     FetchPartners,
     FetchLinks,
+    FetchUTMSource,
     InsertPartner,
     UpdatePartner,
     PaginatedResponse,
@@ -22,9 +24,11 @@ class PartnerService:
         self,
         partner_client: PartnerAPIClient,
         link_client: LinkAPIClient,
+        utm_source_client: UTMSourceAPIClient,
     ) -> None:
         self._partner_client = partner_client
         self._link_client = link_client
+        self._utm_source_client = utm_source_client
 
     async def fetch(
         self,
@@ -130,3 +134,10 @@ class PartnerService:
         page: int = 1,
     ) -> PaginatedResponse[FetchLinks]:
         return await self._link_client.fetch_page(page=page)
+
+    async def fetch_utm_sources(
+        self,
+        *,
+        page: int = 1,
+    ) -> PaginatedResponse[FetchUTMSource]:
+        return await self._utm_source_client.fetch_page(page=page)
