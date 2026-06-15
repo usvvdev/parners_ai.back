@@ -2,7 +2,7 @@ from libs.core.constants import DEFAULT_PAGE_SIZE
 
 FILTER_ALL = -1
 
-LIST_GRID_COLUMNS = 3
+LIST_GRID_COLUMNS = 2
 
 LIST_GRID_URL_LIMIT = 14
 
