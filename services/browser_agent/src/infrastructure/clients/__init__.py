@@ -1,7 +1,9 @@
-from .ai.crawler import Crawler
-from .ai.gemini import Gemini
+from .crawler import CrawlerAgent
 
-__all__ = [
-    "Crawler",
-    "Gemini",
+from .gemini import GeminiAgent
+
+
+__all__: list[str] = [
+    "CrawlerAgent",
+    "GeminiAgent",
 ]

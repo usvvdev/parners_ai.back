@@ -1,15 +1,16 @@
+# packages
+
 from asyncio import run
 
 from pathlib import Path
 
 from loguru import logger
 
-from .src.infrastructure.factories import (
-    APIClientsFactory,
-    AgentServicesFactory,
-)
+# application depencies
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
+
+from .src.infrastructure.factories.services import ParserAgentServiceFactory
 
 
 SERVICE_DIR = Path(__file__).parent
@@ -20,17 +21,12 @@ async def run_app() -> None:
         service_dir=SERVICE_DIR,
     )
 
-    clients = APIClientsFactory.create(
+    agent = ParserAgentServiceFactory.create(
         config=config,
-    )
-
-    services = AgentServicesFactory.create(
-        config=config,
-        clients=clients,
     )
 
     try:
-        results = await services.parser.execute()
+        results = await agent.execute()
 
         for result in results:
             for offer in result.target_offers_found:
@@ -44,7 +40,7 @@ async def run_app() -> None:
                     result.link,
                 )
     finally:
-        await clients.close()
+        await agent._api_clients.close()
 
 
 def main() -> None:

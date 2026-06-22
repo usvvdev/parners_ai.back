@@ -1,3 +1,9 @@
-from libs.core.constants import DEFAULT_PAGE_SIZE
+# crawler variables
 
-__all__ = ["DEFAULT_PAGE_SIZE"]
+NAVIGATION_TIMEOUT_MS = 30_000
+
+POPUP_WAIT_MS = 15_000
+
+REDIRECT_SETTLE_MS = 2_000
+
+POPUP_POLL_MS = 200

@@ -1,9 +1,10 @@
 # application dependencies
 
-from ...domain.protocols import (
+from ...domain.protocols.agent import (
     ICrawlerProtocol,
     IGeminiProtocol,
 )
+
 from ...domain.types._types import PartnerResult
 
 

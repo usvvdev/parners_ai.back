@@ -1,5 +1,5 @@
-from .adapter import HTTPAdapterProtocol
+from .client import IHTTPClientProtocol
 
 __all__: list[str] = [
-    "HTTPAdapterProtocol",
+    "IHTTPClientProtocol",
 ]

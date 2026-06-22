@@ -1,12 +1,13 @@
 # packages
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+)
 
 # application depencies
 
-from ..base import APIClients
-
-from .services import (
+from ..services import (
     PartnerServiceFactory,
     LinkServiceFactory,
     OfferServiceFactory,
@@ -17,6 +18,8 @@ from ....interface.services import (
     LinkService,
     OfferService,
 )
+
+from libs.domain.types._types.shared import APIClients
 
 
 class BotServices(BaseModel):

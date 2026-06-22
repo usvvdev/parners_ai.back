@@ -6,48 +6,37 @@ from datetime import datetime
 
 # application dependencies
 
-from ...domain.types._types import (
+from .browser_agent import BrowserAgentService
+
+from ...domain.types._types import PartnerResult
+
+from libs.domain.types._types.shared import APIClients
+
+from libs.infrastructure.clients.http.schemas import (
     FetchLinks,
     FetchOffer,
     InsertOfferPosition,
     InsertPartner,
     InsertUTMSource,
-    PartnerResult,
     UpdatePartner,
 )
-from ...domain.utils.parse_url import extract_query_param
-from .browser_agent import BrowserAgentService
 
-from ...infrastructure.clients.api import (
-    LinkAPIClient,
-    OfferAPIClient,
-    PartnerAPIClient,
-    UTMSourceAPIClient,
-    OfferPositionAPIClient,
-)
+from ...infrastructure.utils.parse_url import extract_query_param
 
 
 class ParserAgentService:
     def __init__(
         self,
         browser_agent: BrowserAgentService,
-        link_client: LinkAPIClient,
-        offer_client: OfferAPIClient,
-        partner_client: PartnerAPIClient,
-        utm_source_client: UTMSourceAPIClient,
-        offer_position_client: OfferPositionAPIClient,
+        api_clients: APIClients,
     ) -> None:
         self._browser_agent = browser_agent
-        self._link_client = link_client
-        self._offer_client = offer_client
-        self._partner_client = partner_client
-        self._utm_source_client = utm_source_client
-        self._offer_position_client = offer_position_client
+        self._api_clients = api_clients
         self._default_offers: list[FetchOffer] | None = None
 
     async def _get_default_offers(self) -> list[FetchOffer]:
         if self._default_offers is None:
-            self._default_offers = await self._offer_client.fetch_all()
+            self._default_offers = await self._api_clients.offer.fetch_all()
             logger.info(
                 "Cached {} default offers",
                 len(self._default_offers),
@@ -74,11 +63,11 @@ class ParserAgentService:
     ) -> int:
         normalized = title.strip().lower()
 
-        for source in await self._utm_source_client.fetch_all():
+        for source in await self._api_clients.utm_source.fetch_all():
             if source.title.strip().lower() == normalized:
                 return source.id
 
-        created = await self._utm_source_client.create(
+        created = await self._api_clients.utm_source.create(
             InsertUTMSource(title=title.strip()),
         )
         return created.id
@@ -95,14 +84,14 @@ class ParserAgentService:
         existing = next(
             (
                 partner
-                for partner in await self._partner_client.fetch_all()
+                for partner in await self._api_clients.partner.fetch_all()
                 if partner.wmid == wmid
             ),
             None,
         )
 
         if existing is None:
-            await self._partner_client.create(
+            await self._api_clients.partner.create(
                 InsertPartner(
                     wmid=wmid,
                     utm_source_id=utm_source_id,
@@ -111,11 +100,11 @@ class ParserAgentService:
             )
             return
 
-        partner = await self._partner_client.fetch_by_id(existing.id)
+        partner = await self._api_clients.partner.fetch_by_id(existing.id)
         link_ids = {item.id for item in partner.links.items}
         link_ids.add(link_id)
 
-        await self._partner_client.update(
+        await self._api_clients.partner.update(
             existing.id,
             UpdatePartner(
                 link_ids=list(link_ids),
@@ -165,7 +154,7 @@ class ParserAgentService:
                 link_id=link.id,
             )
 
-            await self._offer_position_client.create(
+            await self._api_clients.offer_position.create(
                 InsertOfferPosition(
                     wmid=wmid,
                     utm_source=utm_source,
@@ -177,7 +166,7 @@ class ParserAgentService:
             )
 
     async def execute(self) -> list[PartnerResult]:
-        links = await self._link_client.fetch_all_active()
+        links = await self._api_clients.link.fetch_all()
         all_offers = await self._get_default_offers()
 
         results: list[PartnerResult] = []

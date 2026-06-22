@@ -22,12 +22,11 @@ from .src.interface.api.routes import (
     offer_router,
 )
 
-from .src.infrastructure.factories import (
-    APIClientsFactory,
-    BotServicesFactory,
-)
-
 from .src.interface.middleware import AuthMiddleware
+
+from .src.infrastructure.factories import BotServicesFactory
+
+from libs.infrastructure.factories.api import APIClientsFactory
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
