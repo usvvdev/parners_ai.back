@@ -181,3 +181,16 @@ else
 		up -d --build
 	@echo "✅ $(service) перезапущен!"
 endif
+
+job-run: ## Запуск одноразового job сервиса
+ifndef service
+	@echo "❌ Укажи сервис: make job-run service=browser_agent"
+	@exit 1
+else
+	@echo "⚡ Job запуск $(service)..."
+	@docker compose \
+		--project-directory $(SERVICE_DIR)/$(service) \
+		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
+		-f $(SERVICE_DIR)/$(service)/docker/$(TARGET_FILE) \
+		run --rm $(service)
+endif
