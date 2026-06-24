@@ -1,9 +1,6 @@
 # packages
 
-from pydantic import (
-    Field,
-    computed_field,
-)
+from pydantic import Field
 
 # application dependencies
 
@@ -30,17 +27,3 @@ class OpenAPIOptions(BaseConfigType):
         default="0.0.1",
         description="Application API version.",
     )
-
-    # title: str = Field(
-    #     default="api",
-    #     description="Title of the API (shown in docs).",
-    # )
-
-    # @computed_field
-    # @property
-    # def root_path(
-    #     self,
-    # ) -> str:
-    #     if self.title is not None:
-    #         return f"/{self.title}"
-    #     raise ValueError("Application title is not filled")

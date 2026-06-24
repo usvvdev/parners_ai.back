@@ -1,46 +1,79 @@
+# packages
+
+from fastapi_pagination import Params
+
 # application dependencies
 
-from ..dto import FetchPartner, FetchOffer
+from ..dto import (
+    FetchPartner,
+    FetchPartners,
+    InsertPartner,
+    UpdatePartner,
+    FiltersPartner,
+)
 
-from ...services import PartnerRepositoryService
+from libs.infrastructure.stores.mysql.repositories import PartnerRepository
 
 
 class PartnerRepositoryView:
     def __init__(
         self,
-        service: PartnerRepositoryService,
+        repository: PartnerRepository,
     ) -> None:
-        self._service = service
+        self._repository = repository
 
     async def fetch(
         self,
+        filters: FiltersPartner,
     ) -> list[FetchPartner]:
-        data = await self._service.fetch()
-        return data
-        # return [FetchPartner.model_validate(item) for item in data]
+        return await self._repository.fetch_many(
+            filters=filters,
+        )
 
-    # async def create(
-    #     self,
-    #     data: InsertOffer,
-    # ) -> FetchOffer:
-    #     return await self._service.create(
-    #         data=data.dump,
-    #     )
+    async def fetch_by_id(
+        self,
+        id: int,
+        params: Params,
+    ) -> FetchPartners:
+        partner, links = await self._repository.fetch_one(
+            id=id,
+            params=params,
+        )
+        return FetchPartners(
+            **partner.__dict__,
+            links=links,
+        )
 
-    # async def update(
-    #     self,
-    #     offer_id: int,
-    #     data: InsertOffer,
-    # ) -> FetchOffer:
-    #     return await self._service.update(
-    #         offer_id=offer_id,
-    #         data=data.dump,
-    #     )
+    async def insert(
+        self,
+        data: InsertPartner,
+    ) -> FetchPartners:
+        partner, links = await self._repository.insert(
+            data=data,
+        )
+        return FetchPartners(
+            **partner.__dict__,
+            links=links,
+        )
 
-    # async def delete(
-    #     self,
-    #     offer_id: int,
-    # ) -> FetchOffer:
-    #     return await self._service.delete(
-    #         offer_id=offer_id,
-    #     )
+    async def update(
+        self,
+        id: int,
+        data: UpdatePartner,
+    ) -> FetchPartners:
+        partner, links = await self._repository.update(
+            id=id,
+            data=data,
+        )
+        return FetchPartners(
+            **partner.__dict__,
+            links=links,
+        )
+
+    async def delete(
+        self,
+        id: int,
+    ) -> None:
+        return await self._repository.delete(
+            id=id,
+        )

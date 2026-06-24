@@ -1,0 +1,21 @@
+x-base-service: &base-service
+  restart: unless-stopped
+  build:
+    context: ../../
+    dockerfile: services/bot/docker/Dockerfile
+  environment:
+    - PYTHONUNBUFFERED=1
+    - PYTHONDONTWRITEBYTECODE=1
+    - TZ=UTC
+
+services:
+  bot:
+    <<: *base-service
+    container_name: bot
+
+networks:
+  default:
+    driver: bridge
+    name: backend_network
+    external: true
+

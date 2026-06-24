@@ -12,12 +12,13 @@ WORKDIR /app
 # 2. Копируем файлы конфигурации проекта
 COPY pyproject.toml uv.lock ./
 
-# 3. Синхронизируем ТОЛЬКО внешние зависимости для browser-agent
+# 3. Синхронизируем ТОЛЬКО внешние зависимости для api
 # --extra browser-agent указывает uv установить эту конкретную группу
 RUN uv sync --frozen --no-install-project --extra api
 
-# 4. Копируем весь исходный код (включая папки libs и services)
-COPY . .
+# 4. Копируем весь исходный код (включая папки libs и services/api)
+COPY libs libs/
+COPY services/api services/api/
 
 # 5. Финальный sync — теперь uv устанавливает сам проект (ваши пакеты)
 # и регистрирует скрипт [project.scripts] api

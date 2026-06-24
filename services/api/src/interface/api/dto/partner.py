@@ -1,40 +1,124 @@
-from pydantic import Field
+# packages
+
+from pydantic import (
+    Field,
+    field_validator,
+)
 
 from typing import Optional
 
-from .offer import FetchOffer
+from datetime import datetime
+
+from fastapi_pagination import Page
+
+from fastapi_filters import (
+    FilterField,
+    FilterSet,
+)
+
+# application dependencies
+
+from .link import FetchLinks
+
+from .utm_source import FetchUTMSource
+
+from .base import BaseFetch
 
 from libs.domain.types._types.common import BaseModelType
 
 
-class BasePartner(BaseModelType):
-    title: str = Field(
-        ...,
-        description="Название оффера",
-    )
-
-    link: str = Field(
-        ...,
-        description="Ссылка на платформу парнтера",
-    )
-
+class BasePartnerFields(BaseModelType):
     is_tracking: bool = Field(
         default=True,
         description="Активность оффера",
     )
 
-
-class FetchPartner(BasePartner):
-    id: int = Field(
-        ...,
-        description="ID оффера",
+    is_selected: bool = Field(
+        default=False,
+        description="Избранный партнер",
     )
 
-    offers: Optional[list[FetchOffer]] = Field(
-        default=list,
+
+class PartnerIdentity(BaseModelType):
+    wmid: str = Field(
+        ...,
+        description="Название оффера",
+    )
+
+
+class FetchPartners(
+    PartnerIdentity,
+    BasePartnerFields,
+    BaseFetch,
+):
+    utm_source: Optional[FetchUTMSource | str] = Field(
+        default=None,
+        description="UTM метка",
+    )
+
+    links: Optional[Page[FetchLinks]] = Field(
+        default=None,
         description="Офферы, относящиеся к партнеру",
     )
 
+    @field_validator("utm_source", mode="after")
+    def validate_utm_source(
+        cls,
+        value: Optional[FetchUTMSource],
+    ) -> str:
+        if value is not None:
+            return value.title
+        return value
 
-class InsertPartner(BasePartner):
-    pass
+
+class FetchPartner(
+    PartnerIdentity,
+    BasePartnerFields,
+    BaseFetch,
+):
+    utm_source: Optional[FetchUTMSource | str] = Field(
+        default=None,
+        description="UTM метка",
+    )
+
+    @field_validator("utm_source", mode="after")
+    def validate_utm_source(
+        cls,
+        value: Optional[FetchUTMSource],
+    ) -> str:
+        if value is not None:
+            return value.title
+        return value
+
+
+class InsertPartner(
+    PartnerIdentity,
+    BasePartnerFields,
+):
+    utm_source_id: int = Field(
+        ...,
+        description="Название оффера",
+    )
+
+    link_ids: list[int] = Field(
+        default_factory=list,
+        description="ID офферов, относящихся к партнеру",
+    )
+
+
+class UpdatePartner(BasePartnerFields):
+    link_ids: Optional[list[int]] = Field(
+        default=None,
+        description="ID офферов, относящихся к партнеру",
+    )
+
+    updated_at: datetime = Field(
+        default=datetime.now(),
+        description="Текущее время обновления",
+    )
+
+
+class FiltersPartner(FilterSet):
+    is_tracking: FilterField[bool]
+
+    is_selected: FilterField[bool]

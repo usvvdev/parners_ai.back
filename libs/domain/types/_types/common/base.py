@@ -10,4 +10,5 @@ class BasePydanticModel:
             by_alias=True,
             exclude_none=True,
             mode="json",
+            exclude_unset=True,
         )

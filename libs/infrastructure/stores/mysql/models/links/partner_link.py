@@ -12,10 +12,10 @@ from sqlalchemy.orm import (
 
 # application dependencies
 
-from ..mixins.common import LinkMixin
+from ....common.sql.models import LinkModel
 
 
-class PartnerLink(LinkMixin):
+class PartnerLinks(LinkModel):
     partner_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey(

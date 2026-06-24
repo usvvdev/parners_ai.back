@@ -3,6 +3,8 @@
 from sqlalchemy import (
     String,
     Index,
+    Integer,
+    ForeignKey,
 )
 
 from sqlalchemy.orm import (
@@ -16,23 +18,38 @@ from sqlalchemy.dialects.mysql import (
 
 # application dependencies
 
-from .mixins.common import (
-    BaseMixin,
-    TimestampMixin,
+from ...common.sql.models import (
+    BaseModel,
+    TimestampModel,
 )
 
-from .mixins.relations import (
-    PartnerRelationMixin,
-)
+from .mixins.relations import PartnerRelationMixin
 
 
 class Partners(
-    BaseMixin,
-    TimestampMixin,
+    BaseModel,
+    TimestampModel,
     PartnerRelationMixin,
 ):
-    title: Mapped[str] = mapped_column(
+    wmid: Mapped[str] = mapped_column(
         String(128),
+        nullable=False,
+    )
+
+    utm_source_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey(
+            "utm_sources.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+
+    is_selected: Mapped[bool] = mapped_column(
+        TINYINT,
+        default=False,
+        server_default="0",
         nullable=False,
     )
 
@@ -46,5 +63,5 @@ class Partners(
 
     __table_args__ = (
         # fast search
-        Index("ix_partner_title", "title"),
+        Index("ix_partner_wmid", "wmid"),
     )

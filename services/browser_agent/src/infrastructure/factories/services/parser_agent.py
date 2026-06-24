@@ -1,33 +1,24 @@
-from .browser_agent import BrowserAgentServiceFactory
-
-from ....interface.services.parser_agent import ParserAgentService
-
 from libs.core.config import TApplicationConfig
 
-from libs.infrastructure.factories.stores.mysql import (
-    MySQLEngineFactory,
-    MySQLPartnerRepository,
-)
+from .browser_agent import BrowserAgentServiceFactory
+
+from ....interface.services import ParserAgentService
+
+from libs.infrastructure.factories.api import APIClientsFactory
 
 
-class PartnerParserServiceFactory:
-    @classmethod
+class ParserAgentServiceFactory:
+    @staticmethod
     def create(
-        cls,
         config: type[TApplicationConfig],
     ) -> ParserAgentService:
-
-        partner_repository = MySQLPartnerRepository.create(
-            engine=MySQLEngineFactory.create(
-                config=config,
-            ),
-        )
-
         browser_agent = BrowserAgentServiceFactory.create(
+            # config=config,
+        )
+        api_clients = APIClientsFactory.create(
             config=config,
         )
-
         return ParserAgentService(
-            partner_repository=partner_repository,
             browser_agent=browser_agent,
+            api_clients=api_clients,
         )

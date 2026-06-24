@@ -6,7 +6,7 @@ class RequestMethod(StrEnum):
 
     POST = "post"
 
-    PUT = "put"
+    patch = "patch"
 
     UPDATE = "update"
 

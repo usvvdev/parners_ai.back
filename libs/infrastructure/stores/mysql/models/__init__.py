@@ -4,15 +4,18 @@ from .partner import Partners
 
 from .link import Links
 
+from .utm_source import UtmSources
+
 from .links import (
-    PartnerOffer,
-    PartnerLink,
+    PartnerLinks,
+    LinkOffers,
 )
 
 __all__: list[str] = [
     "Offers",
     "Partners",
     "Links",
-    "PartnerOffer",
-    "PartnerLink",
+    "UtmSources",
+    "PartnerLinks",
+    "LinkOffers",
 ]

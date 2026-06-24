@@ -53,9 +53,6 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - ./ssl:/etc/caddy/ssl
-    depends_on:
-      api:
-        condition: service_healthy
 
 networks:
   default:

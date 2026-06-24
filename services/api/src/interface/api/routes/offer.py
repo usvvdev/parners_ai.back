@@ -1,16 +1,33 @@
+# packages
+
 from fastapi import (
     APIRouter,
     Depends,
 )
 
-from ..dto import (
-    FetchOffer,
-    InsertOffer,
+from fastapi_pagination import (
+    Page,
+    Params,
+    paginate,
 )
 
-from ..views.offer import (
-    OfferRepositoryView,
+# application depencies
+
+from ..dto import (
+    FetchOffer,
+    FetchOffers,
+    InsertOffer,
+    UpdateOffer,
 )
+
+from ..views import OfferRepositoryView
+
+from ....infrastructure.utils.functions import (
+    verify_token,
+    set_custom_pagination,
+)
+
+from ....infrastructure.utils.decorators import disable_extension_check
 
 from ....infrastructure.factories.api.view import OfferRepositoryViewFactory
 
@@ -21,48 +38,90 @@ offer_router = APIRouter(
 )
 
 
-@offer_router.get("/")
+@offer_router.get(
+    "",
+    response_model=Page[FetchOffers],
+)
+@disable_extension_check
 async def fetch_offers(
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
-) -> list[FetchOffer]:
-    return await view.fetch()
+    _: str = Depends(
+        verify_token,
+    ),
+    params: Params = Depends(
+        set_custom_pagination,
+    ),
+) -> Page[FetchOffers]:
+    data = await view.fetch()
+
+    return paginate(
+        data,
+        params=params,
+    )
 
 
-@offer_router.post("/")
+@offer_router.post("")
 async def create_offer(
     data: InsertOffer,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
+    _: str = Depends(
+        verify_token,
+    ),
 ) -> FetchOffer:
-    return await view.create(
+    return await view.insert(
         data=data,
     )
 
 
-@offer_router.put("/{offer_id}")
-async def update_offer(
-    offer_id: int,
-    data: InsertOffer,
+@offer_router.get(
+    "/{id}",
+    response_model=FetchOffer,
+)
+async def fetch_offer_by_id(
+    id: int,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
+    ),
+) -> FetchOffer:
+    return await view.fetch_by_id(
+        id=id,
+    )
+
+
+@offer_router.patch("/{id}")
+async def update_offer(
+    id: int,
+    data: UpdateOffer,
+    view: OfferRepositoryView = Depends(
+        OfferRepositoryViewFactory.create,
+    ),
+    _: str = Depends(
+        verify_token,
     ),
 ) -> FetchOffer:
     return await view.update(
-        offer_id=offer_id,
+        id=id,
         data=data,
     )
 
 
-@offer_router.delete("/{offer_id}")
+@offer_router.delete("/{id}")
 async def delete_offer(
-    offer_id: int,
+    id: int,
     view: OfferRepositoryView = Depends(
         OfferRepositoryViewFactory.create,
     ),
-) -> FetchOffer:
+    _: str = Depends(
+        verify_token,
+    ),
+) -> None:
     return await view.delete(
-        offer_id=offer_id,
+        id=id,
     )

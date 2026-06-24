@@ -6,17 +6,16 @@ from sqlalchemy.orm import (
 
 class PartnerRelationMixin:
     @declared_attr
-    def offers(cls):
+    def links(cls):
         return relationship(
-            "Offers",
-            secondary="partner_offer",
+            "Links",
+            secondary="partner_links",
             back_populates="partners",
         )
 
     @declared_attr
-    def links(cls):
+    def utm_source(cls):
         return relationship(
-            "Links",
-            secondary="partner_link",
-            back_populates="partners",
+            "UtmSources",
+            lazy="selectin",
         )

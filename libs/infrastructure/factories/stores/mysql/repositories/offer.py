@@ -3,7 +3,7 @@ from ..engine import MySQLEngineFactory
 from libs.infrastructure.stores.mysql.repositories import OfferRepository
 
 
-class MySQLOfferRepository:
+class OfferRepositoryFactory:
     @staticmethod
     def create(
         engine: MySQLEngineFactory,

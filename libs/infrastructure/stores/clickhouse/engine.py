@@ -9,6 +9,7 @@ from libs.domain.types.enums.stores import EngineType
 
 class ClickHouseEngine(BaseSQLEngine):
     _name: str = EngineType.CLICKHOUSE
+    _supports_transactions: bool = False
 
     def __init__(
         self,

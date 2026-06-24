@@ -19,7 +19,9 @@ class BaseSQLEngine(BaseEngine):
     @cached_property
     def engine(self) -> AsyncEngine:
         return create_async_engine(
-            **self.options.model_dump(),
+            **self.options.model_dump(
+                exclude=None,
+            ),
         )
 
     @cached_property

@@ -2,13 +2,21 @@
 
 from os import getenv
 
-from typing import Any, TypeVar
+from typing import (
+    Any,
+    Optional,
+    TypeVar,
+)
 
 from pydantic import Field
 
 from pathlib import PosixPath
 
-from logging import INFO
+from logging import (
+    INFO,
+    ERROR,
+    DEBUG,
+)
 
 from pydantic_settings import (
     BaseSettings,
@@ -21,7 +29,7 @@ from pydantic_settings import (
 
 from .mixins import ApplicationOptionsMixin
 
-from libs.domain.utils import get_service_files
+from libs.domain.utils.service_files import get_service_files
 
 from libs.domain.types.enums.config import AppMode
 
@@ -46,14 +54,34 @@ class ApplicationBaseConfig(
     )
 
     # Logging level/loggers settings
-    logging_level: int = Field(
-        default=INFO,
+    logging_level: tuple[int, ...] = Field(
+        default=(
+            INFO,
+            ERROR,
+            DEBUG,
+        ),
         description="Default logging level",
     )
 
     loggers: tuple[str, ...] = Field(
-        default=("uvicorn.asgi", "uvicorn.access"),
+        default=(
+            "uvicorn",
+            "uvicorn.error",
+            "uvicorn.access",
+        ),
         description="Tuple of logger names to configure",
+    )
+
+    # Proxy URL
+    proxy_url: Optional[str] = Field(
+        default=None,
+        description="Proxy url",
+    )
+
+    # Secret key(like JWT auth)
+    access_token: Optional[str] = Field(
+        default=None,
+        description="Secret key for the application",
     )
 
     @classmethod

@@ -1,9 +1,6 @@
 # packages
 
-from sqlalchemy import (
-    String,
-    Index,
-)
+from sqlalchemy import String
 
 from sqlalchemy.orm import (
     Mapped,
@@ -16,9 +13,9 @@ from sqlalchemy.dialects.mysql import (
 
 # application dependencies
 
-from .mixins.common import (
-    BaseMixin,
-    TimestampMixin,
+from ...common.sql.models import (
+    BaseModel,
+    TimestampModel,
 )
 
 from .mixins.relations import (
@@ -27,8 +24,8 @@ from .mixins.relations import (
 
 
 class Links(
-    BaseMixin,
-    TimestampMixin,
+    BaseModel,
+    TimestampModel,
     LinkRelationMixin,
 ):
     link: Mapped[str] = mapped_column(
@@ -43,8 +40,3 @@ class Links(
     )
 
     __updated_at__: bool = True
-
-    __table_args__ = (
-        # fast search
-        Index("ix_offers_link", "link"),
-    )

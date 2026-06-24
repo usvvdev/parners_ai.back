@@ -6,7 +6,12 @@ from typing import (
 
 
 class IBaseSQLProtocol(Protocol):
-    def fetch(
+    def fetch_one(
+        self,
+        id: int,
+    ) -> None: ...
+
+    def fetch_many(
         self,
     ) -> None: ...
 

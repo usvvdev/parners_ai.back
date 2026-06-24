@@ -16,17 +16,8 @@ URL_REQUIRED_FIELDS: frozenset[str] = frozenset(
     {"driver", "host", "port"},
 )
 
-# Variables for the system prompt
+# Pagination defaults (used by API and bot independently)
 
-SYSTEM_PROMPT = """
-    Ты анализируешь сайт-витрину МФО/Беттинга. У тебя есть скриншот страницы и её Markdown код.
-    Мой список целевых офферов: {target_offers}.
-    
-    Твоя задача:
-    1. Посмотри на скриншот. Найди на нем все карточки. Ищи логотипы брендов из моего списка (даже если текст не написан, а просто нарисован логотип, например PARI).
-    2. Посчитай общее количество карточек.
-    3. Найди, на каких позициях (сверху вниз) находятся мои целевые офферы.
-    
-    Markdown код для справки:
-    {markdown}
-"""
+DEFAULT_PAGE = 1
+
+DEFAULT_PAGE_SIZE = 6

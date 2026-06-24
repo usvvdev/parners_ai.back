@@ -25,7 +25,7 @@ COPY . .
 
 # 6. Финальный sync — теперь uv устанавливает сам проект (ваши пакеты)
 # и регистрирует скрипт [project.scripts] browser_agent
-RUN uv sync --frozen --extra browser-agent
+RUN uv sync --frozen --extra browser_agent
 
 # 7. Запуск сервиса через зарегистрированный скрипт проекта
 CMD ["uv", "run", "browser_agent"]

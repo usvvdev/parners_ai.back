@@ -21,7 +21,7 @@ from libs.core.config import TApplicationConfig
 from libs.domain.types._types.options import ConnectionOptions
 
 
-class ETableModel(DeclarativeBase):
+class ETableModel:
     __name__: str
 
     @declared_attr.directive
@@ -34,6 +34,20 @@ class ETableModel(DeclarativeBase):
         return table_name.lower()
 
 
+class BaseMySQLModel(
+    DeclarativeBase,
+    ETableModel,
+):
+    pass
+
+
+class BaseClickhouseModel(
+    DeclarativeBase,
+    ETableModel,
+):
+    pass
+
+
 TTable = TypeVar(
     "TTable",
     bound=ETableModel,
@@ -41,6 +55,8 @@ TTable = TypeVar(
 
 
 class BaseEngine:
+    _supports_transactions: bool = True
+
     def __init__(
         self,
         *,

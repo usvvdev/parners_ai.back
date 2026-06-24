@@ -1,8 +1,8 @@
-from .gemini import Gemini
+from .crawler import CrawlerAgent
 
-from .crawler import Crawler
+from .ocr import OCRAgent
 
 __all__: list[str] = [
-    "Crawler",
-    "Gemini",
+    "CrawlerAgent",
+    "OCRAgent",
 ]

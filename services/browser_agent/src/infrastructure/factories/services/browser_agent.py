@@ -1,12 +1,6 @@
-# packages
-
-from typing import Optional
-
-# application dependencies
-
 from ...clients import (
-    Gemini,
-    Crawler,
+    CrawlerAgent,
+    OCRAgent,
 )
 
 from libs.core.config import TApplicationConfig
@@ -16,16 +10,15 @@ from ....interface.services import BrowserAgentService
 
 class BrowserAgentServiceFactory:
     @staticmethod
-    def create(
-        crawler: Optional[Crawler] = None,
-        gemini: Optional[Gemini] = None,
-        *,
-        config: type[TApplicationConfig],
-    ) -> BrowserAgentService:
+    def create() -> BrowserAgentService:
+        crawler = CrawlerAgent(
+            viewport_width=1920,
+            viewport_height=4000,
+        )
+
         return BrowserAgentService(
-            crawler=crawler or Crawler(),
-            gemini=gemini
-            or Gemini(
-                config=config,
+            analyzer=OCRAgent(
+                crawler=crawler,
             ),
+            crawler=crawler,
         )

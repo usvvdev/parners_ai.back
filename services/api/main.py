@@ -1,15 +1,41 @@
-from contextlib import asynccontextmanager
+# packages
+
+from uvicorn import run
+
 from pathlib import Path
+
 from loguru import logger
 
 from fastapi import FastAPI
+
+from contextlib import asynccontextmanager
+
+from fastapi_pagination import add_pagination
+
 from fastapi.middleware.cors import CORSMiddleware
-from uvicorn import run
+
+
+# application dependencies
+
+from .src.interface.api.routes import (
+    offer_router,
+    partner_router,
+    link_router,
+    utm_source_router,
+    offer_position_router,
+)
+
+from libs.domain.types.enums.config import AppMode
+
+from .src.interface.routing import ApplicationRouter
+
+from libs.domain.errors.base import BaseApplicationException
+
+from .src.infrastructure.utils.functions import run_migrations
+
+from libs.domain.utils.exception_handler import app_exception_handler
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
-
-from .src.infrastructure.utils import run_migrations
-from .src.interface.api.routes import offer_router, partner_router
 
 
 SERVICE_DIR = Path(__file__).parent
@@ -31,8 +57,13 @@ def create_app() -> FastAPI:
     )
 
     app = FastAPI(
-        lifespan=lifespan,
+        lifespan=lifespan if config.mode == AppMode.PRODUCTION else None,
         **config.openai,
+    )
+
+    app.add_exception_handler(
+        BaseApplicationException,
+        app_exception_handler,
     )
 
     app.add_middleware(
@@ -40,10 +71,19 @@ def create_app() -> FastAPI:
         allow_credentials=True,
     )
 
-    [
-        app.include_router(route, prefix="/api")
-        for route in (offer_router, partner_router)
-    ]
+    ApplicationRouter(
+        app=app,
+    ).register_routes(
+        routes=[
+            partner_router,
+            link_router,
+            offer_router,
+            utm_source_router,
+            offer_position_router,
+        ]
+    )
+
+    add_pagination(app)
 
     return app
 

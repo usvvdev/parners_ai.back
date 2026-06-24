@@ -1,8 +1,14 @@
-from .offer import MySQLOfferRepository
+from .offer import OfferRepositoryFactory
 
-from .partner import MySQLPartnerRepository
+from .partner import PartnerRepositoryFactory
+
+from .link import LinkRepositoryFactory
+
+from .utm_source import UTMSourceRepositoryFactory
 
 __all__: list[str] = [
-    "MySQLOfferRepository",
-    "MySQLPartnerRepository",
+    "OfferRepositoryFactory",
+    "PartnerRepositoryFactory",
+    "LinkRepositoryFactory",
+    "UTMSourceRepositoryFactory",
 ]

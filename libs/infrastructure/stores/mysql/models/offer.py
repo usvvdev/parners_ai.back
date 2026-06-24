@@ -10,25 +10,17 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 
-from sqlalchemy.dialects.mysql import (
-    TINYINT,
-)
-
 # application dependencies
-
-from .mixins.common import (
-    BaseMixin,
-    TimestampMixin,
-)
 
 from .mixins.relations import (
     OfferRelationMixin,
 )
 
+from ...common.sql.models import BaseModel
+
 
 class Offers(
-    BaseMixin,
-    TimestampMixin,
+    BaseModel,
     OfferRelationMixin,
 ):
     title: Mapped[str] = mapped_column(
@@ -36,13 +28,11 @@ class Offers(
         nullable=False,
     )
 
-    is_active: Mapped[bool] = mapped_column(
-        TINYINT,
-        default=True,
+    symbol: Mapped[str] = mapped_column(
+        String(8),
+        server_default="",
         nullable=False,
     )
-
-    __updated_at__: bool = True
 
     __table_args__ = (
         # fast search

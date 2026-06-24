@@ -16,7 +16,7 @@ from libs.domain.types.enums.stores import EngineType
 
 from libs.infrastructure.stores.mysql.models import *
 
-from libs.infrastructure.stores.common.base import ETableModel
+from libs.infrastructure.stores.common.base import BaseMySQLModel
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
@@ -42,7 +42,7 @@ url = mysql_options.url.replace(
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = ETableModel.metadata
+target_metadata = BaseMySQLModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

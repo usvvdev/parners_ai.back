@@ -1,48 +1,57 @@
 # application dependencies
 
 from ..dto import (
-    InsertOffer,
     FetchOffer,
+    FetchOffers,
+    InsertOffer,
+    UpdateOffer,
 )
 
-from ...services.offer import OfferRepositoryService
+from libs.infrastructure.stores.mysql.repositories import OfferRepository
 
 
 class OfferRepositoryView:
     def __init__(
         self,
-        service: OfferRepositoryService,
+        repository: OfferRepository,
     ) -> None:
-        self._service = service
+        self._repository = repository
 
     async def fetch(
         self,
-    ) -> list[FetchOffer]:
-        data = await self._service.fetch()
-        return [FetchOffer.model_validate(item) for item in data]
+    ) -> list[FetchOffers]:
+        return await self._repository.fetch_many()
 
-    async def create(
+    async def fetch_by_id(
+        self,
+        id: int,
+    ) -> FetchOffer:
+        return await self._repository.fetch_one(
+            id=id,
+        )
+
+    async def insert(
         self,
         data: InsertOffer,
     ) -> FetchOffer:
-        return await self._service.create(
-            data=data.dump,
+        return await self._repository.insert(
+            data=data,
         )
 
     async def update(
         self,
-        offer_id: int,
-        data: InsertOffer,
+        id: int,
+        data: UpdateOffer,
     ) -> FetchOffer:
-        return await self._service.update(
-            offer_id=offer_id,
-            data=data.dump,
+        return await self._repository.update(
+            id=id,
+            data=data,
         )
 
     async def delete(
         self,
-        offer_id: int,
-    ) -> FetchOffer:
-        return await self._service.delete(
-            offer_id=offer_id,
+        id: int,
+    ) -> None:
+        return await self._repository.delete(
+            id=id,
         )
