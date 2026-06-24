@@ -15,7 +15,6 @@ dependencies = [
 
 [project.optional-dependencies]
 browser_agent = [
-    "cairosvg>=2.9.0",
     "crawl4ai>=0.8.6",
     "easyocr>=1.7.2",
     "httpx>=0.28.1",
