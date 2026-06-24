@@ -84,16 +84,6 @@ class ApplicationBaseConfig(
         description="Secret key for the application",
     )
 
-    google_api_key: Optional[str] = Field(
-        default=None,
-        description="Google Gemini API key",
-    )
-
-    google_model: str = Field(
-        default="gemini-2.0-flash",
-        description="Google Gemini model name",
-    )
-
     @classmethod
     def settings_customise_sources(
         cls,
