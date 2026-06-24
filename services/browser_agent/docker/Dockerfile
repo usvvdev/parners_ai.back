@@ -28,5 +28,7 @@ COPY services/browser_agent services/browser_agent/
 # и регистрирует скрипт [project.scripts] browser_agent
 RUN uv sync --frozen --extra browser_agent
 
+RUN uv run --no-sync playwright install --with-deps chromium
+
 # 7. Запуск сервиса через зарегистрированный скрипт проекта
 CMD ["uv", "run", "browser_agent"]
