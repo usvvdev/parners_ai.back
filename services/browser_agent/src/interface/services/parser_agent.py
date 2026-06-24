@@ -21,8 +21,6 @@ from libs.infrastructure.clients.http.schemas import (
     UpdatePartner,
 )
 
-from ...infrastructure.utils.parse_url import extract_query_param
-
 
 class ParserAgentService:
     def __init__(
@@ -118,25 +116,11 @@ class ParserAgentService:
         result: PartnerResult,
     ) -> None:
         for offer in result.target_offers_found:
-            if not offer.is_found or not offer.url:
+            if not offer.is_found:
                 continue
 
-            try:
-                final_url = await self._browser_agent.capture_offer_redirect_url(
-                    offer.url,
-                )
-            except RuntimeError as err:
-                logger.warning(
-                    "Skip offer redirect capture: link={} offer={} url={} err={}",
-                    link.link,
-                    offer.title,
-                    offer.url,
-                    err,
-                )
-                continue
-
-            wmid = extract_query_param(final_url, "wmid")
-            utm_source = extract_query_param(final_url, "utm_source")
+            wmid = offer.wmid or None
+            utm_source = offer.utm_source or None
 
             if not wmid or not utm_source:
                 logger.warning(
@@ -144,7 +128,7 @@ class ParserAgentService:
                     link.link,
                     offer.title,
                     offer.url,
-                    final_url,
+                    offer.final_url,
                 )
                 continue
 

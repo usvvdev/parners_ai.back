@@ -66,9 +66,14 @@ class CrawlerAgent(ICrawlerProtocol):
                     f"Error during crawling: {str(err)}",
                 )
 
-        if not result.success or not result.screenshot:
+        if not result.success:
             raise RuntimeError(
-                result.error_message if not result.success else "Screenshot not found",
+                result.error_message or "Crawl failed without an error message",
+            )
+
+        if not result.markdown:
+            raise RuntimeError(
+                "Markdown not found in crawl result",
             )
 
         return result

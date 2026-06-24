@@ -13,7 +13,7 @@ class ParserAgentServiceFactory:
         config: type[TApplicationConfig],
     ) -> ParserAgentService:
         browser_agent = BrowserAgentServiceFactory.create(
-            config=config,
+            # config=config,
         )
         api_clients = APIClientsFactory.create(
             config=config,
