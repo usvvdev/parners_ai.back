@@ -36,18 +36,33 @@
 
 FROM python:3.12-slim AS base
 
+# Установка uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+# Оптимизации
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV TZ=UTC
+
 WORKDIR /app
+
+# 1. Сначала только конфиги зависимостей
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen --extra browser_agent
+# 2. Копируем ТОЛЬКО libs (как ты попросил)
+COPY libs libs/
+COPY services/browser_agent services/browser_agent/
 
-FROM python:3.12-slim
+# 3. Ставим зависимости (без проекта ещё)
+RUN uv sync --frozen --no-install-project --extra browser_agent
 
-COPY --from=base /app /app
-COPY --from=base /root/.cache /root/.cache
-
+# 4. Playwright (без --with-deps чтобы не раздувать образ)
 RUN uv run --no-sync playwright install chromium
 
+# 5. Теперь ставим сам проект
+RUN uv sync --frozen --extra browser_agent
+
+# 6. Запуск
 CMD ["uv", "run", "browser_agent"]
