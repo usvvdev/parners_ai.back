@@ -1,5 +1,4 @@
 services:
   browser_agent:
     environment:
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
-      GOOGLE_MODEL: ${GOOGLE_MODEL:-gemini-3.5-flash}
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
