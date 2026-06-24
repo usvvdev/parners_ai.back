@@ -21,7 +21,8 @@ RUN uv sync --frozen --no-install-project --extra browser_agent
 RUN uv run --no-sync playwright install --with-deps chromium
 
 # 5. Копируем весь исходный код (включая папки libs и services)
-COPY . .
+COPY libs libs/
+COPY services/browser_agent services/browser_agent/
 
 # 6. Финальный sync — теперь uv устанавливает сам проект (ваши пакеты)
 # и регистрирует скрипт [project.scripts] browser_agent
