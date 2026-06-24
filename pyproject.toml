@@ -49,7 +49,6 @@ bot = "services.bot.main:main"
 package = true
 
 [tool.uv.sources]
-opencv-python = { package = "opencv-python-headless" }
 torch = { index = "pytorch-cpu" }
 torchvision = { index = "pytorch-cpu" }
 
