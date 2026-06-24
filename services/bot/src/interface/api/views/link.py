@@ -48,12 +48,13 @@ from ....infrastructure.utils import (
     format_link_list_label,
 )
 
-from ....domain.types._types import (
+from libs.infrastructure.clients.http.schemas import (
     FetchLinks,
     FetchLink,
     FetchOffer,
-    PaginatedResponse,
 )
+
+from libs.domain.types._types.shared import PaginatedResponse
 
 
 class LinkView:
@@ -159,10 +160,7 @@ class LinkView:
             ),
         )
 
-        text = (
-            "🔍 <b>Фильтры витрин</b>\n\n"
-            "🟢 <b>Активные</b> и 🔴 <b>неактивные</b>"
-        )
+        text = "🔍 <b>Фильтры витрин</b>\n\n🟢 <b>Активные</b> и 🔴 <b>неактивные</b>"
 
         return text, builder
 

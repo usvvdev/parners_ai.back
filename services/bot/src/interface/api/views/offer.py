@@ -32,10 +32,9 @@ from ....infrastructure.utils import (
     format_offer_button_label,
 )
 
-from ....domain.types._types import (
-    FetchOffer,
-    PaginatedResponse,
-)
+from libs.infrastructure.clients.http.schemas import FetchOffer
+
+from libs.domain.types._types.shared import PaginatedResponse
 
 
 class OfferView:
@@ -130,11 +129,7 @@ class OfferView:
             ),
         )
 
-        symbol_line = (
-            f"🏷 <b>Символ:</b> {safe(offer.symbol)}\n"
-            if offer.symbol
-            else ""
-        )
+        symbol_line = f"🏷 <b>Символ:</b> {safe(offer.symbol)}\n" if offer.symbol else ""
         text = (
             f"📋 <b>Оффер:</b> {safe(offer.title)}\n"
             f"{symbol_line}"

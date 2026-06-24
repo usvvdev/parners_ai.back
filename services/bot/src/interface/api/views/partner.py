@@ -42,13 +42,14 @@ from ....infrastructure.utils import (
     format_link_list_label,
 )
 
-from ....domain.types._types import (
+from libs.infrastructure.clients.http.schemas import (
     FetchPartner,
     FetchPartners,
     FetchLinks,
     FetchUTMSource,
-    PaginatedResponse,
 )
+
+from libs.domain.types._types.shared import PaginatedResponse
 
 
 class PartnerView:
@@ -164,10 +165,7 @@ class PartnerView:
             ),
         )
 
-        text = (
-            "🔍 <b>Фильтры партнёров</b>\n\n"
-            "🔔 <b>Трекинг</b> и ⭐ <b>избранное</b>"
-        )
+        text = "🔍 <b>Фильтры партнёров</b>\n\n🔔 <b>Трекинг</b> и ⭐ <b>избранное</b>"
 
         return text, builder
 

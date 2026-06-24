@@ -38,7 +38,7 @@ from ....domain.types.enums.actions import (
 
 from ....domain.types.enums.common import NavLevel
 
-from ....domain.types._types import (
+from libs.infrastructure.clients.http.schemas import (
     InsertOffer,
     FetchLink,
 )
@@ -149,7 +149,9 @@ async def create_offer_title(
     await state.update_data(title=title)
 
     cancel_data = (
-        LinkCD(action=LinkAction.VIEW, p_id=data.get("p_id", 0), l_id=data.get("l_id", 0))
+        LinkCD(
+            action=LinkAction.VIEW, p_id=data.get("p_id", 0), l_id=data.get("l_id", 0)
+        )
         if data.get("l_id")
         else NavigationCD(level=NavLevel.OFFERS)
     )

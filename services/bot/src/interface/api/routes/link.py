@@ -46,7 +46,7 @@ from ....domain.types.enums.common import (
     PickMode,
 )
 
-from ....domain.types._types import (
+from libs.infrastructure.clients.http.schemas import (
     InsertLink,
     FetchPartners,
 )

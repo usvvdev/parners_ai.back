@@ -2,22 +2,23 @@
 
 from ...core.constants import FILTER_ALL
 
-from ...infrastructure.clients.api import (
+from libs.infrastructure.clients.http.repositories import (
     LinkAPIClient,
     PartnerAPIClient,
     OfferAPIClient,
 )
 
-from ...domain.types._types import (
+from libs.infrastructure.clients.http.schemas import (
     FetchLink,
     FetchOffer,
     FetchPartners,
     InsertLink,
     UpdateLink,
     UpdatePartner,
-    PaginatedResponse,
     FetchLinks,
 )
+
+from libs.domain.types._types.shared import PaginatedResponse
 
 
 class LinkService:

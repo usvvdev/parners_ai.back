@@ -39,7 +39,7 @@ from ....domain.types.enums.actions import (
 
 from ....domain.types.enums.common import NavLevel
 
-from ....domain.types._types import InsertPartner
+from libs.infrastructure.clients.http.schemas import InsertPartner
 
 from ....infrastructure.utils.decorators import (
     handle_http_error,
@@ -130,7 +130,9 @@ async def partner_list(
     await render_callback(callback, text, builder)
 
 
-@partner_router.callback_query(NavigationCD.filter(F.level == NavLevel.PARTNERS_FILTERS))
+@partner_router.callback_query(
+    NavigationCD.filter(F.level == NavLevel.PARTNERS_FILTERS)
+)
 async def partner_filters(
     callback: CallbackQuery,
     callback_data: NavigationCD,
@@ -201,7 +203,9 @@ async def create_partner_wmid(
         await clear_state_keep_filters(state)
 
 
-@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_SELECT))
+@partner_router.callback_query(
+    UTMSourceCD.filter(F.action == UTMSourceAction.PICK_SELECT)
+)
 async def utm_source_pick_select(
     callback: CallbackQuery,
     callback_data: UTMSourceCD,
@@ -225,7 +229,9 @@ async def utm_source_pick_select(
     await callback.answer()
 
 
-@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_PAGE))
+@partner_router.callback_query(
+    UTMSourceCD.filter(F.action == UTMSourceAction.PICK_PAGE)
+)
 async def utm_source_pick_page(
     callback: CallbackQuery,
     callback_data: UTMSourceCD,
@@ -241,7 +247,9 @@ async def utm_source_pick_page(
     await callback.answer()
 
 
-@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_CANCEL))
+@partner_router.callback_query(
+    UTMSourceCD.filter(F.action == UTMSourceAction.PICK_CANCEL)
+)
 @handle_http_error("Ошибка")
 async def utm_source_pick_cancel(
     callback: CallbackQuery,
@@ -263,7 +271,9 @@ async def utm_source_pick_cancel(
     await render_callback(callback, text, builder)
 
 
-@partner_router.callback_query(UTMSourceCD.filter(F.action == UTMSourceAction.PICK_CONFIRM))
+@partner_router.callback_query(
+    UTMSourceCD.filter(F.action == UTMSourceAction.PICK_CONFIRM)
+)
 @handle_http_error("❌ Не удалось создать партнера")
 async def create_partner_finish(
     callback: CallbackQuery,

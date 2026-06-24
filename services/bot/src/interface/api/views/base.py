@@ -19,9 +19,9 @@ from ....core.constants import (
     LIST_GRID_MIN_ITEMS,
 )
 
-from ....domain.types._types.base import PaginatedResponse
-
 from ....domain.types.enums.common import NavLevel
+
+from libs.domain.types._types.shared import PaginatedResponse
 
 
 def build_list_text(
@@ -251,6 +251,7 @@ def partner_filters_button_text(
         parts.append("⭐")
 
     return f"🔍 Фильтры • {' '.join(parts)}"
+
 
 def build_form_prompt(
     text: str,

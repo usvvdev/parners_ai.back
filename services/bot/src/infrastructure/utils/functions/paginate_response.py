@@ -1,8 +1,8 @@
 # application dependencies
 
-from ....domain.types._types.base import PaginatedResponse
-
 from libs.domain.types._types.common import BaseModelType
+
+from libs.domain.types._types.shared import PaginatedResponse
 
 
 def parse_paginated_response(

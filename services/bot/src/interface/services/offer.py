@@ -1,18 +1,19 @@
 # application depencies
 
-from ...infrastructure.clients.api import (
+from libs.infrastructure.clients.http.repositories import (
     OfferAPIClient,
     LinkAPIClient,
 )
 
-from ...domain.types._types import (
+from libs.infrastructure.clients.http.schemas import (
     FetchOffer,
     FetchLink,
     InsertOffer,
     UpdateOffer,
     UpdateLink,
-    PaginatedResponse,
 )
+
+from libs.domain.types._types.shared import PaginatedResponse
 
 
 class OfferService:
