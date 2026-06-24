@@ -1,5 +1,5 @@
 x-base-service: &base-service
-  restart: unless-stopped
+  restart: "no"
   build:
     context: ../../
     dockerfile: services/browser_agent/docker/Dockerfile
