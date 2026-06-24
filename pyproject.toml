@@ -48,6 +48,16 @@ bot = "services.bot.main:main"
 [tool.uv]
 package = true
 
+[tool.uv.sources]
+opencv-python = { package = "opencv-python-headless" }
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
