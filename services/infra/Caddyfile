@@ -1,7 +1,16 @@
-{$DOMAIN} {
+api.{$DOMAIN} {
 
     handle {
         reverse_proxy api:8000
+    }
+
+    respond 404
+}
+
+app.{$DOMAIN} {
+
+    handle {
+        reverse_proxy host.docker.internal:8089
     }
 
     respond 404
