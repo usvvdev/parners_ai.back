@@ -6,11 +6,16 @@ from pathlib import Path
 
 from loguru import logger
 
+import torch
+
 # application depencies
 
 from libs.infrastructure.factories.common import ApplicationConfigFactory
 
 from .src.infrastructure.factories.services import ParserAgentServiceFactory
+
+
+torch.backends.nnpack.set_flags(False)
 
 
 SERVICE_DIR = Path(__file__).parent

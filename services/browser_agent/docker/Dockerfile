@@ -2,10 +2,9 @@ FROM python:3.12-slim
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# ENV 
-# UV_COMPILE_BYTECODE=1 \
-ENV PYTHONUNBUFFERED=1 \
-    # PYTHONDONTWRITEBYTECODE=1 \
+ENV UV_COMPILE_BYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
     TZ=UTC
 
 WORKDIR /app
