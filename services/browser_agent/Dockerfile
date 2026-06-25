@@ -24,7 +24,7 @@ RUN apt-get update && \
 # =========================
 # 1. УСТАНАВЛИВАЕМ TORCH ПЕРВЫМ
 # =========================
-RUN uv pip install --index-url https://download.pytorch.org/whl/cpu \
+RUN uv pip install --system --index-url https://download.pytorch.org/whl/cpu \
     torch==2.3.1 torchvision==0.18.1
 
 
