@@ -39,7 +39,7 @@ COPY pyproject.toml uv.lock ./
 # =========================
 # 3. PLAYWRIGHT
 # =========================
-RUN uv run --no-sync playwright install --with-deps chromium
+# RUN uv run --no-sync playwright install --with-deps chromium
 
 
 # =========================
@@ -52,7 +52,8 @@ COPY services/browser_agent services/browser_agent/
 # =========================
 # 5. ФИНАЛЬНАЯ СИНХРОНИЗАЦИЯ
 # =========================
-RUN uv sync --frozen --extra browser_agent
+RUN uv sync --frozen --extra browser_agent && \
+    uv run playwright install --with-deps chromium
 
 
 # =========================
