@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+ENV ATEN_CPU_CAPABILITY=none
+
+ENV OMP_NUM_THREADS=1
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -20,10 +24,6 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./
-
-ENV ATEN_CPU_CAPABILITY=none
-
-ENV OMP_NUM_THREADS=1
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --extra browser_agent
