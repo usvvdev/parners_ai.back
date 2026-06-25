@@ -83,3 +83,6 @@ config.json
 
 # Migrations
 **/migrations/versions/
+
+#Models
+models/
