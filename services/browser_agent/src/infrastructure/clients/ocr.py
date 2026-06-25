@@ -468,7 +468,10 @@ class OCRAgent(IOCRProtocol):
         import easyocr
 
         return easyocr.Reader(
-            ["ru", "en"], gpu=False, model_storage_directory="models/easyocr"
+            ["ru", "en"],
+            gpu=False,
+            model_storage_directory="models/easyocr",
+            verbose=False,
         )
 
     async def _fetch_logo_bytes(self, logo_src: str) -> tuple[bytes, str] | None:

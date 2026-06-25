@@ -21,6 +21,10 @@ RUN apt-get update && \
 
 COPY pyproject.toml uv.lock ./
 
+ENV ATEN_CPU_CAPABILITY=none
+
+ENV OMP_NUM_THREADS=1
+
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --extra browser_agent
 
