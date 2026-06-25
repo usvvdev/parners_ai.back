@@ -1,4 +1,0 @@
-services:
-  browser_agent:
-    environment:
-      ACCESS_TOKEN: ${ACCESS_TOKEN}

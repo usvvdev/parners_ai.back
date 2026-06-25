@@ -1,4 +1,0 @@
-services:
-  api:
-    environment:
-      APP_MODE: ${APP_MODE:-production}

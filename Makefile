@@ -1,37 +1,16 @@
 .PHONY: dev prod down logs ps clean help rebuild run restart
 
-# === Настройки ===
-SERVICE_DIR := services
+# === Compose файл ===
+COMPOSE_FILE := docker-compose.yaml
 
-# 1. Автоматически находим все папки внутри $(SERVICE_DIR)/
-_SERVICE_PATHS := $(wildcard $(SERVICE_DIR)/*/)
-
-# 2. Очищаем пути и сортируем: infra должна быть первой
-RAW_SERVICES := $(notdir $(patsubst %/,%,$(_SERVICE_PATHS)))
-
-INFRA_SERVICE := $(filter infra, $(RAW_SERVICES))
-OTHER_SERVICES := $(filter-out infra, $(RAW_SERVICES))
-
-ALL_SERVICES := $(INFRA_SERVICE) $(OTHER_SERVICES)
-
-# 3. Мягкое присваивание списка сервисов
-SERVICES ?= $(ALL_SERVICES)
-
-# === Окружение для Rebuild ===
-# По умолчанию используем dev. Для продакшена: make rebuild ENV=prod
+# === Окружение ===
 ENV ?= dev
-ifeq ($(ENV),prod)
-	TARGET_FILE := production.yaml
-else
-	TARGET_FILE := development.yaml
-endif
 
-# ANSI-цвета для вывода в терминале
+# ANSI colors
 CYAN  := \033[36m
 RESET := \033[0m
 
-# === Команды ===
-
+# === HELP ===
 help: ## Показать доступные команды
 	@echo "Использование: make [команда]"
 	@echo ""
@@ -39,158 +18,81 @@ help: ## Показать доступные команды
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(CYAN)%-15s$(RESET) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Примеры:"
-	@echo "  make rebuild              - Полная пересборка (dev) с паузой для infra"
-	@echo "  make rebuild ENV=prod     - Полная пересборка (production) с паузой для infra"
-	@echo "  make logs service=api     - Просмотр логов конкретного сервиса"
+	@echo "  make up               - запуск dev"
+	@echo "  make up ENV=prod      - запуск prod"
+	@echo "  make logs service=api - логи сервиса"
 
-dev: ## Запуск всех сервисов (dev)
-	@echo "🚀 Запуск сервисов (dev)..."
-	@for s in $(SERVICES); do \
-		echo "▶️  Запуск $$s..."; \
-		docker compose \
-			--project-directory $(SERVICE_DIR)/$$s \
-			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-			-f $(SERVICE_DIR)/$$s/docker/development.yaml \
-			up -d || exit 1; \
-		if [ "$$s" = "infra" ]; then \
-			echo "⏳ Ожидание 15 секунд для инициализации баз данных..."; \
-			sleep 15; \
-		fi; \
-	done
-	@echo "✅ Все запущено!"
+# === UP ===
+up: ## Запуск всех сервисов (dev/prod)
+	@echo "🚀 Запуск ($(ENV))..."
+	@docker compose -f $(COMPOSE_FILE) up -d
+	@echo "✅ Готово!"
 
-prod: ## Запуск всех сервисов (production)
-	@echo "🚀 Запуск сервисов (production)..."
-	@for s in $(SERVICES); do \
-		echo "▶️  Запуск $$s..."; \
-		docker compose \
-			--project-directory $(SERVICE_DIR)/$$s \
-			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-			-f $(SERVICE_DIR)/$$s/docker/production.yaml \
-			up -d || exit 1; \
-		if [ "$$s" = "infra" ]; then \
-			echo "⏳ Ожидание 15 секунд для инициализации баз данных..."; \
-			sleep 15; \
-		fi; \
-	done
-	@echo "✅ Продакшн окружение готово!"
+dev: ## Алиас для dev
+	@$(MAKE) up ENV=dev
 
-rebuild: ## Полная пересборка (использование: make rebuild [ENV=prod])
-	@echo "♻️  Пересборка сервисов (Окружение: $(ENV))..."
-	@for s in $(SERVICES); do \
-		echo "⏹️  Удаление старых контейнеров $$s..."; \
-		docker compose \
-			--project-directory $(SERVICE_DIR)/$$s \
-			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-			down || true; \
-		echo "🔨 Сборка $$s без кэша..."; \
-		docker compose \
-			--project-directory $(SERVICE_DIR)/$$s \
-			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-			-f $(SERVICE_DIR)/$$s/docker/$(TARGET_FILE) \
-			build --no-cache; \
-		echo "▶️  Запуск $$s..."; \
-		docker compose \
-			--project-directory $(SERVICE_DIR)/$$s \
-			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-			-f $(SERVICE_DIR)/$$s/docker/$(TARGET_FILE) \
-			up -d --force-recreate || exit 1; \
-		if [ "$$s" = "infra" ]; then \
-			echo "⏳ Ожидание 15 секунд для инициализации баз данных..."; \
-			sleep 15; \
-		fi; \
-	done
-	@echo "✅ Пересборка ($(ENV)) завершена!"
+prod: ## Алиас для prod
+	@$(MAKE) up ENV=prod
 
-down: ## Остановка всех сервисов (в обратном порядке)
-	@echo "⏹️  Остановка сервисов..."
-	@for s in $(OTHER_SERVICES) $(INFRA_SERVICE); do \
-		if echo "$(SERVICES)" | grep -wq "$$s"; then \
-			echo "⏸️  Остановка $$s..."; \
-			docker compose \
-				--project-directory $(SERVICE_DIR)/$$s \
-				-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-				down || true; \
-		fi \
-	done
-	@echo "✅ Все остановлено!"
+# === DOWN ===
+down: ## Остановка всех сервисов
+	@echo "⏹️ Остановка..."
+	@docker compose -f $(COMPOSE_FILE) down
+	@echo "✅ Остановлено!"
 
-logs: ## Просмотр логов (использование: make logs service=browser_agent)
+# === REBUILD ===
+rebuild: ## Полная пересборка
+	@echo "♻️ Пересборка ($(ENV))..."
+	@docker compose -f $(COMPOSE_FILE) down || true
+	@docker compose -f $(COMPOSE_FILE) build --no-cache
+	@docker compose -f $(COMPOSE_FILE) up -d --force-recreate
+	@echo "✅ Пересборка завершена!"
+
+# === LOGS ===
+logs: ## Логи (make logs service=api)
 ifndef service
-	@echo "❌ Ошибка: Укажите сервис. Пример: make logs service=browser_agent"
+	@echo "❌ Укажи сервис: make logs service=api"
 	@exit 1
 else
-	@echo "📜 Логи сервиса $(service)..."
-	@docker compose \
-		--project-directory $(SERVICE_DIR)/$(service) \
-		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
-		logs -f
+	@docker compose -f $(COMPOSE_FILE) logs -f $(service)
 endif
 
-ps: ## Показать статус всех сервисов
-	@for s in $(SERVICES); do \
-		echo ""; \
-		echo "=== Сервис: $$s ==="; \
-		docker compose \
-			--project-directory $(SERVICE_DIR)/$$s \
-			-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-			ps || true; \
-	done
+# === PS ===
+ps: ## Статус контейнеров
+	@docker compose -f $(COMPOSE_FILE) ps
 
-clean: ## Удалить все (контейнеры, volume-диски) в обратном порядке
-	@echo "🧹 Очистка сервисов..."
-	@for s in $(OTHER_SERVICES) $(INFRA_SERVICE); do \
-		if echo "$(SERVICES)" | grep -wq "$$s"; then \
-			echo "🧹 Очистка $$s..."; \
-			docker compose \
-				--project-directory $(SERVICE_DIR)/$$s \
-				-f $(SERVICE_DIR)/$$s/docker/base.yaml \
-				down -v || true; \
-		fi \
-	done
-	@echo "✅ Очистка завершена!"
+# === CLEAN ===
+clean: ## Полная очистка (контейнеры + volumes)
+	@echo "🧹 Очистка..."
+	@docker compose -f $(COMPOSE_FILE) down -v
+	@echo "✅ Готово!"
 
-run: ## Запуск одного сервиса (использование: make run service=api ENV=dev|prod)
+# === RUN ONE SERVICE ===
+run: ## Запуск одного сервиса (make run service=api)
 ifndef service
 	@echo "❌ Укажи сервис: make run service=api"
 	@exit 1
 else
-	@echo "🚀 Запуск сервиса $(service) (ENV=$(ENV))..."
-	@docker compose \
-		--project-directory $(SERVICE_DIR)/$(service) \
-		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
-		-f $(SERVICE_DIR)/$(service)/docker/$(TARGET_FILE) \
-		up -d --build
-	@echo "✅ Сервис $(service) запущен!"
+	@echo "🚀 Запуск $(service)..."
+	@docker compose -f $(COMPOSE_FILE) up -d --build $(service)
+	@echo "✅ $(service) запущен!"
 endif
 
-restart: ## Перезапуск одного сервиса (make restart service=api)
+# === RESTART ===
+restart: ## Перезапуск сервиса (make restart service=api)
 ifndef service
-	@echo "❌ Укажи сервис: make restart service=api"
+	@echo "❌ Укажи сервис"
 	@exit 1
 else
-	@echo "🔁 Перезапуск $(service)..."
-	@docker compose \
-		--project-directory $(SERVICE_DIR)/$(service) \
-		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
-		down || true
-	@docker compose \
-		--project-directory $(SERVICE_DIR)/$(service) \
-		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
-		-f $(SERVICE_DIR)/$(service)/docker/$(TARGET_FILE) \
-		up -d --build
-	@echo "✅ $(service) перезапущен!"
+	@docker compose -f $(COMPOSE_FILE) restart $(service)
+	@echo "🔁 $(service) перезапущен!"
 endif
 
-job-run: ## Запуск одноразового job сервиса
+# === JOB ===
+job-run: ## Одноразовый запуск job сервиса
 ifndef service
-	@echo "❌ Укажи сервис: make job-run service=browser_agent"
+	@echo "❌ Укажи сервис"
 	@exit 1
 else
-	@echo "⚡ Job запуск $(service)..."
-	@docker compose \
-		--project-directory $(SERVICE_DIR)/$(service) \
-		-f $(SERVICE_DIR)/$(service)/docker/base.yaml \
-		-f $(SERVICE_DIR)/$(service)/docker/$(TARGET_FILE) \
-		run --rm $(service)
+	@docker compose -f $(COMPOSE_FILE) run --rm $(service)
 endif

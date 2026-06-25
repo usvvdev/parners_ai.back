@@ -1,0 +1,167 @@
+x-engine: &engine
+  restart: unless-stopped
+  networks:
+    - default
+  healthcheck:
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 30s
+
+x-service: &service
+  restart: unless-stopped
+  networks:
+    - default
+  environment:
+    PYTHONUNBUFFERED: "1"
+    PYTHONDONTWRITEBYTECODE: "1"
+    TZ: UTC
+
+services:
+  mysql:
+    <<: *engine
+    image: mysql:8.3-oracle
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
+      MYSQL_USER: ${MYSQL_USERNAME:-user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init/mysql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${MYSQL_ROOT_PASSWORD:-root}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    env_file:
+      - services/infra/.env
+
+  clickhouse:
+    <<: *engine
+    image: clickhouse/clickhouse-server:24.8-alpine
+    container_name: clickhouse
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-default}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USERNAME:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    env_file:
+      - services/infra/.env
+
+  caddy:
+    <<: *engine
+    image: caddy:2.10
+    container_name: caddy
+    environment:
+      TZ: Europe/Moscow
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./ssl:/etc/caddy/ssl
+    
+    env_file:
+      - services/infra/.env
+
+  api:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    container_name: api
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "uv",
+          "run",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8080', timeout=5)"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    env_file:
+      - services/api/.env
+
+  bot:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/bot/Dockerfile
+    container_name: bot
+
+    env_file:
+      - services/bot/.env
+
+  browser_agent:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/browser_agent/Dockerfile
+    container_name: browser_agent
+    restart: "no"
+    volumes:
+      - easyocr_models:/models/easyocr
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "uv",
+          "run",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=5)"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+networks:
+  default:
+    external: true
+    name: backend_network
+
+volumes:
+  mysql_data:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_mysql_data
+
+  clickhouse_data:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_clickhouse_data
+
+  caddy_data:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_caddy_data
+
+  caddy_config:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_caddy_config
+
+  easyocr_models:
+    name: ${COMPOSE_PROJECT_NAME:-dydex}_easyocr_models
