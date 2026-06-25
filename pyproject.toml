@@ -21,6 +21,8 @@ browser_agent = [
     "pillow>=12.2.0",
     "playwright>=1.60.0",
     "rapidfuzz>=3.14.5",
+    "torch==2.3.1",
+    "torchvision==0.18.1",
 ]
 api = [
     "alembic>=1.18.4",
@@ -51,6 +53,7 @@ package = true
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
 torchvision = { index = "pytorch-cpu" }
+
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
