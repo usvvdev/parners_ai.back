@@ -273,6 +273,7 @@ class OCRAgent(IOCRProtocol):
         self._playwright = None
         self._browser = None
         self._browser_lock = asyncio.Lock()
+        self._reader = self._create_reader()
 
     async def aclose(self) -> None:
         """Закрывает HTTP-клиент и браузер для SVG-рендеринга (если был запущен)."""
@@ -463,12 +464,12 @@ class OCRAgent(IOCRProtocol):
     # ------------------------------------------------------------------
 
     @staticmethod
-    @lru_cache(maxsize=1)
-    def _get_reader():
-        # Ленивая инициализация — модель грузится один раз на процесс.
+    def _create_reader():
         import easyocr
 
-        return easyocr.Reader(["ru", "en"], gpu=False)
+        return easyocr.Reader(
+            ["ru", "en"], gpu=False, model_storage_directory="models/easyocr"
+        )
 
     async def _fetch_logo_bytes(self, logo_src: str) -> tuple[bytes, str] | None:
         data_uri_match = _RE_DATA_URI.match(logo_src)
@@ -598,7 +599,7 @@ class OCRAgent(IOCRProtocol):
         try:
             lines: list[str] = await loop.run_in_executor(
                 None,
-                lambda: self._get_reader().readtext(image_rgb, detail=0),
+                lambda: self._reader.readtext(image_rgb, detail=0),
             )
         except Exception as err:
             logger.warning("OCR failed for logo {!r}: {}", logo_src, err)
