@@ -33,7 +33,7 @@ RUN uv pip install --system --index-url https://download.pytorch.org/whl/cpu \
 # =========================
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen --no-install-project --extra browser_agent
+# RUN uv sync --frozen --no-install-project --extra browser_agent
 
 
 # =========================
