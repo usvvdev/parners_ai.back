@@ -1,17 +1,17 @@
 # packages
 
-from pydantic import Field
-
 from datetime import datetime
 
 from typing import Optional
+
+from pydantic import Field
 
 # application depencies
 
 from libs.domain.types._types.common import BaseModelType
 
 
-class InsertOfferPosition(BaseModelType):
+class BaseOfferPosition(BaseModelType):
     wmid: Optional[str] = Field(
         default=None,
         description="",
@@ -37,7 +37,16 @@ class InsertOfferPosition(BaseModelType):
         description="",
     )
 
+
+class FetchOfferPosition(BaseOfferPosition):
+    created_at: Optional[datetime] = Field(
+        default=None,
+        description="",
+    )
+
+
+class InsertOfferPosition(BaseOfferPosition):
     created_at: datetime = Field(
-        default=datetime.now(),
+        default_factory=datetime.now,
         description="",
     )

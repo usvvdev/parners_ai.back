@@ -28,4 +28,5 @@ class ClickHouseRepository(
         super().__init__(
             engine=engine,
             table=table,
+            use_orm_insert=False,
         )

@@ -20,14 +20,27 @@ class OfferPositionRepositoryView:
         self,
         filters: FiltersOfferPosition,
     ) -> list[FetchOfferPosition]:
-        return await self._repository.fetch_many(
+        entities = await self._repository.fetch_many(
             filters=filters,
         )
+
+        return [
+            FetchOfferPosition.model_validate(
+                entity,
+                from_attributes=True,
+            )
+            for entity in entities
+        ]
 
     async def insert(
         self,
         data: InsertOfferPosition,
-    ) -> InsertOfferPosition:
-        return await self._repository.insert(
+    ) -> FetchOfferPosition:
+        entity = await self._repository.insert(
             data=data,
+        )
+
+        return FetchOfferPosition.model_validate(
+            entity,
+            from_attributes=True,
         )

@@ -20,8 +20,10 @@ class BaseSQLRepository(
         *,
         engine: BaseSQLEngine,
         table: type[TTable],
+        use_orm_insert: bool = True,
     ) -> None:
         super().__init__(
             engine=engine,
+            use_orm_insert=use_orm_insert,
         )
         self._table = table

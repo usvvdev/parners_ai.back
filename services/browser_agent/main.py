@@ -45,7 +45,7 @@ async def run_app() -> None:
                     result.link,
                 )
     finally:
-        await agent._api_clients.close()
+        await agent.aclose()
 
 
 def main() -> None:

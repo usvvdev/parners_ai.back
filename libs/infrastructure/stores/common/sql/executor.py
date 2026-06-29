@@ -65,8 +65,10 @@ class BaseSQLExecutor:
         self,
         *,
         engine: BaseSQLEngine,
+        use_orm_insert: bool = True,
     ) -> None:
         self._engine = engine
+        self._use_orm_insert = use_orm_insert
 
     @asynccontextmanager
     async def _session(
@@ -133,7 +135,7 @@ class BaseSQLExecutor:
                 return result
 
             except SQLAlchemyError:
-                if owns_session:
+                if owns_session and self._engine._supports_transactions:
                     await opened_session.rollback()
 
                 logger.exception(
@@ -249,12 +251,11 @@ class BaseSQLExecutor:
         async def action(
             opened_session: AsyncSession,
         ) -> Any:
-            entity = self._table(
-                **orm_model_dump(
-                    data,
-                    table=self._table.__table__,
-                ),
+            values = orm_model_dump(
+                data,
+                table=self._table.__table__,
             )
+            entity = self._table(**values)
 
             await self._before_commit(
                 entity=entity,
@@ -262,9 +263,20 @@ class BaseSQLExecutor:
                 session=opened_session,
             )
 
-            opened_session.add(entity)
-
-            await opened_session.flush()
+            if self._use_orm_insert:
+                opened_session.add(entity)
+                await opened_session.flush()
+            else:
+                await opened_session.execute(
+                    self._table.__table__.insert(),
+                    [
+                        {
+                            column.name: getattr(entity, column.name)
+                            for column in self._table.__table__.columns
+                            if getattr(entity, column.name) is not None
+                        }
+                    ],
+                )
 
             return await self._after_commit(
                 entity=entity,

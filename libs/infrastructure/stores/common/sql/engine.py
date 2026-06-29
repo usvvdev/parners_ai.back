@@ -16,6 +16,8 @@ from ..base import BaseEngine
 
 
 class BaseSQLEngine(BaseEngine):
+    _supports_transactions: bool = True
+
     @cached_property
     def engine(self) -> AsyncEngine:
         return create_async_engine(

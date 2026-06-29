@@ -12,6 +12,11 @@ from fastapi_filters import (
     FilterSet,
 )
 
+from urllib.parse import (
+    urlsplit,
+    urlunsplit,
+)
+
 from datetime import datetime
 
 from fastapi_pagination import Page
@@ -30,6 +35,16 @@ class LinkIdentity(BaseModelType):
         ...,
         description="Название оффера",
     )
+
+    @field_validator("link", mode="before")
+    @classmethod
+    def strip_query_params(cls, v: str) -> str:
+        if not isinstance(v, str):
+            return v
+
+        parts = urlsplit(v)
+        cleaned = parts._replace(query="", fragment="")
+        return urlunsplit(cleaned)
 
 
 class BaseLinkFields(BaseModelType):

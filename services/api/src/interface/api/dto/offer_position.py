@@ -49,7 +49,10 @@ class FetchOfferPosition(
     BaseOfferPositionFields,
     OfferPositionIdentity,
 ):
-    pass
+    created_at: datetime = Field(
+        ...,
+        description="Время создания записи",
+    )
 
 
 class InsertOfferPosition(
@@ -57,8 +60,8 @@ class InsertOfferPosition(
     OfferPositionIdentity,
 ):
     created_at: datetime = Field(
-        default=datetime.now(),
-        description="Вермя создания записи",
+        default_factory=datetime.now,
+        description="Время создания записи",
     )
 
 
@@ -68,3 +71,5 @@ class FiltersOfferPosition(FilterSet):
     utm_source: FilterField[str]
 
     offer: FilterField[str]
+
+    vitrina: FilterField[str]

@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from datetime import datetime
+
 from sqlalchemy import select
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,6 +44,15 @@ class OfferPositionRepository(ClickHouseRepository[OfferPositions]):
             query=query,
             session=session,
         )
+
+    async def _before_commit(
+        self,
+        entity: OfferPositions,
+        data: Any,
+        session: AsyncSession,
+    ) -> None:
+        if entity.created_at is None:
+            entity.created_at = datetime.now()
 
     async def insert(
         self,

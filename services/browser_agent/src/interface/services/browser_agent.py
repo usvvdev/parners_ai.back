@@ -17,6 +17,16 @@ class BrowserAgentService:
         self._crawler = crawler
         self._analyzer = analyzer
 
+    async def aclose(self) -> None:
+        close = getattr(
+            self._analyzer,
+            "aclose",
+            None,
+        )
+
+        if close:
+            await close()
+
     async def parse(
         self,
         *,

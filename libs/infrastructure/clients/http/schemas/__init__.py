@@ -25,7 +25,10 @@ from .utm_source import (
     InsertUTMSource,
 )
 
-from .offer_position import InsertOfferPosition
+from .offer_position import (
+    FetchOfferPosition,
+    InsertOfferPosition,
+)
 
 __all__: list[str] = [
     "FetchLink",
@@ -36,6 +39,7 @@ __all__: list[str] = [
     "FetchOffers",
     "InsertOffer",
     "UpdateOffer",
+    "FetchOfferPosition",
     "InsertOfferPosition",
     "FetchPartner",
     "FetchPartners",

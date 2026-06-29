@@ -47,6 +47,18 @@ class AllowedUsers(RootModel[dict[str, UserOptions]]):
         return {int(user_id) for user_id in self.root}
 
 
+class ChatOptions(BaseModelType):
+    group_chat_id: Optional[int] = Field(
+        default=None,
+        description="Чат для отправки сообщения",
+    )
+
+    topic_id: Optional[int] = Field(
+        default=None,
+        description="Тема для сообщений",
+    )
+
+
 class TelegramOptions(BaseModelType):
     bot_token: Optional[str] = Field(
         default=None,
@@ -54,17 +66,27 @@ class TelegramOptions(BaseModelType):
         exclude=True,
     )
 
-    api_optins: APIOptions = Field(
+    api_options: APIOptions = Field(
         default_factory=APIOptions,
         exclude=True,
     )
 
-    allowed_users: AllowedUsers = Field(
-        default_factory=AllowedUsers,
+    allowed_users: Optional[AllowedUsers] = Field(
+        default_factory=lambda: AllowedUsers(root={}),
         description="Авторизованные айди пользователей",
+    )
+
+    chat_options: Optional[ChatOptions] = Field(
+        default_factory=ChatOptions,
+        description="Чат для работы с ботом",
+    )
+
+    dashboard_url: Optional[str] = Field(
+        default=None,
+        description="Ссылка к подключенному дешу",
     )
 
     @computed_field
     @property
     def api_base_url(self) -> str:
-        return self.api_optins.base_url
+        return self.api_options.base_url
